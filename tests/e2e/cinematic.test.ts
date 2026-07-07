@@ -19,6 +19,22 @@ test.describe('Cinematic Canvas & Fallback E2E checks', () => {
       console.log(`[BROWSER UNCAUGHT EXCEPTION] ${err.message}`);
     });
 
+    // Force high-capability device parameters for standard rendering
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'hardwareConcurrency', { value: 8, configurable: true });
+      Object.defineProperty(navigator, 'deviceMemory', { value: 8, configurable: true });
+      Object.defineProperty(navigator, 'getBattery', {
+        value: () =>
+          Promise.resolve({
+            charging: true,
+            level: 1.0,
+            addEventListener: () => {},
+            removeEventListener: () => {},
+          }),
+        configurable: true,
+      });
+    });
+
     // Relative path navigation utilizing Playwright baseURL configuration
     await page.goto('/');
 
@@ -44,6 +60,22 @@ test.describe('Cinematic Canvas & Fallback E2E checks', () => {
   });
 
   test('should support mount, unmount, and remount lifecycle safely without duplication', async ({ page }) => {
+    // Force high-capability device parameters for standard rendering
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'hardwareConcurrency', { value: 8, configurable: true });
+      Object.defineProperty(navigator, 'deviceMemory', { value: 8, configurable: true });
+      Object.defineProperty(navigator, 'getBattery', {
+        value: () =>
+          Promise.resolve({
+            charging: true,
+            level: 1.0,
+            addEventListener: () => {},
+            removeEventListener: () => {},
+          }),
+        configurable: true,
+      });
+    });
+
     // 1. Mount the home page
     await page.goto('/');
     const container1 = page.locator('[data-render-state]');
@@ -124,6 +156,22 @@ test.describe('Cinematic Canvas & Fallback E2E checks', () => {
   });
 
   test('should enforce strict CSP headers and verify Next.js nonce propagation', async ({ page }) => {
+    // Force high-capability device parameters for standard rendering
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'hardwareConcurrency', { value: 8, configurable: true });
+      Object.defineProperty(navigator, 'deviceMemory', { value: 8, configurable: true });
+      Object.defineProperty(navigator, 'getBattery', {
+        value: () =>
+          Promise.resolve({
+            charging: true,
+            level: 1.0,
+            addEventListener: () => {},
+            removeEventListener: () => {},
+          }),
+        configurable: true,
+      });
+    });
+
     const response = await page.goto('/');
     const headers = response!.headers();
     const csp = headers['content-security-policy'];

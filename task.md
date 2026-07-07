@@ -41,7 +41,9 @@
   - [x] Write battery status and prefers-reduced-motion hooks
 
 - [ ] **PHASE 3 — Public Website**
-  - [ ] Implement responsive pages and navigation layouts
+  - [x] Stage 3A: Implement navigation header/footer shell & mock route layouts
+  - [ ] Stage 3B: Implement solutions grids dynamic pages & AAA legal pages
+  - [ ] Stage 3C: Implement homepage storyboard scroll journey overlays & canvas link
   - [ ] Code image sequence scroll scrub playback drivers
   - [ ] Integrate legal disclaimer, refund policy, and terms pages
 

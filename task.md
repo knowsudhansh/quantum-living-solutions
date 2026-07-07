@@ -35,10 +35,10 @@
   - [x] Configure ESLint and quality gates
   - [x] Configure unit, E2E, accessibility, and CI verification
 
-- [ ] **PHASE 2 — Cinematic Proof of Concept**
-  - [ ] Establish canvas container and mount Three.js scenes
-  - [ ] Bind GSAP ScrollTrigger timeline to canvas camera pan
-  - [ ] Write battery status and prefers-reduced-motion hooks
+- [x] **PHASE 2 — Cinematic Proof of Concept**
+  - [x] Establish canvas container and mount Three.js scenes
+  - [x] Bind GSAP ScrollTrigger timeline to canvas camera pan
+  - [x] Write battery status and prefers-reduced-motion hooks
 
 - [ ] **PHASE 3 — Public Website**
   - [ ] Implement responsive pages and navigation layouts

@@ -29,7 +29,7 @@
   - [x] Map out phase-based timelines (`docs/25-implementation-roadmap.md`)
   - [x] Build root README index, AGENTS guidelines, and task lists.
 
-- [ ] **PHASE 1 — Engineering Foundation**
+- [x] **PHASE 1 — Engineering Foundation**
   - [x] Initialize code repo dependencies (zero package additions during Phase 0)
   - [x] Configure typescript and compiler parameters
   - [x] Configure ESLint and quality gates

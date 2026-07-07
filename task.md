@@ -30,9 +30,10 @@
   - [x] Build root README index, AGENTS guidelines, and task lists.
 
 - [ ] **PHASE 1 — Engineering Foundation**
-  - [ ] Initialize code repo dependencies (zero package additions during Phase 0)
-  - [ ] Configure typescript and compiler parameters
-  - [ ] Setup ESLint, Prettier, and git commit-msg hooks
+  - [x] Initialize code repo dependencies (zero package additions during Phase 0)
+  - [x] Configure typescript and compiler parameters
+  - [x] Configure ESLint and quality gates
+  - [x] Configure unit, E2E, accessibility, and CI verification
 
 - [ ] **PHASE 2 — Cinematic Proof of Concept**
   - [ ] Establish canvas container and mount Three.js scenes

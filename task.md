@@ -43,7 +43,7 @@
 - [ ] **PHASE 3 — Public Website**
   - [x] Stage 3A: Implement navigation header/footer shell & mock route layouts
   - [x] Stage 3B: Implement solutions grids dynamic pages & AAA legal pages
-  - [ ] Stage 3C: Implement homepage storyboard scroll journey overlays & canvas link
+  - [x] Stage 3C: Implement homepage storyboard scroll journey overlays & canvas link
   - [ ] Code image sequence scroll scrub playback drivers
   - [x] Integrate legal disclaimer, refund policy, and terms pages
 

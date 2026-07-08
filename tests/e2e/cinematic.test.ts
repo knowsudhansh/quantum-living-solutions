@@ -93,18 +93,24 @@ test.describe('Cinematic Canvas & Fallback E2E checks', () => {
     expect(await container2.locator('canvas').count()).toBe(1);
   });
 
-  test('should fallback to blueprint when prefers-reduced-motion reduce emulation is enabled in browser context', async ({ page }) => {
+  test('should completely unmount canvases and observer and render all 10 Acts when prefers-reduced-motion is active', async ({ page }) => {
     // Force prefers-reduced-motion media emulation
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/');
 
-    const container = page.locator('[data-testid="blueprint-fallback"]');
-    await expect(container).toBeVisible();
-
+    // Verify zero canvases are rendered
     const canvasCount = await page.locator('canvas').count();
     expect(canvasCount).toBe(0);
 
-    // Check that fallback screen is fully keyboard/axe-accessible matching Phase 1 filters
+    // Verify zero blueprint fallbacks are rendered
+    const fallbackCount = await page.locator('[data-testid="blueprint-fallback"]').count();
+    expect(fallbackCount).toBe(0);
+
+    // Verify exactly 10 Act sections are rendered
+    const sectionsCount = await page.locator('section[data-act-index]').count();
+    expect(sectionsCount).toBe(10);
+
+    // Run Axe automated accessibility checks
     const accessibilityScanResults = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa'])
       .analyze();
@@ -201,5 +207,70 @@ test.describe('Cinematic Canvas & Fallback E2E checks', () => {
     const nonce2 = csp2.match(/'nonce-([^']+)'/)?.[1];
     expect(nonce2).not.toBeNull();
     expect(cspNonce).not.toEqual(nonce2);
+  });
+
+  test('should update active act telemetry HUD smoothly upon page scrolling', async ({ page }) => {
+    // Force high-capability device parameters for standard rendering
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'hardwareConcurrency', { value: 8, configurable: true });
+      Object.defineProperty(navigator, 'deviceMemory', { value: 8, configurable: true });
+      Object.defineProperty(navigator, 'getBattery', {
+        value: () =>
+          Promise.resolve({
+            charging: true,
+            level: 1.0,
+            addEventListener: () => {},
+            removeEventListener: () => {},
+          }),
+        configurable: true,
+      });
+    });
+
+    await page.goto('/');
+
+    // Check initial active Act telemetry is 01
+    const telemetry = page.locator('span:has-text("NODE POSITION SEC:")');
+    await expect(telemetry).toContainText('NODE POSITION SEC: 01');
+
+    // Scroll down to the second section (Act 2)
+    const act2Section = page.locator('section[data-act-index="1"]');
+    await act2Section.scrollIntoViewIfNeeded();
+
+    // Verify telemetry updates to 02
+    await expect(telemetry).toContainText('NODE POSITION SEC: 02');
+
+    // Verify canvas count remains exactly 1 after scroll transitions
+    expect(await page.locator('canvas').count()).toBe(1);
+  });
+
+  test('should load low-quality WebGL tier and preserve single canvas when device capability signals are low', async ({ page }) => {
+    // Force low hardwareConcurrency (2) or low deviceMemory (2)
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'hardwareConcurrency', { value: 2, configurable: true });
+      Object.defineProperty(navigator, 'deviceMemory', { value: 2, configurable: true });
+      Object.defineProperty(navigator, 'getBattery', {
+        value: () =>
+          Promise.resolve({
+            charging: true,
+            level: 1.0,
+            addEventListener: () => {},
+            removeEventListener: () => {},
+          }),
+        configurable: true,
+      });
+    });
+
+    await page.goto('/');
+
+    const container = page.locator('[data-render-state]');
+    await expect(container).toBeVisible();
+
+    // Verify canvas count is exactly 1
+    const canvasCount = await container.locator('canvas').count();
+    expect(canvasCount).toBe(1);
+
+    // Verify it loads with the low quality tier
+    const quality = await container.getAttribute('data-quality-tier');
+    expect(quality).toBe('low');
   });
 });

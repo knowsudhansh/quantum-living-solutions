@@ -15,7 +15,15 @@ interface BatteryManager {
   level: number;
 }
 
-export function StructuralCanvasContainer() {
+interface StructuralCanvasContainerProps {
+  activeAct: number;
+  onRenderStateChange?: (state: RenderState) => void;
+}
+
+export function StructuralCanvasContainer({
+  activeAct,
+  onRenderStateChange,
+}: StructuralCanvasContainerProps) {
   const [renderState, setSetRenderState] = useState<RenderState | null>(null);
 
   useEffect(() => {
@@ -54,23 +62,25 @@ export function StructuralCanvasContainer() {
       });
 
       setSetRenderState(state);
+      if (onRenderStateChange) {
+        onRenderStateChange(state);
+      }
     }
 
     checkCapabilities();
-  }, []);
+  }, [onRenderStateChange]);
 
   if (renderState === null) {
     return <div className="w-full h-full min-h-[500px] bg-[hsl(220,25%,7%)]" data-testid="canvas-loader" />;
   }
 
-  // Handle fallback unmounting at the container wrapper level to prevent React hook violations
-  if (
-    renderState === 'REDUCED_MOTION' ||
-    renderState === 'LOW_BATTERY' ||
-    renderState === 'WEBGL_UNAVAILABLE'
-  ) {
+  if (renderState === 'REDUCED_MOTION') {
+    return null;
+  }
+
+  if (renderState === 'LOW_BATTERY' || renderState === 'WEBGL_UNAVAILABLE') {
     return <BlueprintFallback />;
   }
 
-  return <StructuralCanvas renderState={renderState} />;
+  return <StructuralCanvas renderState={renderState} activeAct={activeAct} />;
 }

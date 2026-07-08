@@ -15,7 +15,7 @@ This document outlines the development plan from engineering foundation to produ
 - **Dependencies**: Phase 1.
 
 ### Phase 3: Public Website
-- **Goals**: Create dynamic landing page routes, implement responsive CSS grids for solutions pages, integrate static WebP image sequence fallback engine.
+- **Goals**: Create dynamic landing page routes, implement responsive CSS grids for solutions pages, and integrate a capability-based fallback engine (STANDARD_WEBGL -> Three.js, LOW_QUALITY_WEBGL -> low-quality Three.js, REDUCED_MOTION -> static vertical semantic Acts with no canvas, LOW_BATTERY -> SVG blueprint fallback, WEBGL_UNAVAILABLE -> SVG blueprint fallback; the original pre-rendered image-sequence approach was superseded).
 - **Dependencies**: Phase 2.
 
 ### Phase 4: Backend & Database Deployment

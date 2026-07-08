@@ -40,11 +40,11 @@
   - [x] Bind GSAP ScrollTrigger timeline to canvas camera pan
   - [x] Write battery status and prefers-reduced-motion hooks
 
-- [ ] **PHASE 3 — Public Website**
+- [x] **PHASE 3 — Public Website**
   - [x] Stage 3A: Implement navigation header/footer shell & mock route layouts
   - [x] Stage 3B: Implement solutions grids dynamic pages & AAA legal pages
   - [x] Stage 3C: Implement homepage storyboard scroll journey overlays & canvas link
-  - [ ] Code image sequence scroll scrub playback drivers
+  - [x] Resolve image-sequence scroll playback requirement — superseded by the approved Stage 3C Three.js and capability-fallback architecture; no image-sequence driver was implemented.
   - [x] Integrate legal disclaimer, refund policy, and terms pages
 
 - [ ] **PHASE 4 — Backend and Database**

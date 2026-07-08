@@ -47,10 +47,10 @@
   - [x] Resolve image-sequence scroll playback requirement — superseded by the approved Stage 3C Three.js and capability-fallback architecture; no image-sequence driver was implemented.
   - [x] Integrate legal disclaimer, refund policy, and terms pages
 
-- [ ] **PHASE 4 — Backend and Database**
-  - [ ] Deploy Neon PostgreSQL instance
-  - [ ] Establish Prisma client and connection pool pools
-  - [ ] Define dynamic slot models and indexes
+- [x] **PHASE 4 — Backend and Database**
+  - [x] Deploy Neon PostgreSQL instance
+  - [x] Establish Prisma client and connection pool pools
+  - [x] Define dynamic slot models and indexes
 
 - [ ] **PHASE 5 — Authentication and Security**
   - [ ] Integrate NextAuth session routes

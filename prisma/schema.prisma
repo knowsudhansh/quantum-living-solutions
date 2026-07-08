@@ -1,0 +1,22 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model DemoSlot {
+  id          String   @id @default(uuid()) @db.Uuid
+  startTime   DateTime @map("start_time") @db.Timestamptz(6)
+  endTime     DateTime @map("end_time") @db.Timestamptz(6)
+  maxCapacity Int      @default(1) @map("max_capacity")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([startTime], map: "idx_demo_slots_start_time")
+  @@map("demo_slots")
+}

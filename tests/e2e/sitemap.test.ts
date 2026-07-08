@@ -71,7 +71,11 @@ test.describe('Stage 3A Navigation & Sitemap E2E checks', () => {
       '/about',
       '/book-demo',
       '/contact',
-      '/careers'
+      '/careers',
+      '/legal/privacy-policy',
+      '/legal/terms-of-service',
+      '/legal/refund-policy',
+      '/legal/payment-disclaimer'
     ];
 
     for (let i = 0; i < count; i++) {

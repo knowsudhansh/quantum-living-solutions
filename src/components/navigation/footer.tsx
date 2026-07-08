@@ -86,6 +86,46 @@ export default function Footer() {
               </li>
             </ul>
           </div>
+
+          <div>
+            <h2 className="text-sm font-semibold tracking-wider text-[HSL(40,30%,95%)] uppercase mb-4">
+              Legal
+            </h2>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link
+                  href="/legal/privacy-policy"
+                  className="hover:text-[HSL(40,30%,95%)] transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[HSL(210,80%,60%)]"
+                >
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/legal/terms-of-service"
+                  className="hover:text-[HSL(40,30%,95%)] transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[HSL(210,80%,60%)]"
+                >
+                  Terms of Service
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/legal/refund-policy"
+                  className="hover:text-[HSL(40,30%,95%)] transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[HSL(210,80%,60%)]"
+                >
+                  Refund Policy
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/legal/payment-disclaimer"
+                  className="hover:text-[HSL(40,30%,95%)] transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[HSL(210,80%,60%)]"
+                >
+                  Payment Disclaimer
+                </Link>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
 

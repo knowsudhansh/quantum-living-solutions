@@ -61,13 +61,13 @@ export default function Home() {
   return (
     <div className="relative w-full min-h-screen">
       {/* 1. Background Cinematic Layer - always mount it to allow capability evaluations */}
-      <div className="fixed inset-0 -z-10 w-full h-full pointer-events-none">
+      <div className="fixed inset-y-0 right-0 left-0 md:left-1/3 lg:left-1/2 z-0 pointer-events-none">
         <StructuralCanvasContainer activeAct={activeAct} onRenderStateChange={setRenderState} />
       </div>
 
       {/* Initialize capabilities check, rendering a loading placeholder during SSR/Hydration */}
       {renderState === null && (
-        <div className="fixed inset-0 z-50 w-full h-full bg-[hsl(220,25%,7%)] pointer-events-none">
+        <div className="fixed inset-0 z-50 w-full h-full bg-background pointer-events-none">
           <div className="w-full h-full flex items-center justify-center">
             <div className="w-12 h-12 border-4 border-zinc-700 border-t-zinc-400 rounded-full animate-spin" />
           </div>

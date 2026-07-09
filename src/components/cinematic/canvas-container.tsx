@@ -71,11 +71,11 @@ export function StructuralCanvasContainer({
   }, [onRenderStateChange]);
 
   if (renderState === null) {
-    return <div className="w-full h-full min-h-[500px] bg-[hsl(220,25%,7%)]" data-testid="canvas-loader" />;
+    return <div className="w-full h-full min-h-[500px] bg-background" data-testid="canvas-loader" />;
   }
 
   if (renderState === 'REDUCED_MOTION') {
-    return null;
+    return <BlueprintFallback />;
   }
 
   if (renderState === 'LOW_BATTERY' || renderState === 'WEBGL_UNAVAILABLE') {

@@ -1,13 +1,26 @@
 import { NextResponse } from 'next/server';
 
 export function proxy() {
-  // Generate a cryptographically secure random base64 nonce per request
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
-  // Strict CSP configuration as required by the approved POC specifications
+  const isDev = process.env.NODE_ENV !== 'production';
+
+  const scriptSrc = isDev
+    ? `script-src 'self' 'unsafe-eval' 'unsafe-inline';`
+    : `script-src 'self' 'nonce-${nonce}';`;
+
+  const styleSrc = isDev
+    ? `style-src 'self' 'unsafe-inline';`
+    : `style-src 'self';`;
+
+  const connectSrc = isDev
+    ? `connect-src 'self' ws: wss:;`
+    : `connect-src 'self';`;
+
   const cspHeader = `
     default-src 'self';
-    script-src 'self' 'nonce-${nonce}';
-    style-src 'self';
+    ${scriptSrc}
+    ${styleSrc}
+    ${connectSrc}
     img-src 'self' data:;
     font-src 'self';
     object-src 'none';
@@ -18,12 +31,9 @@ export function proxy() {
 
   const cleanCspHeader = cspHeader.replace(/\s{2,}/g, ' ').trim();
 
-  // Propagate the Content-Security-Policy header to the response
   const response = NextResponse.next();
-
   response.headers.set('Content-Security-Policy', cleanCspHeader);
 
-  // Set all other standard Phase 1 non-CSP security headers
   response.headers.set('X-Frame-Options', 'DENY');
   response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('Referrer-Policy', 'same-origin');

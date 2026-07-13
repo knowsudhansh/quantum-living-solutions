@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="800" viewBox="0 0 640 800" role="img" aria-labelledby="title desc">
+  <title id="title">Professional founder portrait placeholder</title>
+  <desc id="desc">A refined monochrome portrait illustration for the founder profile.</desc>
+  <rect width="640" height="800" fill="#11151c"/>
+  <rect x="40" y="40" width="560" height="720" rx="2" fill="#151b24" stroke="#303846"/>
+  <circle cx="320" cy="255" r="92" fill="#2a303a"/>
+  <path d="M195 632c15-132 76-212 125-212s110 80 125 212" fill="#242b34"/>
+  <path d="M221 632c10-90 51-146 99-146s89 56 99 146" fill="#313946"/>
+  <path d="M246 500h148l-74 86z" fill="#d8d2c6" opacity=".82"/>
+  <path d="M267 420h106l-53 78z" fill="#bfb7aa"/>
+  <path d="M230 632h180l-36-132-54 76-54-76z" fill="#0e1218"/>
+  <path d="M284 576h72l-36 56z" fill="#c4aa73"/>
+  <text x="320" y="707" text-anchor="middle" fill="#d8d2c6" font-family="Arial, sans-serif" font-size="22" letter-spacing="2">RAJ KUMAR SHARMA</text>
+  <text x="320" y="738" text-anchor="middle" fill="#8f9aaa" font-family="Arial, sans-serif" font-size="14" letter-spacing="3">FOUNDER</text>
+</svg>

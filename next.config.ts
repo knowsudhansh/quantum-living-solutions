@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  turbopack: {
+    root: __dirname,
+  },
   async headers() {
     const isProd = process.env.NODE_ENV === "production";
     const headersList = [

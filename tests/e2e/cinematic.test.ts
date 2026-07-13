@@ -16,7 +16,7 @@ test.describe('Cinematic Canvas & Fallback E2E checks', () => {
     });
 
     page.on('pageerror', (err) => {
-      console.log(`[BROWSER UNCAUGHT EXCEPTION] ${err.message}`);
+      consoleLogs.push(`[BROWSER UNCAUGHT EXCEPTION] ${err.message}`);
     });
 
     // Force high-capability device parameters for standard rendering

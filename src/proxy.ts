@@ -1,6 +1,41 @@
 import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { verifyToken } from './lib/security/auth';
 
-export function proxy() {
+const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-for-local-development-only-12345';
+
+export async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // 1. Session check for Protected Admin Routes
+  const isAdminPath = pathname.startsWith('/admin') && pathname !== '/admin/login';
+  const isAdminApiPath = pathname.startsWith('/api/admin') && pathname !== '/api/admin/auth/login';
+
+  if (isAdminPath || isAdminApiPath) {
+    const sessionCookie = request.cookies.get('qls_admin_session')?.value;
+    let isValid = false;
+
+    if (sessionCookie) {
+      const payload = await verifyToken(sessionCookie, JWT_SECRET);
+      if (payload && (payload as { role?: string }).role === 'admin') {
+        isValid = true;
+      }
+    }
+
+    if (!isValid) {
+      if (isAdminApiPath) {
+        return new NextResponse(
+          JSON.stringify({ error: 'Unauthorized access' }),
+          { status: 401, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+      // Redirect to admin login screen
+      const loginUrl = new URL('/admin/login', request.url);
+      return NextResponse.redirect(loginUrl);
+    }
+  }
+
+  // 2. CSP and Security Headers Proxy
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
   const isDev = process.env.NODE_ENV !== 'production';
 
@@ -8,9 +43,7 @@ export function proxy() {
     ? `script-src 'self' 'unsafe-eval' 'unsafe-inline';`
     : `script-src 'self' 'nonce-${nonce}';`;
 
-  const styleSrc = isDev
-    ? `style-src 'self' 'unsafe-inline';`
-    : `style-src 'self';`;
+  const styleSrc = `style-src 'self' 'unsafe-inline';`;
 
   const connectSrc = isDev
     ? `connect-src 'self' ws: wss:;`
@@ -27,13 +60,10 @@ export function proxy() {
     base-uri 'self';
     form-action 'self';
     frame-ancestors 'none';
-  `;
-
-  const cleanCspHeader = cspHeader.replace(/\s{2,}/g, ' ').trim();
+  `.replace(/\s{2,}/g, ' ').trim();
 
   const response = NextResponse.next();
-  response.headers.set('Content-Security-Policy', cleanCspHeader);
-
+  response.headers.set('Content-Security-Policy', cspHeader);
   response.headers.set('X-Frame-Options', 'DENY');
   response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('Referrer-Policy', 'same-origin');
@@ -50,13 +80,12 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - api (API routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      */
     {
-      source: '/((?!api|_next/static|_next/image|favicon.ico).*)',
+      source: '/((?!_next/static|_next/image|favicon.ico).*)',
       missing: [
         { type: 'header', key: 'next-router-prefetch' },
         { type: 'header', key: 'purpose', value: 'prefetch' },

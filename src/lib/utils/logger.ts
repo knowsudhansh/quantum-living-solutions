@@ -51,7 +51,7 @@ export function writeLog(level: LogLevel, message: string, context?: unknown, re
     ...(requestId ? { requestId } : {}),
     ...(context !== undefined ? { context: redactValue(context) } : {}),
   };
-  console.log(JSON.stringify(payload));
+  console.info(JSON.stringify(payload));
 }
 
 export const logger = {

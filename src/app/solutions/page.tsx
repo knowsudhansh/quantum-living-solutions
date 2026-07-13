@@ -1,6 +1,7 @@
 import React from 'react';
 import { getAllSolutions } from '../../lib/config/solutions';
 import { SolutionsHubGrid } from '../../components/solutions/solutions-hub-grid';
+import { MotionReveal } from '../../components/ui/motion';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,15 +14,16 @@ export default function SolutionsPage() {
   const solutionsList = getAllSolutions();
 
   return (
-    <div className="max-w-6xl mx-auto px-6 pt-20 pb-10 text-foreground/80">
-      <div className="border-b border-zinc-800 pb-8 mb-10">
-        <h1 className="text-4xl md:text-5xl font-light mb-4 text-foreground tracking-tight">
+    <div className="qls-page">
+      <MotionReveal className="qls-hero">
+        <span className="qls-eyebrow">Systems Architecture</span>
+        <h1 className="qls-title mb-5">
           Automation Solutions
         </h1>
-        <p className="text-lg text-foreground/75 max-w-2xl leading-relaxed font-normal">
+        <p className="qls-lead">
           We integrate high-performance system architectures. Select a category below to view detailed specifications.
         </p>
-      </div>
+      </MotionReveal>
 
       <SolutionsHubGrid solutions={solutionsList} />
     </div>

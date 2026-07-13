@@ -1,71 +1,91 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { StructuralCanvasContainer } from '../components/cinematic/canvas-container';
+import { CinematicHomeJourney } from '../components/home/cinematic-home-journey';
 import { RenderState } from '../lib/utils/capability';
-import { useActiveAct } from '../lib/hooks/use-active-act';
+import { getIconForSlug } from '../components/solutions/solution-icons';
+import { HomePartnersSection } from '../components/partners/home-partners-section';
+import { MotionCard, MotionReveal } from '../components/ui/motion';
 
 export const dynamic = 'force-dynamic';
 
+type SceneKey = 'morning' | 'evening' | 'entertaining' | 'security';
+
+interface FeaturedProduct {
+  id: string;
+  title: string;
+  subtitle: string | null;
+  slug: string;
+  description: string;
+  price: number;
+  hidePrice: boolean;
+  coverImage: { fileUrl: string } | null;
+  category: { name: string };
+  brand: { name: string } | null;
+}
+
 export default function Home() {
   const [renderState, setRenderState] = useState<RenderState | null>(null);
-  const activeAct = useActiveAct(renderState);
+  const [activeScene, setActiveScene] = useState<SceneKey>('morning');
+  const [featuredProducts, setFeaturedProducts] = useState<FeaturedProduct[]>([]);
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      try {
+        const res = await fetch('/api/products/featured');
+        if (res.ok) {
+          const data = await res.json() as { success: boolean; products: FeaturedProduct[] };
+          setFeaturedProducts(data.products || []);
+        }
+      } catch (err) {
+        console.error('Error fetching featured products', err);
+      }
+    };
+    fetchFeatured();
+  }, []);
 
-  const acts = [
-    {
-      title: 'The Space is Waiting',
-      desc: 'An architectural living space lit by soft, natural daylight. The ecosystem rests in a dormant state, awaiting occupancy.',
+  const scenes = {
+    morning: {
+      title: 'Morning Scene',
+      desc: 'Shades raise slowly to capture natural morning daylight while heating warms the space.',
+      img: '/images/morning.jpg',
     },
-    {
-      title: 'Morning Routine',
-      desc: 'As morning approaches, automated systems adjust climate boundaries. Natural solar energy is harvested to maintain temperature stability.',
+    evening: {
+      title: 'Evening Sunset',
+      desc: 'Warm ambient illumination sets in as shades lower, creating a private retreat.',
+      img: '/images/evening.jpg',
     },
-    {
-      title: 'Presence Intelligence',
-      desc: 'A digital presence sensor triggers pathway lighting patterns. Subtle guidance guides your movement through the home without manual intervention.',
+    entertaining: {
+      title: 'Cinematic Lounge',
+      desc: 'Theater fixtures dim to minimums while audio arrays activate for premium cinema sessions.',
+      img: '/images/entertaining.jpg',
     },
-    {
-      title: 'Interconnected Ecosystem',
-      desc: 'Control coordinates across hidden devices, wall interfaces, and local keypads, communicating over secure low-latency grids.',
+    security: {
+      title: 'Secure Perimeter',
+      desc: 'Entry lock checks activate and twilight pathways light up to keep your residence safe.',
+      img: '/images/security.jpg',
     },
-    {
-      title: 'Security Shield',
-      desc: 'Evening security profiles verify the status of locks, windows, and entries, establishing a secure sanctuary zone automatically.',
-    },
-    {
-      title: 'Cinema Transformation',
-      desc: 'Deep scenic lighting transitions adapt to entertainment modes. Audio matrices and motorized window coverings coordinate for optimized media playback.',
-    },
-    {
-      title: 'Night-Mode Sanctuary',
-      desc: 'Subsystems shift to high-efficiency dormant profiles, preserving minimal pathway baseboard indicators for night navigation.',
-    },
-    {
-      title: 'Complete Structural Grid',
-      desc: 'An overview of coordinates, sensor locations, and automated nodes displays system diagnostics and network connectivity.',
-    },
-    {
-      title: 'Technology Disappears',
-      desc: 'Control systems fade into the background, letting structural architecture and natural spaces dominate the living environment.',
-    },
-    {
-      title: 'Book Your Experience',
-      desc: 'Online booking is not currently available through this website. Reservation availability details will be published when the scheduling service launches.',
-      isCTA: true,
-    },
+  };
+
+  const systems = [
+    { name: 'Lighting Control', icon: 'lighting-automation', desc: 'Warm scene adjustments that flow with daylight cycles.' },
+    { name: 'Motorized Shading', icon: 'curtains-and-blinds', desc: 'Blinds and curtains that automate for privacy and sun-glare control.' },
+    { name: 'Intelligent Climate', icon: 'climate-control', desc: 'Zoned temperature regulation responding automatically to presence.' },
+    { name: 'Sanctuary Security', icon: 'security-and-surveillance', desc: 'Perimeter checks, remote alarms, and entry validations.' },
+    { name: 'Audio & Cinema', icon: 'audio-video-entertainment', desc: 'Distributed hi-fi sound matrices and optimized home screens.' },
+    { name: 'Energy Management', icon: 'energy-management', desc: 'Dormant load monitoring and solar harvesting coordination.' },
   ];
 
-  const isReducedMotion = renderState === 'REDUCED_MOTION';
+  const spaces = [
+    { title: 'Luxury Residences', subtitle: 'Private Smart Homes', img: '/images/evening.jpg', link: '/projects' },
+    { title: 'Intelligent Workspaces', subtitle: 'Modern Corporate Offices', img: '/images/workspace.jpg', link: '/projects' },
+    { title: 'Cinematic Entertainment', subtitle: 'Home Theaters & Lounges', img: '/images/entertaining.jpg', link: '/projects' },
+  ];
 
   return (
     <div className="relative w-full min-h-screen">
-      {/* 1. Background Cinematic Layer - always mount it to allow capability evaluations */}
-      <div className="fixed inset-y-0 right-0 left-0 md:left-1/3 lg:left-1/2 z-0 pointer-events-none">
-        <StructuralCanvasContainer activeAct={activeAct} onRenderStateChange={setRenderState} />
-      </div>
-
-      {/* Initialize capabilities check, rendering a loading placeholder during SSR/Hydration */}
+      <h1 className="sr-only">Quantum Living Solutions premium home automation</h1>
+      {/* Loading placeholder during SSR/Hydration */}
       {renderState === null && (
         <div className="fixed inset-0 z-50 w-full h-full bg-background pointer-events-none">
           <div className="w-full h-full flex items-center justify-center">
@@ -74,62 +94,359 @@ export default function Home() {
         </div>
       )}
 
-      {/* 2. Semantic Storyboard Content Layer */}
-      <div className="relative w-full max-w-4xl mx-auto px-6 md:px-12 z-10">
-        {acts.map((act, i) => {
-          const isActive = activeAct === i;
+      {/* Immersive Scroll Home Journey (Acts 01–10, ZONE A, B, C) */}
+      <CinematicHomeJourney renderState={renderState} setRenderState={setRenderState} />
 
-          // Set accessibility styling based on active/inactive states
-          // We keep contrast > 4.5:1 even on inactive acts by using text-foreground/70
-          const textOpacityClass = isReducedMotion
-            ? 'text-foreground'
-            : isActive
-            ? 'text-foreground font-medium transition-all duration-300'
-            : 'text-foreground/70 transition-all duration-300';
+      {/* Solid Backdrop Container for Lower Editorial Content (Blocks fixed Canvas background) */}
+      <div className="relative z-10 bg-zinc-950 border-t border-zinc-900/60 mt-12">
 
-          const titleColorClass = isReducedMotion
-            ? 'text-foreground'
-            : isActive
-            ? 'text-foreground font-light'
-            : 'text-foreground/75';
-
-          const borderHighlightClass = isReducedMotion
-            ? 'border-transparent'
-            : isActive
-            ? 'border-[HSL(35,30%,45%)]'
-            : 'border-zinc-200 dark:border-zinc-800';
-
-          return (
-            <section
-              key={i}
-              data-act-index={i}
-              className="min-h-screen w-full flex flex-col justify-center py-24 outline-none"
-            >
-              <div className={`border-l-4 ${borderHighlightClass} pl-6 transition-all duration-300`}>
-                <span className="text-xs uppercase tracking-widest text-[hsl(210,80%,30%)] dark:text-[hsl(210,80%,60%)] font-semibold mb-2 block select-none">
-                  Act {(i + 1).toString().padStart(2, '0')}
-                </span>
-                <h2 className={`text-3xl md:text-4xl font-light mb-4 tracking-tight ${titleColorClass}`}>
-                  {act.title}
-                </h2>
-                <p className={`text-base md:text-lg leading-relaxed max-w-2xl ${textOpacityClass}`}>
-                  {act.desc}
-                </p>
-
-                {act.isCTA && (
-                  <div className="mt-8">
-                    <Link
-                      href="/book-demo"
-                      className="inline-block bg-[HSL(35,35%,25%)] dark:bg-[HSL(210,80%,60%)] text-white dark:text-zinc-950 px-8 py-3 rounded-sm text-sm font-semibold tracking-wider uppercase hover:opacity-90 transition-opacity duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[HSL(210,80%,60%)]"
-                    >
-                      Schedule a Consultation
-                    </Link>
-                  </div>
-                )}
+        {/* ==================================================
+            SECTION 3 — ONE COMMAND, MANY SYSTEMS
+            ================================================== */}
+        <MotionReveal className="max-w-7xl mx-auto px-6 qls-section">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            <div className="lg:col-span-5">
+              <span className="text-xs font-mono uppercase tracking-widest text-[HSL(25,60%,50%)] font-semibold mb-2 block select-none">
+                SYSTEM INTEGRATION
+              </span>
+              <h2 className="qls-section-title mb-6">
+                One Command.<br />
+                Many Systems.
+              </h2>
+              <p className="text-base md:text-lg text-foreground/75 leading-relaxed max-w-md mb-8 font-normal">
+                {"You shouldn't have to manage six different applications. We combine your subsystems to behave as one unified, comfortable living environment."}
+              </p>
+              {/* Asymmetrical Image block */}
+              <div className="relative aspect-video rounded-sm overflow-hidden border border-zinc-900/80 bg-zinc-900 max-w-sm hidden lg:block">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/images/kitchen.jpg"
+                  alt="Seamless smart home integration"
+                  className="w-full h-full object-cover opacity-45"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent" />
               </div>
-            </section>
-          );
-        })}
+            </div>
+
+            <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {systems.map((sys) => (
+                <MotionCard
+                  key={sys.name}
+                  className="qls-card qls-card-hover p-5 md:p-6"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="text-[HSL(210,80%,60%)]">
+                      {getIconForSlug(sys.icon, 'w-5 h-5')}
+                    </span>
+                    <h3 className="text-base font-semibold text-foreground tracking-tight">
+                      {sys.name}
+                    </h3>
+                  </div>
+                  <p className="text-xs text-foreground/70 leading-relaxed font-normal">
+                    {sys.desc}
+                  </p>
+                </MotionCard>
+              ))}
+            </div>
+          </div>
+        </MotionReveal>
+
+        {/* ==================================================
+            SECTION 4 — LIVING SCENES PREVIEW
+            ================================================== */}
+        <MotionReveal className="max-w-7xl mx-auto px-6 qls-section">
+          <div className="text-center max-w-xl mx-auto mb-16">
+            <span className="text-xs font-mono uppercase tracking-widest text-[HSL(25,60%,50%)] font-semibold mb-2 block select-none">
+              SCENE DEMONSTRATION
+            </span>
+            <h2 className="qls-section-title">
+              Intuitive Living Scenes
+            </h2>
+            <p className="text-sm text-foreground/75 leading-relaxed mt-2">
+              Select a scene preset below to see how our custom configurations orchestrate lighting warmth, climate settings, and shading dynamically.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            {/* Left selector menu */}
+            <div className="lg:col-span-4 flex flex-col gap-3">
+              {(Object.keys(scenes) as SceneKey[]).map((key) => {
+                const isSelected = activeScene === key;
+                return (
+                  <button
+                    key={key}
+                    onClick={() => setActiveScene(key)}
+                    className={`qls-card qls-card-hover w-full text-left p-5 border transition-all duration-300 outline-none cursor-pointer ${
+                      isSelected
+                        ? 'border-[HSL(35,30%,45%)] bg-[HSL(35,30%,45%)]/5'
+                        : 'border-zinc-900 text-foreground/60 hover:border-zinc-800'
+                    }`}
+                  >
+                    <span className="text-xs font-mono uppercase tracking-widest block text-[HSL(35,30%,45%)] font-semibold mb-1">
+                      {key.toUpperCase()}
+                    </span>
+                    <span className="text-base font-light text-foreground block">
+                      {scenes[key].title}
+                    </span>
+                    <span className="text-xs text-foreground/60 leading-normal block mt-2 font-normal">
+                      {scenes[key].desc}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Right preview display viewport */}
+            <div className="qls-card lg:col-span-8 relative aspect-video overflow-hidden bg-zinc-900">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={scenes[activeScene].img}
+                alt={scenes[activeScene].title}
+                className="w-full h-full object-cover opacity-50 transition-opacity duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent" />
+              <div className="absolute bottom-6 left-6 select-none">
+                <Link
+                  href="/experience"
+                  className="qls-button qls-button-secondary bg-zinc-950/80 backdrop-blur-sm"
+                >
+                  Explore the Full Experience &rarr;
+                </Link>
+              </div>
+            </div>
+          </div>
+        </MotionReveal>
+
+        {/* ==================================================
+            SECTION 5 — SPACES WE TRANSFORM
+            ================================================== */}
+        <MotionReveal className="max-w-7xl mx-auto px-6 qls-section">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+            <div>
+              <span className="text-xs font-mono uppercase tracking-widest text-[HSL(25,60%,50%)] font-semibold mb-2 block select-none">
+                WHERE WE WORK
+              </span>
+              <h2 className="qls-section-title">
+                Spaces We Transform
+              </h2>
+            </div>
+            <Link
+              href="/projects"
+              className="qls-text-link"
+            >
+              Discover All Environments &rarr;
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {spaces.map((space) => (
+              <MotionCard
+                key={space.title}
+                className="qls-card group relative flex flex-col justify-end aspect-[4/5] overflow-hidden bg-zinc-900/40 p-6"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={space.img}
+                  alt={space.title}
+                  className="absolute inset-0 w-full h-full object-cover opacity-35 group-hover:opacity-50 transition-opacity duration-500"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent z-10" />
+                <div className="relative z-20">
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-[HSL(35,30%,45%)] font-semibold block mb-1">
+                    {space.subtitle}
+                  </span>
+                  <h3 className="text-xl font-light text-foreground tracking-tight mb-4">
+                    {space.title}
+                  </h3>
+                  <Link
+                    href={space.link}
+                    className="inline-flex items-center text-xs font-mono text-[HSL(210,80%,60%)] hover:text-white transition-colors"
+                  >
+                    View Projects <span className="ml-2">&rarr;</span>
+                  </Link>
+                </div>
+              </MotionCard>
+            ))}
+          </div>
+        </MotionReveal>
+
+        {/* ==================================================
+            SECTION 6 — REAL COMPANY STORY
+            ================================================== */}
+        <MotionReveal className="max-w-7xl mx-auto px-6 qls-section">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            <div className="qls-card lg:col-span-5 relative aspect-video md:aspect-[4/3] overflow-hidden bg-zinc-900">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/security.jpg"
+                alt="Quantum Living Solutions company story"
+                className="w-full h-full object-cover opacity-45"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent" />
+            </div>
+
+            <div className="lg:col-span-7 space-y-6">
+              <span className="text-xs font-mono uppercase tracking-widest text-[HSL(25,60%,50%)] font-semibold block select-none">
+                BUILT IN GORAKHPUR
+              </span>
+              <h2 className="qls-section-title">
+                Engineered Around Real Life.
+              </h2>
+              <p className="text-base text-foreground/75 leading-relaxed font-normal">
+                Quantum Living Solutions provides premium home and commercial automation services. Under the leadership of founder Raj Kumar Sharma, we coordinate custom scene layouts, climate presets, shading, and cinematic audio/video matrices.
+              </p>
+              <p className="text-sm text-foreground/60 leading-relaxed font-normal">
+                Our consultation-led approach ensures you receive highly intuitive systems that remain dependable and simple to operate, with thorough testing and clean handover procedures.
+              </p>
+              <div className="pt-4 select-none">
+                <Link
+                  href="/about"
+                  className="qls-button qls-button-secondary"
+                >
+                  Our Story &rarr;
+                </Link>
+              </div>
+            </div>
+          </div>
+        </MotionReveal>
+
+        {/* ==================================================
+            SECTION 6B — FEATURED PRODUCTS CATALOG
+            ================================================== */}
+        {featuredProducts.length > 0 && (
+          <MotionReveal className="max-w-7xl mx-auto px-6 qls-section">
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
+              <div>
+                <span className="text-xs font-mono uppercase tracking-widest text-[HSL(35,30%,45%)] font-semibold mb-2 block select-none">
+                  LATEST HARDWARE
+                </span>
+                <h2 className="text-3xl sm:text-4xl font-light text-white tracking-tight">
+                  Featured Components
+                </h2>
+              </div>
+              <Link
+                href="/products"
+                className="text-xs font-mono uppercase text-zinc-500 hover:text-white transition-colors duration-200 mt-4 md:mt-0 select-none block"
+              >
+                Browse Entire Catalog &rarr;
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {featuredProducts.map((p) => {
+                const formatPrice = (paise: number) => {
+                  return new Intl.NumberFormat('en-IN', {
+                    style: 'currency',
+                    currency: 'INR',
+                    maximumFractionDigits: 0
+                  }).format(paise / 100);
+                };
+
+                return (
+                  <MotionCard
+                    key={p.id}
+                    className="qls-card qls-card-hover group flex flex-col h-full overflow-hidden"
+                  >
+                    <div className="aspect-video w-full relative bg-zinc-900 border-b border-zinc-900/80 overflow-hidden shrink-0">
+                      {p.coverImage ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={p.coverImage.fileUrl}
+                          alt={p.title}
+                          className="w-full h-full object-cover transition-transform duration-300 animate-fade-in"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center text-[10px] font-mono text-zinc-700 uppercase">
+                          No Image
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                      <div>
+                        <span className="text-[9px] font-mono uppercase text-zinc-500 tracking-wider">
+                          {p.category.name}
+                        </span>
+                        <h3 className="text-sm font-light text-white tracking-tight mt-1 truncate">
+                          {p.title}
+                        </h3>
+                        {p.subtitle && (
+                          <p className="text-[10px] text-zinc-500 font-mono mt-0.5 truncate">
+                            {p.subtitle}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="pt-3 border-t border-zinc-900 flex items-center justify-between text-[11px] font-mono">
+                        <span className="text-zinc-500">Price</span>
+                        <span className="text-zinc-300">
+                          {p.hidePrice ? 'Call for price' : formatPrice(p.price)}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2 pt-1">
+                        <Link
+                          href={`/products/${p.slug}`}
+                          className="qls-button qls-button-secondary min-h-0 py-2 text-[9px]"
+                        >
+                          Details
+                        </Link>
+                        <Link
+                          href="/book-demo"
+                          className="qls-button qls-button-primary min-h-0 py-2 text-[9px]"
+                        >
+                          Demo
+                        </Link>
+                      </div>
+                    </div>
+                  </MotionCard>
+                );
+              })}
+            </div>
+          </MotionReveal>
+        )}
+
+        {/* ==================================================
+            SECTION 6B — PARTNER COLLABORATIONS
+            ================================================== */}
+        <HomePartnersSection />
+
+        {/* ==================================================
+            SECTION 7 — FINAL CONVERSION MOMENT
+            ================================================== */}
+        <MotionReveal className="max-w-7xl mx-auto px-6 py-24 text-center">
+          <div className="max-w-xl mx-auto space-y-6">
+            <span className="text-xs font-mono uppercase tracking-widest text-[HSL(35,30%,45%)] font-semibold block select-none">
+              START A CONVERSATION
+            </span>
+            <h2 className="qls-section-title">
+              Your Space Can Do More.
+            </h2>
+            <p className="text-base text-foreground/75 leading-relaxed max-w-md mx-auto">
+              Visit our Gorakhpur showroom for a private demo, or schedule a free consultation to discuss your smart home or automation project.
+            </p>
+            <div className="pt-8 flex flex-col sm:flex-row gap-4 justify-center items-center select-none">
+              <Link
+                href="/book-demo"
+                className="qls-button qls-button-primary w-full sm:w-auto text-center"
+              >
+                Book Showroom Demo
+              </Link>
+              <a
+                href="https://wa.me/918130856575"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="qls-button qls-button-secondary w-full sm:w-auto text-center"
+              >
+                Consult on WhatsApp
+              </a>
+            </div>
+          </div>
+        </MotionReveal>
+
       </div>
     </div>
   );

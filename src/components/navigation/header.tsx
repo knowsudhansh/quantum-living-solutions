@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { AnimatePresence, motion } from 'framer-motion';
 
 export default function Header() {
   const pathname = usePathname();
@@ -97,31 +98,57 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-[HSL(220,15%,12%)] bg-[HSL(220,25%,7%)]/80 backdrop-blur-md px-6 py-4">
+    <header className="sticky top-0 z-50 w-full border-b border-[HSL(220,15%,12%)] bg-[HSL(8,10%,4%)]/82 backdrop-blur-xl px-4 sm:px-6 py-3.5">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
-        {/* Brand Logo link */}
         <Link
           href="/"
-          className="text-lg font-normal tracking-wider text-[HSL(40,30%,95%)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[HSL(210,80%,60%)]"
+          className="flex min-w-0 items-center gap-3 rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-[HSL(210,80%,60%)] outline-none"
         >
-          QUANTUM
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/brand/qls-logo.jpg"
+            alt="Quantum Living Solutions Logo"
+            className="w-8 h-8 shrink-0 rounded-md object-cover border border-zinc-800"
+          />
+          <span className="truncate font-sans text-base sm:text-lg font-light tracking-wide text-[HSL(40,30%,95%)]">
+            Quantum Living Solutions
+          </span>
         </Link>
 
         {/* Desktop Navigation */}
-        <nav aria-label="Main Navigation" className="hidden md:flex items-center space-x-8">
+        <nav aria-label="Main Navigation" className="hidden lg:flex items-center gap-5 xl:gap-7">
           {navLinks.map((link) => {
             const isActive = pathname === link.href;
+            const isBookDemo = link.name === 'Book Demo';
+            if (isBookDemo) {
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="qls-button qls-button-primary min-h-0 px-4 py-2 text-[10px]"
+                >
+                  {link.name}
+                </Link>
+              );
+            }
             return (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-sm tracking-wide transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[HSL(210,80%,60%)] px-1 py-1 ${
+                className={`relative rounded-sm px-1 py-1 text-sm tracking-wide transition-colors duration-200 ${
                   isActive
-                    ? 'text-[HSL(40,30%,95%)] border-b border-[HSL(35,30%,45%)]'
+                    ? 'text-[HSL(40,30%,95%)]'
                     : 'text-[HSL(210,15%,75%)] hover:text-[HSL(40,30%,95%)]'
                 }`}
               >
                 {link.name}
+                {isActive && (
+                  <motion.span
+                    layoutId="nav-indicator"
+                    className="absolute -bottom-1 left-0 right-0 h-px bg-[HSL(35,30%,50%)]"
+                    transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                  />
+                )}
               </Link>
             );
           })}
@@ -134,7 +161,7 @@ export default function Header() {
           aria-expanded={isMobileMenuOpen}
           aria-controls="mobile-menu"
           aria-label="Toggle menu"
-          className="md:hidden p-2 text-[HSL(210,15%,85%)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[HSL(210,80%,60%)]"
+          className="lg:hidden rounded-md p-2 text-[HSL(210,15%,85%)]"
         >
           <svg
             className="w-6 h-6"
@@ -163,20 +190,26 @@ export default function Header() {
       </div>
 
       {/* Mobile Navigation Menu Drawer */}
+      <AnimatePresence>
       {isMobileMenuOpen && (
-        <div
+        <motion.div
           ref={menuRef}
           id="mobile-menu"
-          className="fixed inset-0 top-[65px] z-40 w-full h-[calc(100vh-65px)] bg-[HSL(220,25%,7%)] px-6 py-12 flex flex-col md:hidden"
+          className="fixed inset-x-0 top-[61px] z-40 h-[calc(100vh-61px)] w-full bg-[HSL(8,10%,4%)]/98 px-6 py-10 flex flex-col lg:hidden"
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
         >
-          <nav aria-label="Mobile Navigation" className="flex flex-col space-y-6">
+          <nav aria-label="Mobile Navigation" className="flex flex-col space-y-5">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`text-xl font-light tracking-wide focus-visible:outline focus-visible:outline-2 focus-visible:outline-[HSL(210,80%,60%)] py-2 ${
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`rounded-md py-3 text-xl font-light tracking-wide ${
                     isActive ? 'text-[HSL(40,30%,95%)] border-l-2 border-[HSL(35,30%,45%)] pl-4' : 'text-[HSL(210,15%,75%)]'
                   }`}
                 >
@@ -185,8 +218,9 @@ export default function Header() {
               );
             })}
           </nav>
-        </div>
+        </motion.div>
       )}
+      </AnimatePresence>
     </header>
   );
 }

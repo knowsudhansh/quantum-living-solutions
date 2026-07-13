@@ -1,0 +1,400 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
+}
+
+// User model for administrative access
+model User {
+  id           String        @id @default(uuid()) @db.Uuid
+  email        String        @unique @db.VarChar(255)
+  passwordHash String        @map("password_hash") @db.VarChar(255)
+  mfaSecret    String?       @map("mfa_secret") @db.VarChar(255)
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+  roles        UserRole[]
+  activityLogs ActivityLog[]
+
+  @@map("users")
+}
+
+// RBAC Role definitions
+model Role {
+  id          String           @id @default(uuid()) @db.Uuid
+  name        String           @unique @db.VarChar(100)
+  description String?          @db.Text
+  users       UserRole[]
+  permissions RolePermission[]
+
+  @@map("roles")
+}
+
+// Role join table
+model UserRole {
+  userId String @map("user_id") @db.Uuid
+  roleId String @map("role_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+  @@map("user_roles")
+}
+
+// RBAC Permissions
+model Permission {
+  id          String           @id @default(uuid()) @db.Uuid
+  name        String           @unique @db.VarChar(100)
+  description String?          @db.Text
+  roles       RolePermission[]
+
+  @@map("permissions")
+}
+
+// Permission join table
+model RolePermission {
+  roleId       String     @map("role_id") @db.Uuid
+  permissionId String     @map("permission_id") @db.Uuid
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+// CRM Lead Records
+model Lead {
+  id        String    @id @default(uuid()) @db.Uuid
+  firstName String    @map("first_name") @db.VarChar(100)
+  lastName  String    @map("last_name") @db.VarChar(100)
+  email     String    @db.VarChar(255)
+  phone     String    @db.VarChar(50)
+  interest  String    @default("Smart Home") @db.VarChar(100)
+  source    String    @db.VarChar(100) // "contact", "demo", "careers"
+  status    String    @default("NEW") @db.VarChar(50)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  bookings  Booking[]
+
+  @@index([email])
+  @@map("leads")
+}
+
+// Showroom demo booking schedule slots
+model DemoSlot {
+  id              String     @id @default(uuid()) @db.Uuid
+  startTime       DateTime   @map("start_time") @db.Timestamptz(6)
+  endTime         DateTime   @map("end_time") @db.Timestamptz(6)
+  maxCapacity     Int        @default(1) @map("max_capacity")
+  currentBookings Int        @default(0) @map("current_bookings")
+  isActive        Boolean    @default(true) @map("is_active")
+  createdAt       DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+  holds           SlotHold[]
+  bookings        Booking[]
+
+  @@unique([startTime])
+  @@index([startTime], map: "idx_demo_slots_start_time")
+  @@map("demo_slots")
+}
+
+// Concurrency locks on checkout holds
+model SlotHold {
+  id        String   @id @default(uuid()) @db.Uuid
+  slotId    String   @map("slot_id") @db.Uuid
+  sessionId String   @map("session_id") @db.VarChar(255)
+  heldUntil DateTime @map("held_until") @db.Timestamptz(6)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  slot      DemoSlot @relation(fields: [slotId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@map("slot_holds")
+}
+
+// Completed demo slot reservations
+model Booking {
+  id          String    @id @default(uuid()) @db.Uuid
+  slotId      String    @map("slot_id") @db.Uuid
+  leadId      String    @map("lead_id") @db.Uuid
+  status      String    @default("PENDING") @db.VarChar(50)
+  totalAmount Decimal   @map("total_amount") @db.Decimal(10, 2)
+  paidAmount  Decimal   @default(0.00) @map("paid_amount") @db.Decimal(10, 2)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  slot        DemoSlot  @relation(fields: [slotId], references: [id])
+  lead        Lead      @relation(fields: [leadId], references: [id])
+  payments    Payment[]
+
+  @@map("bookings")
+}
+
+// Payments Ledger matching gateway webhooks
+model Payment {
+  id               String   @id @default(uuid()) @db.Uuid
+  bookingId        String   @map("booking_id") @db.Uuid
+  gatewayPaymentId String   @unique @map("gateway_payment_id") @db.VarChar(255)
+  gatewayOrderId   String   @map("gateway_order_id") @db.VarChar(255)
+  amount           Decimal  @db.Decimal(10, 2)
+  currency         String   @default("INR") @db.VarChar(10)
+  status           String   @db.VarChar(50)
+  rawResponse      Json     @map("raw_response")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  booking          Booking  @relation(fields: [bookingId], references: [id])
+
+  @@map("payments")
+}
+
+// Career Application storage
+model CareerApplication {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @db.VarChar(100)
+  email     String   @db.VarChar(255)
+  phone     String   @db.VarChar(50)
+  role      String   @db.VarChar(100)
+  message   String?  @db.Text
+  resumeUrl String   @map("resume_url") @db.VarChar(512)
+  status    String   @default("SUBMITTED") @db.VarChar(50)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("career_applications")
+}
+
+// Newsletter Subscription Emails
+model NewsletterSubscriber {
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String   @unique @db.VarChar(255)
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("newsletter_subscribers")
+}
+
+// Projects & Showcases configuration
+model Project {
+  id          String         @id @default(uuid()) @db.Uuid
+  title       String         @db.VarChar(255)
+  slug        String         @unique @db.VarChar(255)
+  category    String         @db.VarChar(100) // "Residences", "Workspaces", "Entertainment"
+  subtitle    String?        @db.VarChar(255)
+  description String         @db.Text
+  location    String?        @db.VarChar(255)
+  isActive    Boolean        @default(true) @map("is_active")
+  createdAt   DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
+  images      ProjectImage[]
+
+  @@map("projects")
+}
+
+// Project Images
+model ProjectImage {
+  id        String  @id @default(uuid()) @db.Uuid
+  projectId String  @map("project_id") @db.Uuid
+  imageUrl  String  @map("image_url") @db.VarChar(512)
+  isCover   Boolean @default(false) @map("is_cover")
+  sortOrder Int     @default(0) @map("sort_order")
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("project_images")
+}
+
+// Testimonials
+model Testimonial {
+  id             String   @id @default(uuid()) @db.Uuid
+  clientName     String   @map("client_name") @db.VarChar(100)
+  projectDetails String   @map("project_details") @db.VarChar(255)
+  quote          String   @db.Text
+  isApproved     Boolean  @default(false) @map("is_approved")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("testimonials")
+}
+
+// System settings dashboard config
+model SystemSetting {
+  id        String   @id @default(uuid()) @db.Uuid
+  key       String   @unique @db.VarChar(100)
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("system_settings")
+}
+
+// Security Auditor logs
+model ActivityLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String?  @map("user_id") @db.Uuid
+  action    String   @db.VarChar(100)
+  ipAddress String   @map("ip_address") @db.VarChar(100)
+  details   String?  @db.Text
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("activity_logs")
+}
+
+// Media library items
+model MediaItem {
+  id           String         @id @default(uuid()) @db.Uuid
+  fileName     String         @map("file_name") @db.VarChar(255)
+  fileUrl      String         @map("file_url") @db.VarChar(512)
+  mimeType     String         @map("mime_type") @db.VarChar(100)
+  fileSize     Int            @map("file_size")
+  createdAt    DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  products     Product[]      @relation("ProductCoverImage")
+  galleryItems ProductImage[]
+  brands       Brand[]
+  technologies Technology[]
+  partners     Partner[]
+
+  @@map("media_items")
+}
+
+// Product categories tree
+model Category {
+  id        String     @id @default(uuid()) @db.Uuid
+  slug      String     @unique @db.VarChar(255)
+  name      String     @db.VarChar(255)
+  parentId  String?    @map("parent_id") @db.Uuid
+  createdAt DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  products  Product[]
+  parent    Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children  Category[] @relation("CategoryHierarchy")
+
+  @@map("categories")
+}
+
+// Brand registry
+model Brand {
+  id           String     @id @default(uuid()) @db.Uuid
+  name         String     @db.VarChar(255)
+  logoId       String?    @map("logo_id") @db.Uuid
+  websiteUrl   String?    @map("website_url") @db.VarChar(512)
+  displayOrder Int        @default(0) @map("display_order")
+  isActive     Boolean    @default(true) @map("is_active")
+  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  products     Product[]
+  logo         MediaItem? @relation(fields: [logoId], references: [id], onDelete: SetNull)
+
+  @@map("brands")
+}
+
+// Technology registry
+model Technology {
+  id          String     @id @default(uuid()) @db.Uuid
+  name        String     @db.VarChar(100)
+  logoId      String?    @map("logo_id") @db.Uuid
+  description String     @db.Text
+  createdAt   DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  logo        MediaItem? @relation(fields: [logoId], references: [id], onDelete: SetNull)
+
+  @@map("technologies")
+}
+
+// Main Product table
+model Product {
+  id             String    @id @default(uuid()) @db.Uuid
+  slug           String    @unique @db.VarChar(255)
+  title          String    @db.VarChar(255)
+  subtitle       String?   @db.VarChar(255)
+  description    String    @db.Text
+  categoryId     String    @map("category_id") @db.Uuid
+  brandId        String?   @map("brand_id") @db.Uuid
+  price          Int       @default(0) // Price in minor units (e.g. Paise)
+  hidePrice      Boolean   @default(false) @map("hide_price")
+  availability   String    @default("IN_STOCK") @db.VarChar(50)
+  warrantyMonths Int       @default(12) @map("warranty_months")
+  coverImageId   String?   @map("cover_image_id") @db.Uuid
+  status         String    @default("DRAFT") @db.VarChar(50) // "DRAFT", "PUBLISHED"
+  sortOrder      Int       @default(0) @map("sort_order")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt      DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  category       Category               @relation(fields: [categoryId], references: [id])
+  brand          Brand?                 @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  coverImage     MediaItem?             @relation("ProductCoverImage", fields: [coverImageId], references: [id], onDelete: SetNull)
+  gallery        ProductImage[]
+  specifications ProductSpecification[]
+  downloads      ProductDownload[]
+
+  @@index([categoryId])
+  @@index([brandId])
+  @@index([status])
+  @@map("products")
+}
+
+// Product images gallery join table
+model ProductImage {
+  id        String    @id @default(uuid()) @db.Uuid
+  productId String    @map("product_id") @db.Uuid
+  mediaId   String    @map("media_id") @db.Uuid
+  sortOrder Int       @default(0) @map("sort_order")
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  media     MediaItem @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@map("product_images")
+}
+
+// Product downloads links
+model ProductDownload {
+  id        String  @id @default(uuid()) @db.Uuid
+  productId String  @map("product_id") @db.Uuid
+  label     String  @db.VarChar(255) // "User Manual", "Datasheet"
+  fileUrl   String  @map("file_url") @db.VarChar(512)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_downloads")
+}
+
+// Specifications values per product
+model ProductSpecification {
+  productId  String       @map("product_id") @db.Uuid
+  templateId String       @map("template_id") @db.Uuid
+  value      String       @db.Text
+  product    Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  template   SpecTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@id([productId, templateId])
+  @@map("product_specifications")
+}
+
+// Specifications template definition
+model SpecTemplate {
+  id        String                 @id @default(uuid()) @db.Uuid
+  groupName String                 @map("group_name") @db.VarChar(100) // "Electrical", "Connectivity"
+  name      String                 @db.VarChar(100) // "Voltage", "Protocol"
+  createdAt DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
+  products  ProductSpecification[]
+
+  @@map("specification_templates")
+}
+
+// Brand Collaboration Partners
+model Partner {
+  id           String     @id @default(uuid()) @db.Uuid
+  name         String     @db.VarChar(255)
+  slug         String     @unique @db.VarChar(255)
+  tagline      String?    @db.VarChar(255)
+  overview     String     @db.Text
+  partnership  String     @db.Text
+  services     String[]
+  websiteUrl   String     @map("website_url") @db.VarChar(512)
+  logoId       String?    @map("logo_id") @db.Uuid
+  displayOrder Int        @default(0) @map("display_order")
+  isActive     Boolean    @default(true) @map("is_active")
+  showOnHome   Boolean    @default(true) @map("show_on_home")
+  showOnAbout  Boolean    @default(true) @map("show_on_about")
+  showOnFooter Boolean    @default(false) @map("show_on_footer")
+  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+  logo         MediaItem? @relation(fields: [logoId], references: [id], onDelete: SetNull)
+
+  @@index([isActive])
+  @@index([displayOrder])
+  @@map("partners")
+}

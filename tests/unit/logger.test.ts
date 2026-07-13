@@ -3,7 +3,7 @@ import { writeLog } from '../../src/lib/utils/logger';
 
 describe('Structured JSON logger redaction', () => {
   it('should redact sensitive keys case-insensitively', () => {
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, 'info').mockImplementation(() => {});
     const sensitiveData = {
       password: 'myPassword123',
       Secret_Key: 'supersecret',
@@ -34,7 +34,7 @@ describe('Structured JSON logger redaction', () => {
   });
 
   it('should not mutate original input object parameters', () => {
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, 'info').mockImplementation(() => {});
     const input = { password: '123', safe: 'abc' };
     writeLog('INFO', 'test', input);
     expect(input.password).toBe('123'); // Original remains unchanged
@@ -42,7 +42,7 @@ describe('Structured JSON logger redaction', () => {
   });
 
   it('should handle nested structures and arrays without crashing', () => {
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, 'info').mockImplementation(() => {});
     const complexObj = {
       nested: { password: '123', token: 'abc' },
       list: [{ card: '1111' }, 'safe_item'],
@@ -59,7 +59,7 @@ describe('Structured JSON logger redaction', () => {
   });
 
   it('should resolve circular loops safely', () => {
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, 'info').mockImplementation(() => {});
     const circularObj: Record<string, unknown> = { name: 'Node' };
     circularObj.self = circularObj;
     
@@ -70,7 +70,7 @@ describe('Structured JSON logger redaction', () => {
   });
 
   it('should restrict depth levels past maximum limit (5)', () => {
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, 'info').mockImplementation(() => {});
     const deeplyNested = {
       level1: {
         level2: {
@@ -91,7 +91,7 @@ describe('Structured JSON logger redaction', () => {
   });
 
   it('should format and redact Error objects safely', () => {
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, 'info').mockImplementation(() => {});
     const err = new Error('Sensitive database trace message');
     
     // Test in default environment (testing/dev)

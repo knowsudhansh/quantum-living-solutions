@@ -68,7 +68,7 @@ export default function Footer() {
         <div className="flex flex-wrap gap-x-16 gap-y-8">
           <div>
             <h2 className="text-sm font-semibold tracking-wider text-[HSL(40,30%,95%)] uppercase mb-4">
-              Sitemap
+              Quick Links
             </h2>
             <ul className="space-y-2 text-sm">
               <li>
@@ -77,6 +77,14 @@ export default function Footer() {
                   className="hover:text-[HSL(40,30%,95%)] transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[HSL(210,80%,60%)]"
                 >
                   Solutions
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/products"
+                  className="hover:text-[HSL(40,30%,95%)] transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[HSL(210,80%,60%)]"
+                >
+                  Products
                 </Link>
               </li>
               <li>

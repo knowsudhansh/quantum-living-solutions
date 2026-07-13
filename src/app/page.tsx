@@ -153,7 +153,112 @@ export default function Home() {
         </MotionReveal>
 
         {/* ==================================================
-            SECTION 4 — LIVING SCENES PREVIEW
+            SECTION 4 — FEATURED PRODUCTS
+            ================================================== */}
+        {featuredProducts.length > 0 && (
+          <MotionReveal className="max-w-7xl mx-auto px-6 qls-section">
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+              <div>
+                <span className="text-xs font-mono uppercase tracking-widest text-[HSL(35,30%,45%)] font-semibold mb-2 block select-none">
+                  LATEST HARDWARE
+                </span>
+                <h2 className="qls-section-title">
+                  Featured Products
+                </h2>
+                <p className="text-sm text-foreground/70 leading-relaxed mt-3 max-w-xl">
+                  Browse selected smart home controllers, touch panels, sensors and automation devices from our published catalog.
+                </p>
+              </div>
+              <Link
+                href="/products"
+                className="qls-button qls-button-secondary w-full sm:w-auto text-center"
+              >
+                View All Products
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {featuredProducts.map((p) => {
+                const formatPrice = (paise: number) => {
+                  return new Intl.NumberFormat('en-IN', {
+                    style: 'currency',
+                    currency: 'INR',
+                    maximumFractionDigits: 0
+                  }).format(paise / 100);
+                };
+
+                return (
+                  <MotionCard
+                    key={p.id}
+                    className="qls-card qls-card-hover group flex flex-col h-full overflow-hidden"
+                  >
+                    <Link href={`/products/${p.slug}`} className="block focus-visible:outline focus-visible:outline-2 focus-visible:outline-[HSL(210,80%,60%)]">
+                      <div className="aspect-video w-full relative bg-zinc-900 border-b border-zinc-900/80 overflow-hidden shrink-0">
+                        {p.coverImage ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={p.coverImage.fileUrl}
+                            alt={p.title}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center text-[10px] font-mono text-zinc-700 uppercase">
+                            No Image
+                          </div>
+                        )}
+                      </div>
+                    </Link>
+
+                    <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                      <div>
+                        <span className="text-[9px] font-mono uppercase text-zinc-500 tracking-wider">
+                          {p.category.name}
+                        </span>
+                        <Link
+                          href={`/products/${p.slug}`}
+                          className="block mt-1 text-sm font-light text-white tracking-tight hover:text-[HSL(35,30%,70%)] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[HSL(210,80%,60%)]"
+                        >
+                          {p.title}
+                        </Link>
+                        {p.subtitle && (
+                          <p className="text-[10px] text-zinc-500 font-mono mt-0.5 truncate">
+                            {p.subtitle}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="pt-3 border-t border-zinc-900 flex items-center justify-between text-[11px] font-mono">
+                        <span className="text-zinc-500">Price</span>
+                        <span className="text-zinc-300">
+                          {p.hidePrice ? 'Call for price' : formatPrice(p.price)}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2 pt-1">
+                        <Link
+                          href={`/products/${p.slug}`}
+                          className="qls-button qls-button-secondary min-h-0 py-2 text-[9px]"
+                        >
+                          Details
+                        </Link>
+                        <Link
+                          href="/products"
+                          className="qls-button qls-button-primary min-h-0 py-2 text-[9px]"
+                        >
+                          Catalog
+                        </Link>
+                      </div>
+                    </div>
+                  </MotionCard>
+                );
+              })}
+            </div>
+          </MotionReveal>
+        )}
+
+        {/* ==================================================
+            SECTION 5 — LIVING SCENES PREVIEW
             ================================================== */}
         <MotionReveal className="max-w-7xl mx-auto px-6 qls-section">
           <div className="text-center max-w-xl mx-auto mb-16">
@@ -312,102 +417,6 @@ export default function Home() {
             </div>
           </div>
         </MotionReveal>
-
-        {/* ==================================================
-            SECTION 6B — FEATURED PRODUCTS CATALOG
-            ================================================== */}
-        {featuredProducts.length > 0 && (
-          <MotionReveal className="max-w-7xl mx-auto px-6 qls-section">
-            <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
-              <div>
-                <span className="text-xs font-mono uppercase tracking-widest text-[HSL(35,30%,45%)] font-semibold mb-2 block select-none">
-                  LATEST HARDWARE
-                </span>
-                <h2 className="text-3xl sm:text-4xl font-light text-white tracking-tight">
-                  Featured Components
-                </h2>
-              </div>
-              <Link
-                href="/products"
-                className="text-xs font-mono uppercase text-zinc-500 hover:text-white transition-colors duration-200 mt-4 md:mt-0 select-none block"
-              >
-                Browse Entire Catalog &rarr;
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featuredProducts.map((p) => {
-                const formatPrice = (paise: number) => {
-                  return new Intl.NumberFormat('en-IN', {
-                    style: 'currency',
-                    currency: 'INR',
-                    maximumFractionDigits: 0
-                  }).format(paise / 100);
-                };
-
-                return (
-                  <MotionCard
-                    key={p.id}
-                    className="qls-card qls-card-hover group flex flex-col h-full overflow-hidden"
-                  >
-                    <div className="aspect-video w-full relative bg-zinc-900 border-b border-zinc-900/80 overflow-hidden shrink-0">
-                      {p.coverImage ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={p.coverImage.fileUrl}
-                          alt={p.title}
-                          className="w-full h-full object-cover transition-transform duration-300 animate-fade-in"
-                        />
-                      ) : (
-                        <div className="absolute inset-0 flex items-center justify-center text-[10px] font-mono text-zinc-700 uppercase">
-                          No Image
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                      <div>
-                        <span className="text-[9px] font-mono uppercase text-zinc-500 tracking-wider">
-                          {p.category.name}
-                        </span>
-                        <h3 className="text-sm font-light text-white tracking-tight mt-1 truncate">
-                          {p.title}
-                        </h3>
-                        {p.subtitle && (
-                          <p className="text-[10px] text-zinc-500 font-mono mt-0.5 truncate">
-                            {p.subtitle}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="pt-3 border-t border-zinc-900 flex items-center justify-between text-[11px] font-mono">
-                        <span className="text-zinc-500">Price</span>
-                        <span className="text-zinc-300">
-                          {p.hidePrice ? 'Call for price' : formatPrice(p.price)}
-                        </span>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-2 pt-1">
-                        <Link
-                          href={`/products/${p.slug}`}
-                          className="qls-button qls-button-secondary min-h-0 py-2 text-[9px]"
-                        >
-                          Details
-                        </Link>
-                        <Link
-                          href="/book-demo"
-                          className="qls-button qls-button-primary min-h-0 py-2 text-[9px]"
-                        >
-                          Demo
-                        </Link>
-                      </div>
-                    </div>
-                  </MotionCard>
-                );
-              })}
-            </div>
-          </MotionReveal>
-        )}
 
         {/* ==================================================
             SECTION 6B — PARTNER COLLABORATIONS

@@ -6,8 +6,8 @@ import { MotionCard, MotionReveal } from '../../components/ui/motion';
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Product Catalog | Quantum Living Solutions',
-  description: 'Browse our range of luxury home automation devices, controllers, and accessories.',
+  title: 'Products | Quantum Living Solutions',
+  description: 'Browse the complete automation product catalog from Quantum Living Solutions.',
 };
 
 interface SearchParams {

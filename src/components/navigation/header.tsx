@@ -19,7 +19,9 @@ export default function Header() {
   const menuRef = useRef<HTMLDivElement>(null);
 
   const navLinks = [
+    { name: 'Home', href: '/' },
     { name: 'Solutions', href: '/solutions' },
+    { name: 'Products', href: '/products' },
     { name: 'Experience', href: '/experience' },
     { name: 'Projects', href: '/projects' },
     { name: 'About', href: '/about' },
@@ -118,7 +120,11 @@ export default function Header() {
         {/* Desktop Navigation */}
         <nav aria-label="Main Navigation" className="hidden lg:flex items-center gap-5 xl:gap-7">
           {navLinks.map((link) => {
-            const isActive = pathname === link.href;
+            const isActive = link.href === '/'
+              ? pathname === '/'
+              : link.href === '/products'
+                ? pathname.startsWith('/products')
+                : pathname === link.href;
             const isBookDemo = link.name === 'Book Demo';
             if (isBookDemo) {
               return (
@@ -203,7 +209,11 @@ export default function Header() {
         >
           <nav aria-label="Mobile Navigation" className="flex flex-col space-y-5">
             {navLinks.map((link) => {
-              const isActive = pathname === link.href;
+              const isActive = link.href === '/'
+                ? pathname === '/'
+                : link.href === '/products'
+                  ? pathname.startsWith('/products')
+                  : pathname === link.href;
               return (
                 <Link
                   key={link.href}

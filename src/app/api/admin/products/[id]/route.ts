@@ -14,6 +14,7 @@ interface ProductUpdateBody {
   hidePrice?: boolean;
   availability?: string;
   warrantyMonths?: number;
+  extendedWarrantyAvailable?: boolean;
   coverImageId?: string;
   status?: 'DRAFT' | 'PUBLISHED';
   sortOrder?: number;
@@ -80,6 +81,7 @@ export async function PUT(
       hidePrice,
       availability,
       warrantyMonths,
+      extendedWarrantyAvailable,
       coverImageId,
       status,
       sortOrder,
@@ -143,6 +145,7 @@ export async function PUT(
       if (hidePrice !== undefined) dataUpdate.hidePrice = !!hidePrice;
       if (availability !== undefined) dataUpdate.availability = availability;
       if (warrantyMonths !== undefined) dataUpdate.warrantyMonths = warrantyMonths;
+      if (extendedWarrantyAvailable !== undefined) dataUpdate.extendedWarrantyAvailable = !!extendedWarrantyAvailable;
       if (coverImageId !== undefined) dataUpdate.coverImageId = coverImageId || null;
       if (status !== undefined) dataUpdate.status = status;
       if (sortOrder !== undefined) dataUpdate.sortOrder = sortOrder;

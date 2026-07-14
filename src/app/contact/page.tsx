@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { useToast } from '../../components/utils/toast';
 import { MotionReveal, MotionPresencePanel } from '../../components/ui/motion';
+import { BUSINESS_CONTACT } from '../../lib/config/business';
 
 export default function ContactPage() {
   const { showToast } = useToast();
@@ -138,8 +139,8 @@ export default function ContactPage() {
               </p>
               <p className="flex justify-between border-b border-zinc-900 pb-2">
                 <span className="text-zinc-500">Email</span>
-                <a href="mailto:rajkumarsharma@quantumlivingsolutions.com" className="hover:text-white transition-colors text-foreground text-right break-all">
-                  rajkumarsharma@quantumlivingsolutions.com
+                <a href={`mailto:${BUSINESS_CONTACT.supportEmail}`} className="hover:text-white transition-colors text-foreground text-right break-all">
+                  {BUSINESS_CONTACT.supportEmail}
                 </a>
               </p>
             </div>
@@ -151,12 +152,8 @@ export default function ContactPage() {
             </h3>
             <div className="space-y-2 font-mono text-xs text-zinc-400">
               <div className="flex justify-between">
-                <span>Monday – Friday</span>
-                <span className="text-foreground">09:00 am – 05:00 pm</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Saturday – Sunday</span>
-                <span className="text-foreground">Closed</span>
+                <span>{BUSINESS_CONTACT.businessDays}</span>
+                <span className="text-foreground">{BUSINESS_CONTACT.businessHours}</span>
               </div>
             </div>
           </div>
@@ -207,7 +204,7 @@ export default function ContactPage() {
               {status === 'error' && (
                 <div className="p-4 bg-red-950/20 border border-red-900/60 rounded-sm text-xs font-mono text-red-400 flex justify-between items-start gap-4">
                   <span>Error: {errorMessage}</span>
-                  <button type="button" onClick={() => setStatus('idle')} className="text-zinc-500 hover:text-white transition-colors cursor-pointer">✕</button>
+                  <button type="button" onClick={() => setStatus('idle')} className="text-zinc-500 hover:text-white transition-colors cursor-pointer">âœ•</button>
                 </div>
               )}
 

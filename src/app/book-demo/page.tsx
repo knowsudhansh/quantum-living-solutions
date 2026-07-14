@@ -1,10 +1,12 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { MotionPresencePanel, MotionReveal } from '../../components/ui/motion';
 import { useToast } from '../../components/utils/toast';
-import { MotionReveal, MotionPresencePanel } from '../../components/ui/motion';
+import { PRIVATE_SITE_VISIT } from '../../lib/config/business';
 
 type Step = 1 | 2 | 3;
+type AutomationCategory = 'Home Automation' | 'Industrial Automation' | 'Creative Automation';
 
 interface DemoSlotData {
   id: string;
@@ -12,20 +14,38 @@ interface DemoSlotData {
   endTime: string;
 }
 
+const automationOptions: Record<Exclude<AutomationCategory, 'Creative Automation'>, string[]> = {
+  'Home Automation': [
+    'Lighting Automation',
+    'Curtains & Blinds',
+    'Climate Control',
+    'Security & Surveillance',
+    'Audio / Video',
+    'Energy Management',
+  ],
+  'Industrial Automation': [
+    'Automatic Changeover Switch',
+    'Genset Automation',
+    'Power Management',
+    'Source Selector',
+    'Solar Liability Management',
+  ],
+};
+
 export default function BookDemoPage() {
   const { showToast } = useToast();
   const [step, setStep] = useState<Step>(1);
-  const [interest, setInterest] = useState<string>('Home Automation');
-  const [projectType, setProjectType] = useState<string>('Residence');
-
-  const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' });
-  const [touched, setTouched] = useState({ name: false, email: false, phone: false });
+  const [automationCategory, setAutomationCategory] = useState<AutomationCategory | null>(null);
+  const [automationSelections, setAutomationSelections] = useState<string[]>([]);
+  const [creativeRequirement, setCreativeRequirement] = useState('');
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', location: '' });
+  const [touched, setTouched] = useState({ name: false, email: false, phone: false, location: false, creativeRequirement: false });
+  const [stepError, setStepError] = useState('');
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
   const [whatsappUrl, setWhatsappUrl] = useState('');
-
   const [slots, setSlots] = useState<DemoSlotData[]>([]);
-  const [selectedSlotId, setSelectedSlotId] = useState<string>('');
+  const [selectedSlotId, setSelectedSlotId] = useState('');
 
   useEffect(() => {
     fetch('/api/book-demo/slots')
@@ -33,52 +53,81 @@ export default function BookDemoPage() {
       .then((data) => {
         if (data.success && data.slots) {
           setSlots(data.slots);
-          if (data.slots.length > 0) {
-            setSelectedSlotId(data.slots[0].id);
-          }
+          if (data.slots.length > 0) setSelectedSlotId(data.slots[0].id);
         }
       })
-      .catch((err) => console.error('Failed to load slots', err));
+      .catch(() => setErrorMessage('Unable to load available visit dates. Please try again shortly.'));
   }, []);
 
-  // Inline Validation
-  const errors = useMemo(() => {
-    return {
-      name: formData.name.trim().length < 2 ? 'Name must be at least 2 characters.' : '',
-      email: !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) ? 'Enter a valid email address.' : '',
-      phone: !/^\+?[0-9\s\-()]{10,15}$/.test(formData.phone) ? 'Enter a valid phone number.' : '',
-    };
-  }, [formData]);
+  const errors = useMemo(() => ({
+    name: formData.name.trim().length < 2 ? 'Name must be at least 2 characters.' : '',
+    email: !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) ? 'Enter a valid email address.' : '',
+    phone: !/^\+?[0-9\s\-()]{10,15}$/.test(formData.phone) ? 'Enter a valid phone number.' : '',
+    location: formData.location.trim().length < 3 ? 'Enter the site location.' : '',
+    creativeRequirement: automationCategory === 'Creative Automation' && creativeRequirement.trim().length < 10
+      ? 'Describe your automation requirement in at least 10 characters.'
+      : '',
+  }), [automationCategory, creativeRequirement, formData]);
 
-  const isFormValid = useMemo(() => {
-    return Object.values(errors).every((err) => err === '');
-  }, [errors]);
+  const selectionIsValid = automationCategory === 'Creative Automation'
+    ? !errors.creativeRequirement
+    : automationSelections.length > 0;
 
-  const handleBlur = (field: keyof typeof touched) => {
-    setTouched((prev) => ({ ...prev, [field]: true }));
+  const toggleSelection = (option: string) => {
+    setAutomationSelections((current) => current.includes(option)
+      ? current.filter((item) => item !== option)
+      : [...current, option]);
+  };
+
+  const handleCategoryChange = (category: AutomationCategory) => {
+    setAutomationCategory(category);
+    setAutomationSelections([]);
+    setCreativeRequirement('');
+    setStepError('');
   };
 
   const handleNextStep = () => {
-    setStep((prev) => (prev + 1) as Step);
-  };
-
-  const handlePrevStep = () => {
-    setStep((prev) => (prev - 1) as Step);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setTouched({ name: true, email: true, phone: true });
-
-    if (!selectedSlotId) {
-      setErrorMessage('Please select a demonstration time slot');
-      setStatus('error');
-      showToast('Please select a demonstration time slot.', 'error');
+    if (step === 1 && !automationCategory) {
+      setStepError('Choose an automation category to continue.');
       return;
     }
+    if (step === 2 && !selectionIsValid) {
+      setTouched((current) => ({ ...current, creativeRequirement: true }));
+      setStepError(automationCategory === 'Creative Automation'
+        ? 'Describe your automation requirement before continuing.'
+        : 'Select at least one automation requirement before continuing.');
+      return;
+    }
+    setStepError('');
+    setStep((current) => (current + 1) as Step);
+  };
 
-    if (!isFormValid) {
-      showToast('Please correct form errors before booking.', 'error');
+  const handleBlur = (field: keyof typeof touched) => {
+    setTouched((current) => ({ ...current, [field]: true }));
+  };
+
+  const resetForm = () => {
+    setStep(1);
+    setAutomationCategory(null);
+    setAutomationSelections([]);
+    setCreativeRequirement('');
+    setFormData({ name: '', email: '', phone: '', location: '' });
+    setTouched({ name: false, email: false, phone: false, location: false, creativeRequirement: false });
+    setStepError('');
+    setStatus('idle');
+  };
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setTouched({ name: true, email: true, phone: true, location: true, creativeRequirement: true });
+
+    if (!automationCategory || !selectionIsValid || !selectedSlotId || Object.values(errors).some(Boolean)) {
+      const message = !selectedSlotId
+        ? 'Select an available visit date and time.'
+        : 'Please complete the required booking details.';
+      setErrorMessage(message);
+      setStatus('error');
+      showToast(message, 'error');
       return;
     }
 
@@ -86,388 +135,146 @@ export default function BookDemoPage() {
     setErrorMessage('');
 
     try {
-      const selectedSlot = slots.find((s) => s.id === selectedSlotId);
+      const selectedSlot = slots.find((slot) => slot.id === selectedSlotId);
       const slotTimeText = selectedSlot
         ? new Date(selectedSlot.startTime).toLocaleString('en-IN', { dateStyle: 'long', timeStyle: 'short' })
         : 'N/A';
+      const requestDetail = automationCategory === 'Creative Automation'
+        ? creativeRequirement.trim()
+        : automationSelections.join(', ');
 
-      const payload = {
-        slotId: selectedSlotId,
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        interest,
-        notes: formData.message,
-      };
-
-      const res = await fetch('/api/book-demo', {
+      const response = await fetch('/api/book-demo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          slotId: selectedSlotId,
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          location: formData.location,
+          automationCategory,
+          automationSelections,
+          creativeRequirement: automationCategory === 'Creative Automation' ? creativeRequirement : undefined,
+        }),
       });
 
-      if (!res.ok) {
-        const data = await res.json() as { error?: string };
-        throw new Error(data.error || 'Failed to complete booking');
+      if (!response.ok) {
+        const data = await response.json() as { error?: string };
+        throw new Error(data.error || 'Failed to book the private site visit.');
       }
 
-      // Construct pre-filled WhatsApp message
-      const baseText = `Hello Quantum Living Solutions,\n\nI would like to request a showroom demo and consultation.`;
-      const details = `\n\nName: ${formData.name}\nPhone: ${formData.phone}\nEmail: ${formData.email}\nSelected Subsystem: ${interest}\nProject Type: ${projectType}\nScheduled Time: ${slotTimeText}\nNotes: ${formData.message || 'None'}\n\nSource: Quantum Living Solutions Website Demo Request`;
-      const fullMessage = encodeURIComponent(baseText + details);
-      const url = `https://wa.me/918130856575?text=${fullMessage}`;
-
-      setWhatsappUrl(url);
+      const details = [
+        `Name: ${formData.name}`,
+        `Phone: ${formData.phone}`,
+        `Email: ${formData.email}`,
+        `Location: ${formData.location}`,
+        `Automation Category: ${automationCategory}`,
+        `Requirement: ${requestDetail}`,
+        `Preferred Visit: ${slotTimeText}`,
+        `Visit Charge: ${PRIVATE_SITE_VISIT.priceLabel}`,
+      ].join('\n');
+      setWhatsappUrl(`https://wa.me/918130856575?text=${encodeURIComponent(`Hello Quantum Living Solutions,\n\nI would like to request a ${PRIVATE_SITE_VISIT.label}.\n\n${details}`)}`);
       setStatus('success');
-      showToast('Demo booking request logged successfully!', 'success');
-      window.open(url, '_blank');
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'An unexpected error occurred';
-      setErrorMessage(msg);
+      showToast('Private site visit request logged successfully.', 'success');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'An unexpected error occurred.';
+      setErrorMessage(message);
       setStatus('error');
-      showToast(msg, 'error');
+      showToast(message, 'error');
     }
   };
-
-  const interests = [
-    'Home Automation',
-    'Lighting Automation',
-    'Curtains & Blinds',
-    'Climate Control',
-    'Security & Surveillance',
-    'Audio / Video',
-    'Energy Management',
-  ];
 
   return (
     <div className="qls-page max-w-5xl">
       <MotionReveal className="qls-hero text-center md:text-left">
-        <span className="qls-eyebrow">
-          SHOWROOM DEMONSTRATION
-        </span>
-        <h1 className="qls-title mb-5">
-          Request a Consultation
-        </h1>
+        <span className="qls-eyebrow">PRIVATE SITE VISIT</span>
+        <h1 className="qls-title mb-5">Plan Your Visit</h1>
         <p className="qls-lead mx-auto md:mx-0">
-          Select your automation interests below to configure a direct consultation request. We will coordinate details with you on WhatsApp.
+          Share your automation requirements and choose a convenient consultation time with our engineering team.
         </p>
+        <div className="mt-6 inline-flex flex-col border-l-2 border-[HSL(35,30%,45%)] pl-4 text-left">
+          <span className="font-mono text-sm text-[HSL(35,30%,62%)]">{PRIVATE_SITE_VISIT.label} · {PRIVATE_SITE_VISIT.priceLabel}</span>
+          <span className="mt-1 max-w-xl text-xs leading-relaxed text-foreground/65">{PRIVATE_SITE_VISIT.adjustmentNote}</span>
+        </div>
       </MotionReveal>
 
-      {/* Progress timeline bar */}
-      <div className="max-w-md mx-auto mb-12 select-none">
+      <div className="max-w-md mx-auto mb-12 select-none" aria-label={`Booking step ${step} of 3`}>
         <div className="flex justify-between items-center relative">
-          <div className="absolute left-0 right-0 top-1/2 h-[1px] bg-zinc-800 -translate-y-1/2 z-0" />
-
-          {[1, 2, 3].map((num) => {
-            const isCompleted = step > num || status === 'success';
-            const isActive = step === num && status === 'idle';
-            return (
-              <div
-                key={num}
-                className={`relative z-10 w-8 h-8 rounded-full border flex items-center justify-center text-xs font-mono transition-all duration-300 ${
-                  isCompleted
-                    ? 'bg-[HSL(35,30%,45%)] border-[HSL(35,30%,45%)] text-white'
-                    : isActive
-                    ? 'bg-zinc-950 border-[HSL(210,80%,60%)] text-[HSL(210,80%,60%)]'
-                    : 'bg-zinc-950 border-zinc-800 text-zinc-500'
-                }`}
-              >
-                0{num}
-              </div>
-            );
+          <div className="absolute left-0 right-0 top-1/2 h-px bg-zinc-800 -translate-y-1/2" />
+          {[1, 2, 3].map((number) => {
+            const isComplete = step > number || status === 'success';
+            const isActive = step === number && status === 'idle';
+            return <div key={number} className={`relative z-10 flex h-8 w-8 items-center justify-center rounded-full border text-xs font-mono ${isComplete ? 'border-[HSL(35,30%,45%)] bg-[HSL(35,30%,45%)] text-white' : isActive ? 'border-[HSL(210,80%,60%)] bg-zinc-950 text-[HSL(210,80%,60%)]' : 'border-zinc-800 bg-zinc-950 text-zinc-500'}`}>0{number}</div>;
           })}
         </div>
-        <div className="flex justify-between text-[10px] font-mono text-zinc-500 mt-2 px-1">
-          <span>INTEREST</span>
-          <span>PROJECT</span>
-          <span>CONTACT</span>
-        </div>
+        <div className="mt-2 flex justify-between px-1 text-[10px] font-mono text-zinc-500"><span>CATEGORY</span><span>REQUIREMENTS</span><span>CONTACT</span></div>
       </div>
 
-      <MotionReveal className="qls-card p-6 md:p-8 max-w-2xl mx-auto relative">
+      <MotionReveal className="qls-card relative mx-auto max-w-2xl p-6 md:p-8">
         {status === 'success' ? (
-          <MotionPresencePanel className="py-12 text-center space-y-4">
-            <div className="w-12 h-12 bg-emerald-950/40 text-emerald-400 border border-emerald-900/60 rounded-full flex items-center justify-center mx-auto">
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <h3 className="text-2xl font-light text-foreground tracking-tight">
-              Request Ready
-            </h3>
-            <p className="text-xs font-mono text-zinc-400 leading-relaxed max-w-sm mx-auto uppercase">
-              Your session time slot is saved. Continue in WhatsApp to send details.
+          <MotionPresencePanel className="space-y-4 py-12 text-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-emerald-900/60 bg-emerald-950/40 text-emerald-400">✓</div>
+            <h2 className="text-2xl font-light text-foreground tracking-tight">Private Site Visit Requested</h2>
+            <p className="mx-auto max-w-md text-sm leading-relaxed text-zinc-400">
+              Your preferred time has been reserved. The visit charge is {PRIVATE_SITE_VISIT.priceLabel}. {PRIVATE_SITE_VISIT.adjustmentNote}
             </p>
-            <div className="pt-4 flex flex-col sm:flex-row gap-4 justify-center">
-              <a
-                href={whatsappUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="qls-button qls-button-primary"
-              >
-                Continue in WhatsApp
-              </a>
-              <button
-                onClick={() => {
-                  setFormData({ name: '', email: '', phone: '', message: '' });
-                  setTouched({ name: false, email: false, phone: false });
-                  setStep(1);
-                  setStatus('idle');
-                }}
-                className="qls-button qls-button-secondary cursor-pointer"
-              >
-                Submit Another
-              </button>
+            <div className="flex flex-col justify-center gap-4 pt-4 sm:flex-row">
+              <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="qls-button qls-button-primary">Continue in WhatsApp</a>
+              <button type="button" onClick={resetForm} className="qls-button qls-button-secondary cursor-pointer">Submit Another</button>
             </div>
           </MotionPresencePanel>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* STEP 1: Interest */}
+          <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+            {status === 'error' && <div className="flex items-start justify-between gap-4 border border-red-900/60 bg-red-950/20 p-4 text-xs font-mono text-red-400"><span>{errorMessage}</span><button type="button" onClick={() => setStatus('idle')} className="cursor-pointer text-zinc-500 hover:text-white" aria-label="Dismiss error">×</button></div>}
+            {stepError && <p className="text-xs font-mono text-red-400" role="alert">{stepError}</p>}
+
             {step === 1 && (
-              <div className="space-y-6">
-                <span className="text-xs font-mono uppercase tracking-widest text-[HSL(210,80%,60%)] font-semibold block select-none">
-                  STEP 01 — SELECT INTEREST
-                </span>
-                <h2 className="text-xl font-light text-foreground mb-4">
-                  What subsystems are you planning?
-                </h2>
-                <div className="flex flex-col gap-3">
-                  {interests.map((item) => {
-                    const isSelected = interest === item;
-                    return (
-                      <button
-                        key={item}
-                        type="button"
-                        onClick={() => setInterest(item)}
-                        className={`w-full text-left p-4 rounded border text-xs font-mono tracking-wider uppercase transition-all duration-200 outline-none cursor-pointer ${
-                          isSelected
-                            ? 'border-[HSL(35,30%,45%)] text-[HSL(35,30%,45%)] bg-[HSL(35,30%,45%)]/5 font-semibold'
-                            : 'border-zinc-800 text-foreground/75 hover:border-zinc-700'
-                        }`}
-                      >
-                        {item}
-                      </button>
-                    );
-                  })}
+              <section className="space-y-6" aria-labelledby="category-title">
+                <span className="block text-xs font-mono font-semibold uppercase tracking-widest text-[HSL(210,80%,60%)]">Step 01 — Choose Category</span>
+                <h2 id="category-title" className="text-xl font-light text-foreground">Choose automation category</h2>
+                <div className="space-y-3">
+                  {(['Home Automation', 'Industrial Automation', 'Creative Automation'] as AutomationCategory[]).map((category) => (
+                    <button key={category} type="button" onClick={() => handleCategoryChange(category)} className={`w-full rounded-sm border p-4 text-left text-xs font-mono uppercase tracking-wider transition-colors ${automationCategory === category ? 'border-[HSL(35,30%,45%)] bg-[HSL(35,30%,45%)]/10 text-[HSL(35,30%,62%)]' : 'border-zinc-800 text-foreground/75 hover:border-zinc-700'}`} aria-pressed={automationCategory === category}>{category}</button>
+                  ))}
                 </div>
-                <button
-                  type="button"
-                  onClick={handleNextStep}
-                  className="qls-button qls-button-primary w-full cursor-pointer"
-                >
-                  Continue
-                </button>
-              </div>
+                <button type="button" onClick={handleNextStep} className="qls-button qls-button-primary w-full cursor-pointer">Continue</button>
+              </section>
             )}
 
-            {/* STEP 2: Project Type */}
-            {step === 2 && (
-              <div className="space-y-6">
-                <span className="text-xs font-mono uppercase tracking-widest text-[HSL(210,80%,60%)] font-semibold block select-none">
-                  STEP 02 — SELECT PROJECT TYPE
-                </span>
-                <h2 className="text-xl font-light text-foreground mb-4">
-                  What is the scale of the environment?
-                </h2>
-                <div className="flex flex-col gap-3">
-                  {['Residence', 'Workspace / Commercial', 'Other'].map((type) => {
-                    const isSelected = projectType === type;
-                    return (
-                      <button
-                        key={type}
-                        type="button"
-                        onClick={() => setProjectType(type)}
-                        className={`w-full text-left p-4 rounded border text-xs font-mono tracking-wider uppercase transition-all duration-200 outline-none cursor-pointer ${
-                          isSelected
-                            ? 'border-[HSL(35,30%,45%)] text-[HSL(35,30%,45%)] bg-[HSL(35,30%,45%)]/5 font-semibold'
-                            : 'border-zinc-800 text-foreground/75 hover:border-zinc-700'
-                        }`}
-                      >
-                        {type}
-                      </button>
-                    );
-                  })}
-                </div>
-                <div className="flex gap-4">
-                  <button
-                    type="button"
-                    onClick={handlePrevStep}
-                    className="qls-button qls-button-secondary w-1/3 cursor-pointer"
-                  >
-                    Back
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleNextStep}
-                    className="qls-button qls-button-primary w-2/3 cursor-pointer"
-                  >
-                    Continue
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* STEP 3: Contact details & Slot Selector */}
-            {step === 3 && (
-              <div className="space-y-6 animate-act-fade-in">
-                <span className="text-xs font-mono uppercase tracking-widest text-[HSL(210,80%,60%)] font-semibold block select-none">
-                  STEP 03 — CONTACT & SCHEDULING
-                </span>
-                <h2 className="text-xl font-light text-foreground mb-4">
-                  Select a time and provide details
-                </h2>
-
-                {status === 'error' && (
-                  <div className="p-4 bg-red-950/20 border border-red-900/60 rounded-sm text-xs font-mono text-red-400 flex justify-between items-center gap-4">
-                    <span>Error: {errorMessage}</span>
-                    <button type="button" onClick={() => setStatus('idle')} className="text-zinc-500 hover:text-white transition-colors cursor-pointer">✕</button>
+            {step === 2 && automationCategory && (
+              <section className="space-y-6" aria-labelledby="requirements-title">
+                <span className="block text-xs font-mono font-semibold uppercase tracking-widest text-[HSL(210,80%,60%)]">Step 02 — Requirements</span>
+                <h2 id="requirements-title" className="text-xl font-light text-foreground">{automationCategory === 'Creative Automation' ? 'Describe your automation requirement' : 'Select the systems you need'}</h2>
+                {automationCategory === 'Creative Automation' ? (
+                  <div>
+                    <label htmlFor="creative-requirement" className="qls-label">Describe Your Automation Requirement</label>
+                    <textarea id="creative-requirement" rows={7} required value={creativeRequirement} onBlur={() => handleBlur('creativeRequirement')} onChange={(event) => { setCreativeRequirement(event.target.value); setStepError(''); }} placeholder={'Tell us your idea...\nExplain your requirement...\nMention your goals...\nUpload references during consultation.'} className={`qls-field resize-none ${touched.creativeRequirement && errors.creativeRequirement ? 'border-red-900/80 focus:border-red-500' : ''}`} />
+                    {touched.creativeRequirement && errors.creativeRequirement && <p className="mt-1.5 text-[10px] font-mono text-red-400">{errors.creativeRequirement}</p>}
                   </div>
+                ) : (
+                  <fieldset className="space-y-3">
+                    <legend className="sr-only">{automationCategory} systems</legend>
+                    {automationOptions[automationCategory].map((option) => <label key={option} className="flex cursor-pointer items-center gap-3 rounded-sm border border-zinc-800 px-4 py-3 text-sm text-zinc-300 transition-colors hover:border-zinc-700"><input type="checkbox" checked={automationSelections.includes(option)} onChange={() => { toggleSelection(option); setStepError(''); }} className="h-4 w-4 rounded-sm border-zinc-700 bg-zinc-950" />{option}</label>)}
+                  </fieldset>
                 )}
+                <div className="flex gap-4"><button type="button" onClick={() => setStep(1)} className="qls-button qls-button-secondary w-1/3 cursor-pointer">Back</button><button type="button" onClick={handleNextStep} className="qls-button qls-button-primary w-2/3 cursor-pointer">Continue</button></div>
+              </section>
+            )}
 
-                <div className="space-y-4">
-                  <div>
-                    <label htmlFor="slot" className="qls-label">
-                      Available Showroom Time Slots
-                    </label>
-                    {slots.length === 0 ? (
-                      <div className="qls-empty py-6 text-xs font-mono text-zinc-500">
-                        No future slots currently scheduled. Please check back later.
-                      </div>
-                    ) : (
-                      <select
-                        id="slot"
-                        required
-                        disabled={status === 'submitting'}
-                        value={selectedSlotId}
-                        onChange={(e) => setSelectedSlotId(e.target.value)}
-                        className="qls-field"
-                      >
-                        {slots.map((s) => {
-                          const dateStr = new Date(s.startTime).toLocaleString('en-IN', {
-                            dateStyle: 'medium',
-                            timeStyle: 'short',
-                          });
-                          return (
-                            <option key={s.id} value={s.id}>
-                              {dateStr}
-                            </option>
-                          );
-                        })}
-                      </select>
-                    )}
-                  </div>
-
-                  {/* Name field */}
-                  <div>
-                    <label htmlFor="name" className="qls-label">
-                      Name
-                    </label>
-                    <input
-                      id="name"
-                      type="text"
-                      required
-                      disabled={status === 'submitting'}
-                      value={formData.name}
-                      onBlur={() => handleBlur('name')}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className={`qls-field ${
-                        touched.name && errors.name
-                          ? 'border-red-900/80 focus:border-red-500'
-                          : 'border-zinc-800 focus:border-zinc-550'
-                      }`}
-                    />
-                    {touched.name && errors.name && (
-                      <p className="text-[10px] font-mono text-red-400 mt-1.5">{errors.name}</p>
-                    )}
-                  </div>
-
-                  {/* Email & Phone */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="email" className="qls-label">
-                        Email Address
-                      </label>
-                      <input
-                        id="email"
-                        type="email"
-                        required
-                        disabled={status === 'submitting'}
-                        value={formData.email}
-                        onBlur={() => handleBlur('email')}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className={`qls-field ${
-                          touched.email && errors.email
-                            ? 'border-red-900/80 focus:border-red-500'
-                            : 'border-zinc-800 focus:border-zinc-550'
-                        }`}
-                      />
-                      {touched.email && errors.email && (
-                        <p className="text-[10px] font-mono text-red-400 mt-1.5">{errors.email}</p>
-                      )}
-                    </div>
-                    <div>
-                      <label htmlFor="phone" className="qls-label">
-                        Phone Number
-                      </label>
-                      <input
-                        id="phone"
-                        type="tel"
-                        required
-                        disabled={status === 'submitting'}
-                        value={formData.phone}
-                        onBlur={() => handleBlur('phone')}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        className={`qls-field ${
-                          touched.phone && errors.phone
-                            ? 'border-red-900/80 focus:border-red-500'
-                            : 'border-zinc-800 focus:border-zinc-550'
-                        }`}
-                      />
-                      {touched.phone && errors.phone && (
-                        <p className="text-[10px] font-mono text-red-400 mt-1.5">{errors.phone}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label htmlFor="message" className="qls-label">
-                      Additional details (Optional)
-                    </label>
-                    <textarea
-                      id="message"
-                      rows={4}
-                      disabled={status === 'submitting'}
-                      value={formData.message}
-                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                      className="qls-field resize-none"
-                    />
-                  </div>
+            {step === 3 && (
+              <section className="space-y-6" aria-labelledby="contact-title">
+                <span className="block text-xs font-mono font-semibold uppercase tracking-widest text-[HSL(210,80%,60%)]">Step 03 — Contact & Scheduling</span>
+                <h2 id="contact-title" className="text-xl font-light text-foreground">Choose a time and share the site details</h2>
+                <div className="border-l-2 border-[HSL(35,30%,45%)] bg-[HSL(35,30%,45%)]/5 px-4 py-3 text-sm text-foreground/85"><span className="font-medium text-[HSL(35,30%,62%)]">{PRIVATE_SITE_VISIT.priceLabel}</span><span className="mx-2 text-zinc-600">·</span>{PRIVATE_SITE_VISIT.adjustmentNote}</div>
+                <div>
+                  <label htmlFor="slot" className="qls-label">Available Private Site Visit Dates</label>
+                  {slots.length === 0 ? <div className="qls-empty py-6 text-xs font-mono text-zinc-500">No future visit times are currently scheduled. Please check back later.</div> : <select id="slot" required value={selectedSlotId} onChange={(event) => setSelectedSlotId(event.target.value)} className="qls-field">{slots.map((slot) => <option key={slot.id} value={slot.id}>{new Date(slot.startTime).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}</option>)}</select>}
                 </div>
-
-                <div className="flex gap-4">
-                  <button
-                    type="button"
-                    disabled={status === 'submitting'}
-                    onClick={handlePrevStep}
-                    className="qls-button qls-button-secondary w-1/3 disabled:opacity-45 cursor-pointer"
-                  >
-                    Back
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={status === 'submitting' || slots.length === 0}
-                    className="qls-button qls-button-primary w-2/3 disabled:opacity-45 flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    {status === 'submitting' && (
-                      <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                      </svg>
-                    )}
-                    {status === 'submitting' ? 'Reserving slot...' : 'Book Demo & WhatsApp \u2192'}
-                  </button>
-                </div>
-              </div>
+                <div><label htmlFor="name" className="qls-label">Name</label><input id="name" required value={formData.name} onBlur={() => handleBlur('name')} onChange={(event) => setFormData({ ...formData, name: event.target.value })} className={`qls-field ${touched.name && errors.name ? 'border-red-900/80 focus:border-red-500' : ''}`} />{touched.name && errors.name && <p className="mt-1.5 text-[10px] font-mono text-red-400">{errors.name}</p>}</div>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2"><div><label htmlFor="email" className="qls-label">Email Address</label><input id="email" type="email" required value={formData.email} onBlur={() => handleBlur('email')} onChange={(event) => setFormData({ ...formData, email: event.target.value })} className={`qls-field ${touched.email && errors.email ? 'border-red-900/80 focus:border-red-500' : ''}`} />{touched.email && errors.email && <p className="mt-1.5 text-[10px] font-mono text-red-400">{errors.email}</p>}</div><div><label htmlFor="phone" className="qls-label">Phone Number</label><input id="phone" type="tel" required value={formData.phone} onBlur={() => handleBlur('phone')} onChange={(event) => setFormData({ ...formData, phone: event.target.value })} className={`qls-field ${touched.phone && errors.phone ? 'border-red-900/80 focus:border-red-500' : ''}`} />{touched.phone && errors.phone && <p className="mt-1.5 text-[10px] font-mono text-red-400">{errors.phone}</p>}</div></div>
+                <div><label htmlFor="location" className="qls-label">Site Location</label><textarea id="location" rows={3} required value={formData.location} onBlur={() => handleBlur('location')} onChange={(event) => setFormData({ ...formData, location: event.target.value })} placeholder="Area, city and site address" className={`qls-field resize-none ${touched.location && errors.location ? 'border-red-900/80 focus:border-red-500' : ''}`} />{touched.location && errors.location && <p className="mt-1.5 text-[10px] font-mono text-red-400">{errors.location}</p>}</div>
+                <div className="flex gap-4"><button type="button" disabled={status === 'submitting'} onClick={() => setStep(2)} className="qls-button qls-button-secondary w-1/3 cursor-pointer disabled:opacity-45">Back</button><button type="submit" disabled={status === 'submitting' || slots.length === 0} className="qls-button qls-button-primary flex w-2/3 items-center justify-center gap-2 cursor-pointer disabled:opacity-45">{status === 'submitting' ? 'Reserving visit...' : `Request Visit · ${PRIVATE_SITE_VISIT.priceLabel}`}</button></div>
+              </section>
             )}
           </form>
         )}

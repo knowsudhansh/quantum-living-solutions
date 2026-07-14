@@ -27,7 +27,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const navLinks = [
     { name: 'Overview', path: '/admin/dashboard', icon: '⚡' },
     { name: 'Leads & Inquiries', path: '/admin/leads', icon: '👤' },
-    { name: 'Demo Bookings', path: '/admin/demo-bookings', icon: '📅' },
+    { name: 'Private Site Visits', path: '/admin/demo-bookings', icon: '📅' },
     { name: 'Products Catalog', path: '/admin/products', icon: '📦' },
     { name: 'Brand Collaborations', path: '/admin/partners', icon: '🤝' },
     { name: 'Job Candidates', path: '/admin/candidates', icon: '💼' },

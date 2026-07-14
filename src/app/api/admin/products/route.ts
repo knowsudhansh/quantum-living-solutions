@@ -14,6 +14,7 @@ interface ProductCreateBody {
   hidePrice?: boolean;
   availability?: string;
   warrantyMonths?: number;
+  extendedWarrantyAvailable?: boolean;
   coverImageId?: string;
   status?: 'DRAFT' | 'PUBLISHED';
   sortOrder?: number;
@@ -119,6 +120,7 @@ export async function POST(request: Request) {
       hidePrice,
       availability,
       warrantyMonths,
+      extendedWarrantyAvailable,
       coverImageId,
       status,
       sortOrder,
@@ -170,6 +172,7 @@ export async function POST(request: Request) {
           hidePrice: !!hidePrice,
           availability: availability || 'IN_STOCK',
           warrantyMonths: warrantyMonths || 12,
+          extendedWarrantyAvailable: !!extendedWarrantyAvailable,
           coverImageId: coverImageId || null,
           status: status || 'DRAFT',
           sortOrder: sortOrder || 0,

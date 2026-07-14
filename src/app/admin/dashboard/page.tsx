@@ -48,7 +48,7 @@ export default function AdminDashboardPage() {
 
   const statCards = [
     { title: 'Contact Leads', value: stats.leads, desc: 'Logged contact form inquiries' },
-    { title: 'Demo Bookings', value: stats.bookings, desc: 'Scheduled experience sessions' },
+    { title: 'Private Site Visits', value: stats.bookings, desc: 'Scheduled project consultations' },
     { title: 'Job Applications', value: stats.candidates, desc: 'Expressed career interests' },
     { title: 'Mailing list', value: stats.subscribers, desc: 'Active newsletter emails' },
   ];

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { logger } from '../../../../../lib/utils/logger';
+import { ADMIN_SESSION_COOKIE } from '../../../../../lib/security/session';
 
 export async function POST() {
   try {
@@ -7,7 +8,7 @@ export async function POST() {
     
     // Clear session cookie by setting past maxAge
     response.cookies.set({
-      name: 'qls_admin_session',
+      name: ADMIN_SESSION_COOKIE,
       value: '',
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

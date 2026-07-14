@@ -6,15 +6,32 @@ import { logger } from '../../../../lib/utils/logger';
 
 export const dynamic = 'force-dynamic';
 
-const ALLOWED_MIME_TYPES = [
-  'image/jpeg',
-  'image/jpg',
-  'image/png',
-  'image/svg+xml',
-  'application/pdf'
-];
+const UPLOAD_POLICIES = {
+  'image/jpeg': {
+    extension: '.jpg',
+    hasValidSignature: (buffer: Buffer) => buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff,
+  },
+  'image/png': {
+    extension: '.png',
+    hasValidSignature: (buffer: Buffer) => buffer.length >= 8 && buffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])),
+  },
+  'application/pdf': {
+    extension: '.pdf',
+    hasValidSignature: (buffer: Buffer) => buffer.length >= 5 && buffer.subarray(0, 5).toString('ascii') === '%PDF-',
+  },
+} as const;
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB limit
+
+function sanitizeOriginalFilename(fileName: string, extension: string) {
+  const baseName = path.basename(fileName, path.extname(fileName))
+    .normalize('NFKC')
+    .replace(/[^a-zA-Z0-9._-]+/g, '_')
+    .replace(/^[_\.]+|[_\.]+$/g, '')
+    .slice(0, 120);
+
+  return `${baseName || 'upload'}${extension}`;
+}
 
 export async function POST(request: Request) {
   try {
@@ -24,7 +41,7 @@ export async function POST(request: Request) {
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
 
-    if (!file) {
+    if (!file || file.size === 0) {
       return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
     }
 
@@ -34,29 +51,22 @@ export async function POST(request: Request) {
     }
 
     // 3. MIME type validation
-    if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-      return NextResponse.json({ error: 'Unsupported file type. Only JPEG, PNG, SVG, and PDF allowed' }, { status: 400 });
+    const uploadPolicy = UPLOAD_POLICIES[file.type as keyof typeof UPLOAD_POLICIES];
+    if (!uploadPolicy) {
+      return NextResponse.json({ error: 'Unsupported file type. Only JPEG, PNG, and PDF files are allowed' }, { status: 400 });
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    // 4. Validate magic bytes (signatures verification)
-    const fileHeader = buffer.slice(0, 4).toString('hex');
-    const isPDF = fileHeader === '25504446'; // %PDF
-    const isPNG = fileHeader === '89504e47'; // PNG
-    const isJPG = fileHeader.startsWith('ffd8'); // JPEG/JPG
-    
-    // SVG is XML text, can check starting character
-    const isSVG = file.type === 'image/svg+xml' && buffer.toString('utf-8', 0, 100).includes('<svg');
-
-    if (!isPDF && !isPNG && !isJPG && !isSVG) {
+    // 4. MIME type and magic bytes must agree before a file reaches storage.
+    if (!uploadPolicy.hasValidSignature(buffer)) {
       return NextResponse.json({ error: 'Security validation failed: File signature mismatch' }, { status: 400 });
     }
 
     // 5. Generate secure filename
-    const fileExt = path.extname(file.name).toLowerCase() || (isPDF ? '.pdf' : isPNG ? '.png' : isSVG ? '.svg' : '.jpg');
     const uniqueId = crypto.randomUUID();
-    const safeFilename = `${uniqueId}${fileExt}`;
+    const safeFilename = `${uniqueId}${uploadPolicy.extension}`;
+    const safeOriginalFilename = sanitizeOriginalFilename(file.name, uploadPolicy.extension);
 
     const uploadDir = path.join(process.cwd(), 'public', 'uploads');
     
@@ -72,14 +82,14 @@ export async function POST(request: Request) {
     const mediaItem = await prisma.mediaItem.create({
       data: {
         id: uniqueId,
-        fileName: file.name,
+        fileName: safeOriginalFilename,
         fileUrl,
         mimeType: file.type,
         fileSize: file.size,
       },
     });
 
-    logger.info(`Admin uploaded file successfully: ${file.name} -> ${fileUrl}`);
+    logger.info(`Admin uploaded file successfully: ${safeOriginalFilename} -> ${fileUrl}`);
 
     return NextResponse.json({
       success: true,

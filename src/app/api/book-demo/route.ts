@@ -2,6 +2,26 @@ import { NextResponse } from 'next/server';
 import { prisma } from '../../../lib/db';
 import { notifyAdminOfDemo, sendDemoAutoReply } from '../../../lib/email';
 import { logger } from '../../../lib/utils/logger';
+import { PRIVATE_SITE_VISIT } from '../../../lib/config/business';
+
+const HOME_AUTOMATION_OPTIONS = new Set([
+  'Lighting Automation',
+  'Curtains & Blinds',
+  'Climate Control',
+  'Security & Surveillance',
+  'Audio / Video',
+  'Energy Management',
+]);
+
+const INDUSTRIAL_AUTOMATION_OPTIONS = new Set([
+  'Automatic Changeover Switch',
+  'Genset Automation',
+  'Power Management',
+  'Source Selector',
+  'Solar Liability Management',
+]);
+
+type AutomationCategory = 'Home Automation' | 'Industrial Automation' | 'Creative Automation';
 
 export async function POST(request: Request) {
   try {
@@ -10,18 +30,46 @@ export async function POST(request: Request) {
       name?: string;
       email?: string;
       phone?: string;
-      interest?: string;
-      notes?: string;
+      location?: string;
+      automationCategory?: AutomationCategory;
+      automationSelections?: string[];
+      creativeRequirement?: string;
     };
-    const { slotId, name, email, phone, interest, notes } = body;
+    const { slotId, name, email, phone, location, automationCategory, automationSelections, creativeRequirement } = body;
 
     // 1. Validation checks
-    if (!slotId || !name || !email || !phone) {
+    if (!slotId || !name?.trim() || !email || !phone?.trim() || !location?.trim() || !automationCategory) {
       return NextResponse.json({ error: 'Missing required booking fields' }, { status: 400 });
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json({ error: 'Invalid email address syntax' }, { status: 400 });
+    }
+
+    if (!['Home Automation', 'Industrial Automation', 'Creative Automation'].includes(automationCategory)) {
+      return NextResponse.json({ error: 'Invalid automation category' }, { status: 400 });
+    }
+
+    if (location.trim().length < 3 || location.trim().length > 255) {
+      return NextResponse.json({ error: 'Enter a valid site location' }, { status: 400 });
+    }
+
+    const selectedOptions = Array.isArray(automationSelections)
+      ? [...new Set(automationSelections.filter((option): option is string => typeof option === 'string').map((option) => option.trim()).filter(Boolean))]
+      : [];
+    const allowedOptions = automationCategory === 'Home Automation'
+      ? HOME_AUTOMATION_OPTIONS
+      : automationCategory === 'Industrial Automation'
+        ? INDUSTRIAL_AUTOMATION_OPTIONS
+        : null;
+    const cleanCreativeRequirement = creativeRequirement?.trim() || null;
+
+    if (allowedOptions && (selectedOptions.length === 0 || selectedOptions.some((option) => !allowedOptions.has(option)))) {
+      return NextResponse.json({ error: 'Select at least one valid automation requirement' }, { status: 400 });
+    }
+
+    if (automationCategory === 'Creative Automation' && (!cleanCreativeRequirement || cleanCreativeRequirement.length < 10)) {
+      return NextResponse.json({ error: 'Describe your creative automation requirement' }, { status: 400 });
     }
 
     // 2. Start transactional execution block with row-locking concurrency controls
@@ -73,7 +121,7 @@ export async function POST(request: Request) {
             lastName,
             email: email.trim().toLowerCase(),
             phone: phone.trim(),
-            interest: interest || 'Smart Home',
+            interest: automationCategory,
             source: 'demo',
             status: 'NEW',
           },
@@ -86,7 +134,11 @@ export async function POST(request: Request) {
           slotId: slot.id,
           leadId: lead.id,
           status: 'CONFIRMED',
-          totalAmount: 0.00, // Showroom demonstrations are free
+          automationCategory,
+          automationSelections: selectedOptions,
+          creativeRequirement: cleanCreativeRequirement,
+          location: location.trim(),
+          totalAmount: PRIVATE_SITE_VISIT.price,
           paidAmount: 0.00,
         },
       });
@@ -104,15 +156,20 @@ export async function POST(request: Request) {
     });
 
     // 3. Dispatch confirmation emails asynchronously
-    notifyAdminOfDemo(name, email, phone, slotTimeFormatted, notes).catch((err) =>
+    notifyAdminOfDemo(name.trim(), email.trim(), phone.trim(), slotTimeFormatted, {
+      automationCategory,
+      automationSelections: selectedOptions,
+      creativeRequirement: cleanCreativeRequirement,
+      location: location.trim(),
+    }).catch((err) =>
       logger.error('Admin booking alert email failed', err instanceof Error ? err : new Error(String(err)))
     );
     
-    sendDemoAutoReply(name, email, slotTimeFormatted).catch((err) =>
+    sendDemoAutoReply(name.trim(), email.trim(), slotTimeFormatted).catch((err) =>
       logger.error('Customer booking confirmation failed', err instanceof Error ? err : new Error(String(err)))
     );
 
-    return NextResponse.json({ success: true, bookingId: result.booking.id }, { status: 201 });
+    return NextResponse.json({ success: true, bookingId: result.booking.id, visitPrice: PRIVATE_SITE_VISIT.price }, { status: 201 });
   } catch (err) {
     const errorMsg = err instanceof Error ? err.message : String(err);
     logger.error(`Booking transaction failed: ${errorMsg}`, err instanceof Error ? err : new Error(String(err)));

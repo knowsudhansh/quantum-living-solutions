@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { generateSlug } from '@/lib/utils/slugs';
 import { ensureDefaultPartners } from '@/lib/partners/initializer';
+import { logger } from '@/lib/utils/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -106,7 +107,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, partner }, { status: 201 });
   } catch (err) {
-    console.error('POST /api/admin/partners error:', err);
+    logger.error('POST /api/admin/partners failed', err);
     if (err instanceof Error && err.message.includes('Unique constraint')) {
       return NextResponse.json({ error: 'A partner with this name already exists' }, { status: 409 });
     }

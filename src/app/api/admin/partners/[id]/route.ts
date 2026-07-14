@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { generateSlug } from '@/lib/utils/slugs';
+import { logger } from '@/lib/utils/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -132,7 +133,7 @@ export async function PUT(
 
     return NextResponse.json({ success: true, partner });
   } catch (err) {
-    console.error('PUT /api/admin/partners/[id] error:', err);
+    logger.error('PUT /api/admin/partners/[id] failed', err);
     return NextResponse.json({ error: 'Failed to update partner' }, { status: 500 });
   }
 }

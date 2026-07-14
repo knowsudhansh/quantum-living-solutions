@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { PartnerCollaborations } from '../../components/partners/partner-collaborations';
 import { founder } from '../../lib/config/founder';
 import { MotionCard, MotionReveal } from '../../components/ui/motion';
+import { PRIVATE_SITE_VISIT } from '../../lib/config/business';
 
 export const dynamic = 'force-dynamic';
 
@@ -210,14 +211,14 @@ export default function AboutPage() {
             See the Technology in Action
           </h3>
           <p className="text-sm md:text-base text-foreground/70 leading-relaxed max-w-xl">
-            Our active showroom in Gorakhpur, Uttar Pradesh is open for private demonstrations. Experience cinematic presets, lighting comfort, and automated curtains.
+            Arrange a private site visit with our Gorakhpur engineering team to discuss lighting comfort, automated curtains, and the systems that fit your project.
           </p>
         </div>
         <Link
           href="/book-demo"
           className="qls-button qls-button-primary text-center"
         >
-          Book Free Showroom Demo
+          {PRIVATE_SITE_VISIT.label} · {PRIVATE_SITE_VISIT.priceLabel}
         </Link>
       </MotionReveal>
     </div>

@@ -84,7 +84,7 @@ model Lead {
   @@map("leads")
 }
 
-// Showroom demo booking schedule slots
+// Private site visit schedule slots
 model DemoSlot {
   id              String     @id @default(uuid()) @db.Uuid
   startTime       DateTime   @map("start_time") @db.Timestamptz(6)
@@ -117,17 +117,21 @@ model SlotHold {
 
 // Completed demo slot reservations
 model Booking {
-  id          String    @id @default(uuid()) @db.Uuid
-  slotId      String    @map("slot_id") @db.Uuid
-  leadId      String    @map("lead_id") @db.Uuid
-  status      String    @default("PENDING") @db.VarChar(50)
-  totalAmount Decimal   @map("total_amount") @db.Decimal(10, 2)
-  paidAmount  Decimal   @default(0.00) @map("paid_amount") @db.Decimal(10, 2)
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
-  slot        DemoSlot  @relation(fields: [slotId], references: [id])
-  lead        Lead      @relation(fields: [leadId], references: [id])
-  payments    Payment[]
+  id                   String    @id @default(uuid()) @db.Uuid
+  slotId               String    @map("slot_id") @db.Uuid
+  leadId               String    @map("lead_id") @db.Uuid
+  automationCategory   String    @default("Home Automation") @map("automation_category") @db.VarChar(100)
+  automationSelections String[]  @default([]) @map("automation_selections")
+  creativeRequirement  String?   @map("creative_requirement") @db.Text
+  location             String    @default("") @db.VarChar(255)
+  status               String    @default("PENDING") @db.VarChar(50)
+  totalAmount          Decimal   @map("total_amount") @db.Decimal(10, 2)
+  paidAmount           Decimal   @default(0.00) @map("paid_amount") @db.Decimal(10, 2)
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  slot                 DemoSlot  @relation(fields: [slotId], references: [id])
+  lead                 Lead      @relation(fields: [leadId], references: [id])
+  payments             Payment[]
 
   @@map("bookings")
 }
@@ -308,6 +312,7 @@ model Product {
   hidePrice      Boolean               @default(false) @map("hide_price")
   availability   String                @default("IN_STOCK") @db.VarChar(50)
   warrantyMonths Int                   @default(12) @map("warranty_months")
+  extendedWarrantyAvailable Boolean    @default(false) @map("extended_warranty_available")
   coverImageId   String?               @map("cover_image_id") @db.Uuid
   status         String                @default("DRAFT") @db.VarChar(50) // "DRAFT", "PUBLISHED"
   sortOrder      Int                   @default(0) @map("sort_order")

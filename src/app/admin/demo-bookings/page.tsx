@@ -18,6 +18,10 @@ interface Booking {
   id: string;
   status: string;
   createdAt: string;
+  automationCategory: string;
+  automationSelections: string[];
+  creativeRequirement: string | null;
+  location: string;
   slot: Slot;
   lead: Lead;
 }
@@ -97,9 +101,9 @@ export default function AdminDemoBookingsPage() {
       {/* Title section */}
       <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-4">
         <div>
-          <h1 className="text-3xl font-light text-white tracking-tight">Showroom Demo Bookings</h1>
+          <h1 className="text-3xl font-light text-white tracking-tight">Private Site Visits</h1>
           <p className="text-sm text-zinc-500 font-mono mt-1">
-            Scheduled demonstration reservations and client calendars
+            Scheduled site consultations and automation requirements
           </p>
         </div>
         <div className="text-xs font-mono text-zinc-500">
@@ -211,6 +215,7 @@ export default function AdminDemoBookingsPage() {
               <thead>
                 <tr className="border-b border-zinc-800 text-zinc-500 uppercase tracking-widest text-[9px] bg-zinc-950/40 select-none">
                   <th className="py-4 px-6 font-semibold">Visitor Profile</th>
+                  <th className="py-4 px-6 font-semibold">Visit Requirements</th>
                   <th className="py-4 px-6 font-semibold">Scheduled Date & Time</th>
                   <th className="py-4 px-6 font-semibold text-center">Status</th>
                   <th className="py-4 px-6 font-semibold text-right">Booked Date</th>
@@ -222,6 +227,11 @@ export default function AdminDemoBookingsPage() {
                     <td className="py-4 px-6 text-white font-medium">
                       <div className="text-white font-medium">{booking.lead.firstName} {booking.lead.lastName}</div>
                       <div className="text-[10px] text-zinc-500 font-normal mt-1 break-all">{booking.lead.email} | {booking.lead.phone}</div>
+                    </td>
+                    <td className="py-4 px-6 text-zinc-300">
+                      <div className="text-[10px] uppercase tracking-wider text-[HSL(35,30%,62%)]">{booking.automationCategory}</div>
+                      <div className="mt-1 max-w-xs text-[10px] leading-relaxed text-zinc-500">{booking.creativeRequirement || booking.automationSelections.join(', ')}</div>
+                      <div className="mt-1 text-[10px] text-zinc-600">{booking.location}</div>
                     </td>
                     <td className="py-4 px-6 text-zinc-300 font-medium">
                       {new Date(booking.slot.startTime).toLocaleString('en-IN', {

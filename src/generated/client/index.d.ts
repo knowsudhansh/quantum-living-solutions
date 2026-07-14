@@ -12272,6 +12272,9 @@ export namespace Prisma {
     id: string | null
     slotId: string | null
     leadId: string | null
+    automationCategory: string | null
+    creativeRequirement: string | null
+    location: string | null
     status: string | null
     totalAmount: Decimal | null
     paidAmount: Decimal | null
@@ -12283,6 +12286,9 @@ export namespace Prisma {
     id: string | null
     slotId: string | null
     leadId: string | null
+    automationCategory: string | null
+    creativeRequirement: string | null
+    location: string | null
     status: string | null
     totalAmount: Decimal | null
     paidAmount: Decimal | null
@@ -12294,6 +12300,10 @@ export namespace Prisma {
     id: number
     slotId: number
     leadId: number
+    automationCategory: number
+    automationSelections: number
+    creativeRequirement: number
+    location: number
     status: number
     totalAmount: number
     paidAmount: number
@@ -12317,6 +12327,9 @@ export namespace Prisma {
     id?: true
     slotId?: true
     leadId?: true
+    automationCategory?: true
+    creativeRequirement?: true
+    location?: true
     status?: true
     totalAmount?: true
     paidAmount?: true
@@ -12328,6 +12341,9 @@ export namespace Prisma {
     id?: true
     slotId?: true
     leadId?: true
+    automationCategory?: true
+    creativeRequirement?: true
+    location?: true
     status?: true
     totalAmount?: true
     paidAmount?: true
@@ -12339,6 +12355,10 @@ export namespace Prisma {
     id?: true
     slotId?: true
     leadId?: true
+    automationCategory?: true
+    automationSelections?: true
+    creativeRequirement?: true
+    location?: true
     status?: true
     totalAmount?: true
     paidAmount?: true
@@ -12437,6 +12457,10 @@ export namespace Prisma {
     id: string
     slotId: string
     leadId: string
+    automationCategory: string
+    automationSelections: string[]
+    creativeRequirement: string | null
+    location: string
     status: string
     totalAmount: Decimal
     paidAmount: Decimal
@@ -12467,6 +12491,10 @@ export namespace Prisma {
     id?: boolean
     slotId?: boolean
     leadId?: boolean
+    automationCategory?: boolean
+    automationSelections?: boolean
+    creativeRequirement?: boolean
+    location?: boolean
     status?: boolean
     totalAmount?: boolean
     paidAmount?: boolean
@@ -12482,6 +12510,10 @@ export namespace Prisma {
     id?: boolean
     slotId?: boolean
     leadId?: boolean
+    automationCategory?: boolean
+    automationSelections?: boolean
+    creativeRequirement?: boolean
+    location?: boolean
     status?: boolean
     totalAmount?: boolean
     paidAmount?: boolean
@@ -12495,6 +12527,10 @@ export namespace Prisma {
     id?: boolean
     slotId?: boolean
     leadId?: boolean
+    automationCategory?: boolean
+    automationSelections?: boolean
+    creativeRequirement?: boolean
+    location?: boolean
     status?: boolean
     totalAmount?: boolean
     paidAmount?: boolean
@@ -12508,6 +12544,10 @@ export namespace Prisma {
     id?: boolean
     slotId?: boolean
     leadId?: boolean
+    automationCategory?: boolean
+    automationSelections?: boolean
+    creativeRequirement?: boolean
+    location?: boolean
     status?: boolean
     totalAmount?: boolean
     paidAmount?: boolean
@@ -12515,7 +12555,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type BookingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "slotId" | "leadId" | "status" | "totalAmount" | "paidAmount" | "createdAt" | "updatedAt", ExtArgs["result"]["booking"]>
+  export type BookingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "slotId" | "leadId" | "automationCategory" | "automationSelections" | "creativeRequirement" | "location" | "status" | "totalAmount" | "paidAmount" | "createdAt" | "updatedAt", ExtArgs["result"]["booking"]>
   export type BookingInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     slot?: boolean | DemoSlotDefaultArgs<ExtArgs>
     lead?: boolean | LeadDefaultArgs<ExtArgs>
@@ -12542,6 +12582,10 @@ export namespace Prisma {
       id: string
       slotId: string
       leadId: string
+      automationCategory: string
+      automationSelections: string[]
+      creativeRequirement: string | null
+      location: string
       status: string
       totalAmount: Prisma.Decimal
       paidAmount: Prisma.Decimal
@@ -12976,6 +13020,10 @@ export namespace Prisma {
     readonly id: FieldRef<"Booking", 'String'>
     readonly slotId: FieldRef<"Booking", 'String'>
     readonly leadId: FieldRef<"Booking", 'String'>
+    readonly automationCategory: FieldRef<"Booking", 'String'>
+    readonly automationSelections: FieldRef<"Booking", 'String[]'>
+    readonly creativeRequirement: FieldRef<"Booking", 'String'>
+    readonly location: FieldRef<"Booking", 'String'>
     readonly status: FieldRef<"Booking", 'String'>
     readonly totalAmount: FieldRef<"Booking", 'Decimal'>
     readonly paidAmount: FieldRef<"Booking", 'Decimal'>
@@ -26383,6 +26431,7 @@ export namespace Prisma {
     hidePrice: boolean | null
     availability: string | null
     warrantyMonths: number | null
+    extendedWarrantyAvailable: boolean | null
     coverImageId: string | null
     status: string | null
     sortOrder: number | null
@@ -26403,6 +26452,7 @@ export namespace Prisma {
     hidePrice: boolean | null
     availability: string | null
     warrantyMonths: number | null
+    extendedWarrantyAvailable: boolean | null
     coverImageId: string | null
     status: string | null
     sortOrder: number | null
@@ -26423,6 +26473,7 @@ export namespace Prisma {
     hidePrice: number
     availability: number
     warrantyMonths: number
+    extendedWarrantyAvailable: number
     coverImageId: number
     status: number
     sortOrder: number
@@ -26457,6 +26508,7 @@ export namespace Prisma {
     hidePrice?: true
     availability?: true
     warrantyMonths?: true
+    extendedWarrantyAvailable?: true
     coverImageId?: true
     status?: true
     sortOrder?: true
@@ -26477,6 +26529,7 @@ export namespace Prisma {
     hidePrice?: true
     availability?: true
     warrantyMonths?: true
+    extendedWarrantyAvailable?: true
     coverImageId?: true
     status?: true
     sortOrder?: true
@@ -26497,6 +26550,7 @@ export namespace Prisma {
     hidePrice?: true
     availability?: true
     warrantyMonths?: true
+    extendedWarrantyAvailable?: true
     coverImageId?: true
     status?: true
     sortOrder?: true
@@ -26604,6 +26658,7 @@ export namespace Prisma {
     hidePrice: boolean
     availability: string
     warrantyMonths: number
+    extendedWarrantyAvailable: boolean
     coverImageId: string | null
     status: string
     sortOrder: number
@@ -26643,6 +26698,7 @@ export namespace Prisma {
     hidePrice?: boolean
     availability?: boolean
     warrantyMonths?: boolean
+    extendedWarrantyAvailable?: boolean
     coverImageId?: boolean
     status?: boolean
     sortOrder?: boolean
@@ -26670,6 +26726,7 @@ export namespace Prisma {
     hidePrice?: boolean
     availability?: boolean
     warrantyMonths?: boolean
+    extendedWarrantyAvailable?: boolean
     coverImageId?: boolean
     status?: boolean
     sortOrder?: boolean
@@ -26693,6 +26750,7 @@ export namespace Prisma {
     hidePrice?: boolean
     availability?: boolean
     warrantyMonths?: boolean
+    extendedWarrantyAvailable?: boolean
     coverImageId?: boolean
     status?: boolean
     sortOrder?: boolean
@@ -26716,6 +26774,7 @@ export namespace Prisma {
     hidePrice?: boolean
     availability?: boolean
     warrantyMonths?: boolean
+    extendedWarrantyAvailable?: boolean
     coverImageId?: boolean
     status?: boolean
     sortOrder?: boolean
@@ -26724,7 +26783,7 @@ export namespace Prisma {
     deletedAt?: boolean
   }
 
-  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "slug" | "title" | "subtitle" | "description" | "categoryId" | "brandId" | "price" | "hidePrice" | "availability" | "warrantyMonths" | "coverImageId" | "status" | "sortOrder" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["product"]>
+  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "slug" | "title" | "subtitle" | "description" | "categoryId" | "brandId" | "price" | "hidePrice" | "availability" | "warrantyMonths" | "extendedWarrantyAvailable" | "coverImageId" | "status" | "sortOrder" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["product"]>
   export type ProductInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     category?: boolean | CategoryDefaultArgs<ExtArgs>
     brand?: boolean | Product$brandArgs<ExtArgs>
@@ -26767,6 +26826,7 @@ export namespace Prisma {
       hidePrice: boolean
       availability: string
       warrantyMonths: number
+      extendedWarrantyAvailable: boolean
       coverImageId: string | null
       status: string
       sortOrder: number
@@ -27213,6 +27273,7 @@ export namespace Prisma {
     readonly hidePrice: FieldRef<"Product", 'Boolean'>
     readonly availability: FieldRef<"Product", 'String'>
     readonly warrantyMonths: FieldRef<"Product", 'Int'>
+    readonly extendedWarrantyAvailable: FieldRef<"Product", 'Boolean'>
     readonly coverImageId: FieldRef<"Product", 'String'>
     readonly status: FieldRef<"Product", 'String'>
     readonly sortOrder: FieldRef<"Product", 'Int'>
@@ -33255,6 +33316,10 @@ export namespace Prisma {
     id: 'id',
     slotId: 'slotId',
     leadId: 'leadId',
+    automationCategory: 'automationCategory',
+    automationSelections: 'automationSelections',
+    creativeRequirement: 'creativeRequirement',
+    location: 'location',
     status: 'status',
     totalAmount: 'totalAmount',
     paidAmount: 'paidAmount',
@@ -33425,6 +33490,7 @@ export namespace Prisma {
     hidePrice: 'hidePrice',
     availability: 'availability',
     warrantyMonths: 'warrantyMonths',
+    extendedWarrantyAvailable: 'extendedWarrantyAvailable',
     coverImageId: 'coverImageId',
     status: 'status',
     sortOrder: 'sortOrder',
@@ -34090,6 +34156,10 @@ export namespace Prisma {
     id?: UuidFilter<"Booking"> | string
     slotId?: UuidFilter<"Booking"> | string
     leadId?: UuidFilter<"Booking"> | string
+    automationCategory?: StringFilter<"Booking"> | string
+    automationSelections?: StringNullableListFilter<"Booking">
+    creativeRequirement?: StringNullableFilter<"Booking"> | string | null
+    location?: StringFilter<"Booking"> | string
     status?: StringFilter<"Booking"> | string
     totalAmount?: DecimalFilter<"Booking"> | Decimal | DecimalJsLike | number | string
     paidAmount?: DecimalFilter<"Booking"> | Decimal | DecimalJsLike | number | string
@@ -34104,6 +34174,10 @@ export namespace Prisma {
     id?: SortOrder
     slotId?: SortOrder
     leadId?: SortOrder
+    automationCategory?: SortOrder
+    automationSelections?: SortOrder
+    creativeRequirement?: SortOrderInput | SortOrder
+    location?: SortOrder
     status?: SortOrder
     totalAmount?: SortOrder
     paidAmount?: SortOrder
@@ -34121,6 +34195,10 @@ export namespace Prisma {
     NOT?: BookingWhereInput | BookingWhereInput[]
     slotId?: UuidFilter<"Booking"> | string
     leadId?: UuidFilter<"Booking"> | string
+    automationCategory?: StringFilter<"Booking"> | string
+    automationSelections?: StringNullableListFilter<"Booking">
+    creativeRequirement?: StringNullableFilter<"Booking"> | string | null
+    location?: StringFilter<"Booking"> | string
     status?: StringFilter<"Booking"> | string
     totalAmount?: DecimalFilter<"Booking"> | Decimal | DecimalJsLike | number | string
     paidAmount?: DecimalFilter<"Booking"> | Decimal | DecimalJsLike | number | string
@@ -34135,6 +34213,10 @@ export namespace Prisma {
     id?: SortOrder
     slotId?: SortOrder
     leadId?: SortOrder
+    automationCategory?: SortOrder
+    automationSelections?: SortOrder
+    creativeRequirement?: SortOrderInput | SortOrder
+    location?: SortOrder
     status?: SortOrder
     totalAmount?: SortOrder
     paidAmount?: SortOrder
@@ -34154,6 +34236,10 @@ export namespace Prisma {
     id?: UuidWithAggregatesFilter<"Booking"> | string
     slotId?: UuidWithAggregatesFilter<"Booking"> | string
     leadId?: UuidWithAggregatesFilter<"Booking"> | string
+    automationCategory?: StringWithAggregatesFilter<"Booking"> | string
+    automationSelections?: StringNullableListFilter<"Booking">
+    creativeRequirement?: StringNullableWithAggregatesFilter<"Booking"> | string | null
+    location?: StringWithAggregatesFilter<"Booking"> | string
     status?: StringWithAggregatesFilter<"Booking"> | string
     totalAmount?: DecimalWithAggregatesFilter<"Booking"> | Decimal | DecimalJsLike | number | string
     paidAmount?: DecimalWithAggregatesFilter<"Booking"> | Decimal | DecimalJsLike | number | string
@@ -34933,6 +35019,7 @@ export namespace Prisma {
     hidePrice?: BoolFilter<"Product"> | boolean
     availability?: StringFilter<"Product"> | string
     warrantyMonths?: IntFilter<"Product"> | number
+    extendedWarrantyAvailable?: BoolFilter<"Product"> | boolean
     coverImageId?: UuidNullableFilter<"Product"> | string | null
     status?: StringFilter<"Product"> | string
     sortOrder?: IntFilter<"Product"> | number
@@ -34959,6 +35046,7 @@ export namespace Prisma {
     hidePrice?: SortOrder
     availability?: SortOrder
     warrantyMonths?: SortOrder
+    extendedWarrantyAvailable?: SortOrder
     coverImageId?: SortOrderInput | SortOrder
     status?: SortOrder
     sortOrder?: SortOrder
@@ -34988,6 +35076,7 @@ export namespace Prisma {
     hidePrice?: BoolFilter<"Product"> | boolean
     availability?: StringFilter<"Product"> | string
     warrantyMonths?: IntFilter<"Product"> | number
+    extendedWarrantyAvailable?: BoolFilter<"Product"> | boolean
     coverImageId?: UuidNullableFilter<"Product"> | string | null
     status?: StringFilter<"Product"> | string
     sortOrder?: IntFilter<"Product"> | number
@@ -35014,6 +35103,7 @@ export namespace Prisma {
     hidePrice?: SortOrder
     availability?: SortOrder
     warrantyMonths?: SortOrder
+    extendedWarrantyAvailable?: SortOrder
     coverImageId?: SortOrderInput | SortOrder
     status?: SortOrder
     sortOrder?: SortOrder
@@ -35042,6 +35132,7 @@ export namespace Prisma {
     hidePrice?: BoolWithAggregatesFilter<"Product"> | boolean
     availability?: StringWithAggregatesFilter<"Product"> | string
     warrantyMonths?: IntWithAggregatesFilter<"Product"> | number
+    extendedWarrantyAvailable?: BoolWithAggregatesFilter<"Product"> | boolean
     coverImageId?: UuidNullableWithAggregatesFilter<"Product"> | string | null
     status?: StringWithAggregatesFilter<"Product"> | string
     sortOrder?: IntWithAggregatesFilter<"Product"> | number
@@ -35838,6 +35929,10 @@ export namespace Prisma {
 
   export type BookingCreateInput = {
     id?: string
+    automationCategory?: string
+    automationSelections?: BookingCreateautomationSelectionsInput | string[]
+    creativeRequirement?: string | null
+    location?: string
     status?: string
     totalAmount: Decimal | DecimalJsLike | number | string
     paidAmount?: Decimal | DecimalJsLike | number | string
@@ -35852,6 +35947,10 @@ export namespace Prisma {
     id?: string
     slotId: string
     leadId: string
+    automationCategory?: string
+    automationSelections?: BookingCreateautomationSelectionsInput | string[]
+    creativeRequirement?: string | null
+    location?: string
     status?: string
     totalAmount: Decimal | DecimalJsLike | number | string
     paidAmount?: Decimal | DecimalJsLike | number | string
@@ -35862,6 +35961,10 @@ export namespace Prisma {
 
   export type BookingUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
+    automationCategory?: StringFieldUpdateOperationsInput | string
+    automationSelections?: BookingUpdateautomationSelectionsInput | string[]
+    creativeRequirement?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     totalAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     paidAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -35876,6 +35979,10 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     slotId?: StringFieldUpdateOperationsInput | string
     leadId?: StringFieldUpdateOperationsInput | string
+    automationCategory?: StringFieldUpdateOperationsInput | string
+    automationSelections?: BookingUpdateautomationSelectionsInput | string[]
+    creativeRequirement?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     totalAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     paidAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -35888,6 +35995,10 @@ export namespace Prisma {
     id?: string
     slotId: string
     leadId: string
+    automationCategory?: string
+    automationSelections?: BookingCreateautomationSelectionsInput | string[]
+    creativeRequirement?: string | null
+    location?: string
     status?: string
     totalAmount: Decimal | DecimalJsLike | number | string
     paidAmount?: Decimal | DecimalJsLike | number | string
@@ -35897,6 +36008,10 @@ export namespace Prisma {
 
   export type BookingUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
+    automationCategory?: StringFieldUpdateOperationsInput | string
+    automationSelections?: BookingUpdateautomationSelectionsInput | string[]
+    creativeRequirement?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     totalAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     paidAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -35908,6 +36023,10 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     slotId?: StringFieldUpdateOperationsInput | string
     leadId?: StringFieldUpdateOperationsInput | string
+    automationCategory?: StringFieldUpdateOperationsInput | string
+    automationSelections?: BookingUpdateautomationSelectionsInput | string[]
+    creativeRequirement?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     totalAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     paidAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -36739,6 +36858,7 @@ export namespace Prisma {
     hidePrice?: boolean
     availability?: string
     warrantyMonths?: number
+    extendedWarrantyAvailable?: boolean
     status?: string
     sortOrder?: number
     createdAt?: Date | string
@@ -36764,6 +36884,7 @@ export namespace Prisma {
     hidePrice?: boolean
     availability?: string
     warrantyMonths?: number
+    extendedWarrantyAvailable?: boolean
     coverImageId?: string | null
     status?: string
     sortOrder?: number
@@ -36785,6 +36906,7 @@ export namespace Prisma {
     hidePrice?: BoolFieldUpdateOperationsInput | boolean
     availability?: StringFieldUpdateOperationsInput | string
     warrantyMonths?: IntFieldUpdateOperationsInput | number
+    extendedWarrantyAvailable?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     sortOrder?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -36810,6 +36932,7 @@ export namespace Prisma {
     hidePrice?: BoolFieldUpdateOperationsInput | boolean
     availability?: StringFieldUpdateOperationsInput | string
     warrantyMonths?: IntFieldUpdateOperationsInput | number
+    extendedWarrantyAvailable?: BoolFieldUpdateOperationsInput | boolean
     coverImageId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -36833,6 +36956,7 @@ export namespace Prisma {
     hidePrice?: boolean
     availability?: string
     warrantyMonths?: number
+    extendedWarrantyAvailable?: boolean
     coverImageId?: string | null
     status?: string
     sortOrder?: number
@@ -36851,6 +36975,7 @@ export namespace Prisma {
     hidePrice?: BoolFieldUpdateOperationsInput | boolean
     availability?: StringFieldUpdateOperationsInput | string
     warrantyMonths?: IntFieldUpdateOperationsInput | number
+    extendedWarrantyAvailable?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     sortOrder?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -36870,6 +36995,7 @@ export namespace Prisma {
     hidePrice?: BoolFieldUpdateOperationsInput | boolean
     availability?: StringFieldUpdateOperationsInput | string
     warrantyMonths?: IntFieldUpdateOperationsInput | number
+    extendedWarrantyAvailable?: BoolFieldUpdateOperationsInput | boolean
     coverImageId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -37640,6 +37766,14 @@ export namespace Prisma {
     createdAt?: SortOrder
   }
 
+  export type StringNullableListFilter<$PrismaModel = never> = {
+    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    has?: string | StringFieldRefInput<$PrismaModel> | null
+    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
+    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
+    isEmpty?: boolean
+  }
+
   export type DecimalFilter<$PrismaModel = never> = {
     equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
     in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
@@ -37670,6 +37804,10 @@ export namespace Prisma {
     id?: SortOrder
     slotId?: SortOrder
     leadId?: SortOrder
+    automationCategory?: SortOrder
+    automationSelections?: SortOrder
+    creativeRequirement?: SortOrder
+    location?: SortOrder
     status?: SortOrder
     totalAmount?: SortOrder
     paidAmount?: SortOrder
@@ -37686,6 +37824,9 @@ export namespace Prisma {
     id?: SortOrder
     slotId?: SortOrder
     leadId?: SortOrder
+    automationCategory?: SortOrder
+    creativeRequirement?: SortOrder
+    location?: SortOrder
     status?: SortOrder
     totalAmount?: SortOrder
     paidAmount?: SortOrder
@@ -37697,6 +37838,9 @@ export namespace Prisma {
     id?: SortOrder
     slotId?: SortOrder
     leadId?: SortOrder
+    automationCategory?: SortOrder
+    creativeRequirement?: SortOrder
+    location?: SortOrder
     status?: SortOrder
     totalAmount?: SortOrder
     paidAmount?: SortOrder
@@ -38313,6 +38457,7 @@ export namespace Prisma {
     hidePrice?: SortOrder
     availability?: SortOrder
     warrantyMonths?: SortOrder
+    extendedWarrantyAvailable?: SortOrder
     coverImageId?: SortOrder
     status?: SortOrder
     sortOrder?: SortOrder
@@ -38339,6 +38484,7 @@ export namespace Prisma {
     hidePrice?: SortOrder
     availability?: SortOrder
     warrantyMonths?: SortOrder
+    extendedWarrantyAvailable?: SortOrder
     coverImageId?: SortOrder
     status?: SortOrder
     sortOrder?: SortOrder
@@ -38359,6 +38505,7 @@ export namespace Prisma {
     hidePrice?: SortOrder
     availability?: SortOrder
     warrantyMonths?: SortOrder
+    extendedWarrantyAvailable?: SortOrder
     coverImageId?: SortOrder
     status?: SortOrder
     sortOrder?: SortOrder
@@ -38494,14 +38641,6 @@ export namespace Prisma {
     groupName?: SortOrder
     name?: SortOrder
     createdAt?: SortOrder
-  }
-
-  export type StringNullableListFilter<$PrismaModel = never> = {
-    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    has?: string | StringFieldRefInput<$PrismaModel> | null
-    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
-    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
-    isEmpty?: boolean
   }
 
   export type PartnerCountOrderByAggregateInput = {
@@ -38997,6 +39136,10 @@ export namespace Prisma {
     update?: XOR<XOR<DemoSlotUpdateToOneWithWhereWithoutHoldsInput, DemoSlotUpdateWithoutHoldsInput>, DemoSlotUncheckedUpdateWithoutHoldsInput>
   }
 
+  export type BookingCreateautomationSelectionsInput = {
+    set: string[]
+  }
+
   export type DemoSlotCreateNestedOneWithoutBookingsInput = {
     create?: XOR<DemoSlotCreateWithoutBookingsInput, DemoSlotUncheckedCreateWithoutBookingsInput>
     connectOrCreate?: DemoSlotCreateOrConnectWithoutBookingsInput
@@ -39021,6 +39164,11 @@ export namespace Prisma {
     connectOrCreate?: PaymentCreateOrConnectWithoutBookingInput | PaymentCreateOrConnectWithoutBookingInput[]
     createMany?: PaymentCreateManyBookingInputEnvelope
     connect?: PaymentWhereUniqueInput | PaymentWhereUniqueInput[]
+  }
+
+  export type BookingUpdateautomationSelectionsInput = {
+    set?: string[]
+    push?: string | string[]
   }
 
   export type DecimalFieldUpdateOperationsInput = {
@@ -40523,6 +40671,10 @@ export namespace Prisma {
 
   export type BookingCreateWithoutLeadInput = {
     id?: string
+    automationCategory?: string
+    automationSelections?: BookingCreateautomationSelectionsInput | string[]
+    creativeRequirement?: string | null
+    location?: string
     status?: string
     totalAmount: Decimal | DecimalJsLike | number | string
     paidAmount?: Decimal | DecimalJsLike | number | string
@@ -40535,6 +40687,10 @@ export namespace Prisma {
   export type BookingUncheckedCreateWithoutLeadInput = {
     id?: string
     slotId: string
+    automationCategory?: string
+    automationSelections?: BookingCreateautomationSelectionsInput | string[]
+    creativeRequirement?: string | null
+    location?: string
     status?: string
     totalAmount: Decimal | DecimalJsLike | number | string
     paidAmount?: Decimal | DecimalJsLike | number | string
@@ -40576,6 +40732,10 @@ export namespace Prisma {
     id?: UuidFilter<"Booking"> | string
     slotId?: UuidFilter<"Booking"> | string
     leadId?: UuidFilter<"Booking"> | string
+    automationCategory?: StringFilter<"Booking"> | string
+    automationSelections?: StringNullableListFilter<"Booking">
+    creativeRequirement?: StringNullableFilter<"Booking"> | string | null
+    location?: StringFilter<"Booking"> | string
     status?: StringFilter<"Booking"> | string
     totalAmount?: DecimalFilter<"Booking"> | Decimal | DecimalJsLike | number | string
     paidAmount?: DecimalFilter<"Booking"> | Decimal | DecimalJsLike | number | string
@@ -40609,6 +40769,10 @@ export namespace Prisma {
 
   export type BookingCreateWithoutSlotInput = {
     id?: string
+    automationCategory?: string
+    automationSelections?: BookingCreateautomationSelectionsInput | string[]
+    creativeRequirement?: string | null
+    location?: string
     status?: string
     totalAmount: Decimal | DecimalJsLike | number | string
     paidAmount?: Decimal | DecimalJsLike | number | string
@@ -40621,6 +40785,10 @@ export namespace Prisma {
   export type BookingUncheckedCreateWithoutSlotInput = {
     id?: string
     leadId: string
+    automationCategory?: string
+    automationSelections?: BookingCreateautomationSelectionsInput | string[]
+    creativeRequirement?: string | null
+    location?: string
     status?: string
     totalAmount: Decimal | DecimalJsLike | number | string
     paidAmount?: Decimal | DecimalJsLike | number | string
@@ -40943,6 +41111,10 @@ export namespace Prisma {
 
   export type BookingCreateWithoutPaymentsInput = {
     id?: string
+    automationCategory?: string
+    automationSelections?: BookingCreateautomationSelectionsInput | string[]
+    creativeRequirement?: string | null
+    location?: string
     status?: string
     totalAmount: Decimal | DecimalJsLike | number | string
     paidAmount?: Decimal | DecimalJsLike | number | string
@@ -40956,6 +41128,10 @@ export namespace Prisma {
     id?: string
     slotId: string
     leadId: string
+    automationCategory?: string
+    automationSelections?: BookingCreateautomationSelectionsInput | string[]
+    creativeRequirement?: string | null
+    location?: string
     status?: string
     totalAmount: Decimal | DecimalJsLike | number | string
     paidAmount?: Decimal | DecimalJsLike | number | string
@@ -40981,6 +41157,10 @@ export namespace Prisma {
 
   export type BookingUpdateWithoutPaymentsInput = {
     id?: StringFieldUpdateOperationsInput | string
+    automationCategory?: StringFieldUpdateOperationsInput | string
+    automationSelections?: BookingUpdateautomationSelectionsInput | string[]
+    creativeRequirement?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     totalAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     paidAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -40994,6 +41174,10 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     slotId?: StringFieldUpdateOperationsInput | string
     leadId?: StringFieldUpdateOperationsInput | string
+    automationCategory?: StringFieldUpdateOperationsInput | string
+    automationSelections?: BookingUpdateautomationSelectionsInput | string[]
+    creativeRequirement?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     totalAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     paidAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -41186,6 +41370,7 @@ export namespace Prisma {
     hidePrice?: boolean
     availability?: string
     warrantyMonths?: number
+    extendedWarrantyAvailable?: boolean
     status?: string
     sortOrder?: number
     createdAt?: Date | string
@@ -41210,6 +41395,7 @@ export namespace Prisma {
     hidePrice?: boolean
     availability?: string
     warrantyMonths?: number
+    extendedWarrantyAvailable?: boolean
     status?: string
     sortOrder?: number
     createdAt?: Date | string
@@ -41383,6 +41569,7 @@ export namespace Prisma {
     hidePrice?: BoolFilter<"Product"> | boolean
     availability?: StringFilter<"Product"> | string
     warrantyMonths?: IntFilter<"Product"> | number
+    extendedWarrantyAvailable?: BoolFilter<"Product"> | boolean
     coverImageId?: UuidNullableFilter<"Product"> | string | null
     status?: StringFilter<"Product"> | string
     sortOrder?: IntFilter<"Product"> | number
@@ -41521,6 +41708,7 @@ export namespace Prisma {
     hidePrice?: boolean
     availability?: string
     warrantyMonths?: number
+    extendedWarrantyAvailable?: boolean
     status?: string
     sortOrder?: number
     createdAt?: Date | string
@@ -41544,6 +41732,7 @@ export namespace Prisma {
     hidePrice?: boolean
     availability?: string
     warrantyMonths?: number
+    extendedWarrantyAvailable?: boolean
     coverImageId?: string | null
     status?: string
     sortOrder?: number
@@ -41698,6 +41887,7 @@ export namespace Prisma {
     hidePrice?: boolean
     availability?: string
     warrantyMonths?: number
+    extendedWarrantyAvailable?: boolean
     status?: string
     sortOrder?: number
     createdAt?: Date | string
@@ -41721,6 +41911,7 @@ export namespace Prisma {
     hidePrice?: boolean
     availability?: string
     warrantyMonths?: number
+    extendedWarrantyAvailable?: boolean
     coverImageId?: string | null
     status?: string
     sortOrder?: number
@@ -42211,6 +42402,7 @@ export namespace Prisma {
     hidePrice?: boolean
     availability?: string
     warrantyMonths?: number
+    extendedWarrantyAvailable?: boolean
     status?: string
     sortOrder?: number
     createdAt?: Date | string
@@ -42235,6 +42427,7 @@ export namespace Prisma {
     hidePrice?: boolean
     availability?: string
     warrantyMonths?: number
+    extendedWarrantyAvailable?: boolean
     coverImageId?: string | null
     status?: string
     sortOrder?: number
@@ -42302,6 +42495,7 @@ export namespace Prisma {
     hidePrice?: BoolFieldUpdateOperationsInput | boolean
     availability?: StringFieldUpdateOperationsInput | string
     warrantyMonths?: IntFieldUpdateOperationsInput | number
+    extendedWarrantyAvailable?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     sortOrder?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -42326,6 +42520,7 @@ export namespace Prisma {
     hidePrice?: BoolFieldUpdateOperationsInput | boolean
     availability?: StringFieldUpdateOperationsInput | string
     warrantyMonths?: IntFieldUpdateOperationsInput | number
+    extendedWarrantyAvailable?: BoolFieldUpdateOperationsInput | boolean
     coverImageId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -42383,6 +42578,7 @@ export namespace Prisma {
     hidePrice?: boolean
     availability?: string
     warrantyMonths?: number
+    extendedWarrantyAvailable?: boolean
     status?: string
     sortOrder?: number
     createdAt?: Date | string
@@ -42407,6 +42603,7 @@ export namespace Prisma {
     hidePrice?: boolean
     availability?: string
     warrantyMonths?: number
+    extendedWarrantyAvailable?: boolean
     coverImageId?: string | null
     status?: string
     sortOrder?: number
@@ -42443,6 +42640,7 @@ export namespace Prisma {
     hidePrice?: BoolFieldUpdateOperationsInput | boolean
     availability?: StringFieldUpdateOperationsInput | string
     warrantyMonths?: IntFieldUpdateOperationsInput | number
+    extendedWarrantyAvailable?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     sortOrder?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -42467,6 +42665,7 @@ export namespace Prisma {
     hidePrice?: BoolFieldUpdateOperationsInput | boolean
     availability?: StringFieldUpdateOperationsInput | string
     warrantyMonths?: IntFieldUpdateOperationsInput | number
+    extendedWarrantyAvailable?: BoolFieldUpdateOperationsInput | boolean
     coverImageId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -42487,6 +42686,7 @@ export namespace Prisma {
     hidePrice?: boolean
     availability?: string
     warrantyMonths?: number
+    extendedWarrantyAvailable?: boolean
     status?: string
     sortOrder?: number
     createdAt?: Date | string
@@ -42511,6 +42711,7 @@ export namespace Prisma {
     hidePrice?: boolean
     availability?: string
     warrantyMonths?: number
+    extendedWarrantyAvailable?: boolean
     coverImageId?: string | null
     status?: string
     sortOrder?: number
@@ -42566,6 +42767,7 @@ export namespace Prisma {
     hidePrice?: BoolFieldUpdateOperationsInput | boolean
     availability?: StringFieldUpdateOperationsInput | string
     warrantyMonths?: IntFieldUpdateOperationsInput | number
+    extendedWarrantyAvailable?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     sortOrder?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -42590,6 +42792,7 @@ export namespace Prisma {
     hidePrice?: BoolFieldUpdateOperationsInput | boolean
     availability?: StringFieldUpdateOperationsInput | string
     warrantyMonths?: IntFieldUpdateOperationsInput | number
+    extendedWarrantyAvailable?: BoolFieldUpdateOperationsInput | boolean
     coverImageId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -42828,6 +43031,10 @@ export namespace Prisma {
   export type BookingCreateManyLeadInput = {
     id?: string
     slotId: string
+    automationCategory?: string
+    automationSelections?: BookingCreateautomationSelectionsInput | string[]
+    creativeRequirement?: string | null
+    location?: string
     status?: string
     totalAmount: Decimal | DecimalJsLike | number | string
     paidAmount?: Decimal | DecimalJsLike | number | string
@@ -42837,6 +43044,10 @@ export namespace Prisma {
 
   export type BookingUpdateWithoutLeadInput = {
     id?: StringFieldUpdateOperationsInput | string
+    automationCategory?: StringFieldUpdateOperationsInput | string
+    automationSelections?: BookingUpdateautomationSelectionsInput | string[]
+    creativeRequirement?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     totalAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     paidAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -42849,6 +43060,10 @@ export namespace Prisma {
   export type BookingUncheckedUpdateWithoutLeadInput = {
     id?: StringFieldUpdateOperationsInput | string
     slotId?: StringFieldUpdateOperationsInput | string
+    automationCategory?: StringFieldUpdateOperationsInput | string
+    automationSelections?: BookingUpdateautomationSelectionsInput | string[]
+    creativeRequirement?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     totalAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     paidAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -42860,6 +43075,10 @@ export namespace Prisma {
   export type BookingUncheckedUpdateManyWithoutLeadInput = {
     id?: StringFieldUpdateOperationsInput | string
     slotId?: StringFieldUpdateOperationsInput | string
+    automationCategory?: StringFieldUpdateOperationsInput | string
+    automationSelections?: BookingUpdateautomationSelectionsInput | string[]
+    creativeRequirement?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     totalAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     paidAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -42877,6 +43096,10 @@ export namespace Prisma {
   export type BookingCreateManySlotInput = {
     id?: string
     leadId: string
+    automationCategory?: string
+    automationSelections?: BookingCreateautomationSelectionsInput | string[]
+    creativeRequirement?: string | null
+    location?: string
     status?: string
     totalAmount: Decimal | DecimalJsLike | number | string
     paidAmount?: Decimal | DecimalJsLike | number | string
@@ -42907,6 +43130,10 @@ export namespace Prisma {
 
   export type BookingUpdateWithoutSlotInput = {
     id?: StringFieldUpdateOperationsInput | string
+    automationCategory?: StringFieldUpdateOperationsInput | string
+    automationSelections?: BookingUpdateautomationSelectionsInput | string[]
+    creativeRequirement?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     totalAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     paidAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -42919,6 +43146,10 @@ export namespace Prisma {
   export type BookingUncheckedUpdateWithoutSlotInput = {
     id?: StringFieldUpdateOperationsInput | string
     leadId?: StringFieldUpdateOperationsInput | string
+    automationCategory?: StringFieldUpdateOperationsInput | string
+    automationSelections?: BookingUpdateautomationSelectionsInput | string[]
+    creativeRequirement?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     totalAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     paidAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -42930,6 +43161,10 @@ export namespace Prisma {
   export type BookingUncheckedUpdateManyWithoutSlotInput = {
     id?: StringFieldUpdateOperationsInput | string
     leadId?: StringFieldUpdateOperationsInput | string
+    automationCategory?: StringFieldUpdateOperationsInput | string
+    automationSelections?: BookingUpdateautomationSelectionsInput | string[]
+    creativeRequirement?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     totalAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     paidAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -43021,6 +43256,7 @@ export namespace Prisma {
     hidePrice?: boolean
     availability?: string
     warrantyMonths?: number
+    extendedWarrantyAvailable?: boolean
     status?: string
     sortOrder?: number
     createdAt?: Date | string
@@ -43078,6 +43314,7 @@ export namespace Prisma {
     hidePrice?: BoolFieldUpdateOperationsInput | boolean
     availability?: StringFieldUpdateOperationsInput | string
     warrantyMonths?: IntFieldUpdateOperationsInput | number
+    extendedWarrantyAvailable?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     sortOrder?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -43102,6 +43339,7 @@ export namespace Prisma {
     hidePrice?: BoolFieldUpdateOperationsInput | boolean
     availability?: StringFieldUpdateOperationsInput | string
     warrantyMonths?: IntFieldUpdateOperationsInput | number
+    extendedWarrantyAvailable?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     sortOrder?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -43124,6 +43362,7 @@ export namespace Prisma {
     hidePrice?: BoolFieldUpdateOperationsInput | boolean
     availability?: StringFieldUpdateOperationsInput | string
     warrantyMonths?: IntFieldUpdateOperationsInput | number
+    extendedWarrantyAvailable?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     sortOrder?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -43264,6 +43503,7 @@ export namespace Prisma {
     hidePrice?: boolean
     availability?: string
     warrantyMonths?: number
+    extendedWarrantyAvailable?: boolean
     coverImageId?: string | null
     status?: string
     sortOrder?: number
@@ -43289,6 +43529,7 @@ export namespace Prisma {
     hidePrice?: BoolFieldUpdateOperationsInput | boolean
     availability?: StringFieldUpdateOperationsInput | string
     warrantyMonths?: IntFieldUpdateOperationsInput | number
+    extendedWarrantyAvailable?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     sortOrder?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -43312,6 +43553,7 @@ export namespace Prisma {
     hidePrice?: BoolFieldUpdateOperationsInput | boolean
     availability?: StringFieldUpdateOperationsInput | string
     warrantyMonths?: IntFieldUpdateOperationsInput | number
+    extendedWarrantyAvailable?: BoolFieldUpdateOperationsInput | boolean
     coverImageId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -43334,6 +43576,7 @@ export namespace Prisma {
     hidePrice?: BoolFieldUpdateOperationsInput | boolean
     availability?: StringFieldUpdateOperationsInput | string
     warrantyMonths?: IntFieldUpdateOperationsInput | number
+    extendedWarrantyAvailable?: BoolFieldUpdateOperationsInput | boolean
     coverImageId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -43378,6 +43621,7 @@ export namespace Prisma {
     hidePrice?: boolean
     availability?: string
     warrantyMonths?: number
+    extendedWarrantyAvailable?: boolean
     coverImageId?: string | null
     status?: string
     sortOrder?: number
@@ -43396,6 +43640,7 @@ export namespace Prisma {
     hidePrice?: BoolFieldUpdateOperationsInput | boolean
     availability?: StringFieldUpdateOperationsInput | string
     warrantyMonths?: IntFieldUpdateOperationsInput | number
+    extendedWarrantyAvailable?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     sortOrder?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -43419,6 +43664,7 @@ export namespace Prisma {
     hidePrice?: BoolFieldUpdateOperationsInput | boolean
     availability?: StringFieldUpdateOperationsInput | string
     warrantyMonths?: IntFieldUpdateOperationsInput | number
+    extendedWarrantyAvailable?: BoolFieldUpdateOperationsInput | boolean
     coverImageId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -43441,6 +43687,7 @@ export namespace Prisma {
     hidePrice?: BoolFieldUpdateOperationsInput | boolean
     availability?: StringFieldUpdateOperationsInput | string
     warrantyMonths?: IntFieldUpdateOperationsInput | number
+    extendedWarrantyAvailable?: BoolFieldUpdateOperationsInput | boolean
     coverImageId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     sortOrder?: IntFieldUpdateOperationsInput | number

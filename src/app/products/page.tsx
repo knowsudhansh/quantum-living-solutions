@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { prisma } from '../../lib/db';
 import { MotionCard, MotionReveal } from '../../components/ui/motion';
+import { PRIVATE_SITE_VISIT } from '../../lib/config/business';
 
 export const dynamic = 'force-dynamic';
 
@@ -293,7 +294,7 @@ export default async function PublicProductListingPage({
                             href="/book-demo"
                             className="qls-button qls-button-primary min-h-0 py-2.5 text-[10px]"
                           >
-                            Book Demo
+                            {PRIVATE_SITE_VISIT.label}
                           </Link>
                         </div>
                       </div>

@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import NewsletterFooterForm from './newsletter-footer-form';
 import { PartnerCollaborations } from '../partners/partner-collaborations';
+import { BUSINESS_CONTACT, PRIVATE_SITE_VISIT } from '../../lib/config/business';
 
 
 export default function Footer() {
@@ -34,7 +35,7 @@ export default function Footer() {
               href="/book-demo"
               className="qls-button qls-button-secondary"
             >
-              Book Free Demo
+              {PRIVATE_SITE_VISIT.label} · {PRIVATE_SITE_VISIT.priceLabel}
             </Link>
           </div>
         </div>
@@ -60,8 +61,8 @@ export default function Footer() {
             <p>Shravan Nagar, Swarn City Road</p>
             <p>Singhariya, Kunraghat, Gorakhpur</p>
             <p>Uttar Pradesh 273008, India</p>
-            <p className="pt-2">Mon – Fri: 09:00 am – 05:00 pm</p>
-            <p>Sat & Sun: Closed</p>
+            <p className="pt-2">{BUSINESS_CONTACT.businessDays}</p>
+            <p>{BUSINESS_CONTACT.businessHours}</p>
           </div>
         </div>
 
@@ -129,10 +130,10 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="mailto:rajkumarsharma@quantumlivingsolutions.com"
+                  href={`mailto:${BUSINESS_CONTACT.supportEmail}`}
                   className="hover:text-[HSL(40,30%,95%)] transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[HSL(210,80%,60%)]"
                 >
-                  rajkumarsharma@quantumlivingsolutions.com
+                  {BUSINESS_CONTACT.supportEmail}
                 </a>
               </li>
               <li>
@@ -192,7 +193,7 @@ export default function Footer() {
               Newsletter
             </h2>
             <p className="text-xs leading-relaxed text-zinc-500 font-mono uppercase">
-              Subscribe to stay updated with showroom slots and design ideas.
+              Subscribe to stay updated with private site visit availability and design ideas.
             </p>
             <NewsletterFooterForm />
           </div>
@@ -204,8 +205,17 @@ export default function Footer() {
         <PartnerCollaborations placement="footer" variant="compact" />
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 border-t border-[HSL(220,15%,12%)] py-8 flex flex-col md:flex-row items-center justify-between text-xs text-[HSL(210,15%,55%)]">
-        <p>&copy; {new Date().getFullYear()} Quantum Living Solutions. All rights reserved.</p>
+      <div className="max-w-7xl mx-auto px-6 border-t border-[HSL(220,15%,12%)] py-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-[HSL(210,15%,55%)]">
+        <div className="space-y-2 text-center md:text-left">
+          <p>&copy; {new Date().getFullYear()} Quantum Living Solutions. All rights reserved.</p>
+          <div className="font-mono text-[10px] leading-relaxed text-zinc-500">
+            <p className="uppercase tracking-wider text-zinc-400">Business Hours</p>
+            <p>{BUSINESS_CONTACT.businessDays}</p>
+            <p>{BUSINESS_CONTACT.businessHours}</p>
+            <p className="mt-2 uppercase tracking-wider text-zinc-400">Support</p>
+            <a href={`mailto:${BUSINESS_CONTACT.supportEmail}`} className="hover:text-white transition-colors">{BUSINESS_CONTACT.supportEmail}</a>
+          </div>
+        </div>
         <p className="mt-2 md:mt-0">Premium Smart Home & Automation Systems.</p>
       </div>
     </footer>

@@ -45,6 +45,7 @@ export default function AdminProductCreatePage() {
   const [hidePrice, setHidePrice] = useState(false);
   const [availability, setAvailability] = useState('IN_STOCK');
   const [warrantyMonths, setWarrantyMonths] = useState('12');
+  const [extendedWarrantyAvailable, setExtendedWarrantyAvailable] = useState(false);
   const [status, setStatus] = useState<'DRAFT' | 'PUBLISHED' | 'ARCHIVED'>('DRAFT');
   const [sortOrder, setSortOrder] = useState('0');
 
@@ -331,6 +332,7 @@ export default function AdminProductCreatePage() {
       hidePrice,
       availability,
       warrantyMonths: parseInt(warrantyMonths, 10),
+      extendedWarrantyAvailable,
       coverImageId: coverImage?.id,
       status,
       sortOrder: parseInt(sortOrder, 10),
@@ -488,6 +490,34 @@ export default function AdminProductCreatePage() {
                 className="w-full bg-zinc-950 border border-zinc-800 focus:border-zinc-500 px-4 py-3 text-sm text-white rounded-sm outline-none"
               />
             </div>
+
+            <fieldset>
+              <legend className="block text-xs font-mono uppercase text-zinc-400 mb-2 select-none">
+                Buy Extended Warranty
+              </legend>
+              <div className="flex gap-5 text-sm text-zinc-300">
+                <label className="inline-flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="extended-warranty"
+                    checked={extendedWarrantyAvailable}
+                    onChange={() => setExtendedWarrantyAvailable(true)}
+                    className="border-zinc-700 bg-zinc-950"
+                  />
+                  Yes
+                </label>
+                <label className="inline-flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="extended-warranty"
+                    checked={!extendedWarrantyAvailable}
+                    onChange={() => setExtendedWarrantyAvailable(false)}
+                    className="border-zinc-700 bg-zinc-950"
+                  />
+                  No
+                </label>
+              </div>
+            </fieldset>
           </div>
 
           {/* Dynamic Specifications */}

@@ -16,6 +16,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/careers',
     '/experience',
     '/projects',
+    '/products',
     '/solutions',
   ];
 

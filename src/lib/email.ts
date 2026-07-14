@@ -1,8 +1,9 @@
 import { logger } from './utils/logger';
+import { BUSINESS_CONTACT, PRIVATE_SITE_VISIT } from './config/business';
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const FROM_EMAIL = 'Quantum Living Solutions <info@quantumlivingsolutions.com>';
-const ADMIN_EMAIL = 'rajkumarsharma@quantumlivingsolutions.com';
+const FROM_EMAIL = `Quantum Living Solutions <${BUSINESS_CONTACT.supportEmail}>`;
+const ADMIN_EMAIL = BUSINESS_CONTACT.ownerEmail;
 
 interface SendMailParams {
   to: string;
@@ -73,31 +74,43 @@ export async function sendContactAutoReply(name: string, email: string) {
   return sendEmail({ to: email, subject: 'We have received your inquiry - Quantum Living Solutions', html });
 }
 
-export async function notifyAdminOfDemo(name: string, email: string, phone: string, slotTime: string, notes?: string) {
+interface PrivateSiteVisitDetails {
+  automationCategory: string;
+  automationSelections: string[];
+  creativeRequirement: string | null;
+  location: string;
+}
+
+export async function notifyAdminOfDemo(name: string, email: string, phone: string, slotTime: string, details: PrivateSiteVisitDetails) {
+  const requirement = details.creativeRequirement || details.automationSelections.join(', ');
   const html = `
-    <h2>New Showroom Demonstration Booking</h2>
+    <h2>New Private Site Visit Request</h2>
     <p><strong>Customer Name:</strong> ${name}</p>
     <p><strong>Email:</strong> ${email}</p>
     <p><strong>Phone:</strong> ${phone}</p>
-    <p><strong>Requested Schedule Slot:</strong> ${slotTime}</p>
-    <p><strong>Notes:</strong> ${notes || 'None'}</p>
+    <p><strong>Site Location:</strong> ${details.location}</p>
+    <p><strong>Automation Category:</strong> ${details.automationCategory}</p>
+    <p><strong>Requirement:</strong> ${requirement}</p>
+    <p><strong>Requested Visit Slot:</strong> ${slotTime}</p>
+    <p><strong>Visit Charge:</strong> ${PRIVATE_SITE_VISIT.priceLabel}</p>
     <hr />
     <p><em>Review schedule details in the admin dashboard portal.</em></p>
   `;
-  return sendEmail({ to: ADMIN_EMAIL, subject: `Demo Reservation Request: ${name}`, html });
+  return sendEmail({ to: ADMIN_EMAIL, subject: `Private Site Visit Request: ${name}`, html });
 }
 
 export async function sendDemoAutoReply(name: string, email: string, slotTime: string) {
   const html = `
     <p>Dear ${name},</p>
-    <p>Your showroom demonstration session is scheduled for: <strong>${slotTime}</strong>.</p>
-    <p>Our experience center is located at Swarn City Road, Kunraghat, Gorakhpur. If you need to make changes or reschedule, please reach out to us at least 24 hours in advance.</p>
+    <p>Your private site visit is scheduled for: <strong>${slotTime}</strong>.</p>
+    <p>The visit charge is <strong>${PRIVATE_SITE_VISIT.priceLabel}</strong>. ${PRIVATE_SITE_VISIT.adjustmentNote}</p>
+    <p>If you need to make changes or reschedule, please contact us at least 24 hours in advance at ${BUSINESS_CONTACT.supportEmail}.</p>
     <br />
     <p>We look forward to welcoming you to the smart space experience.</p>
     <p>Best regards,</p>
     <p><strong>Quantum Living Solutions Team</strong></p>
   `;
-  return sendEmail({ to: email, subject: 'Demo Booking Schedule Confirmed - Quantum Living Solutions', html });
+  return sendEmail({ to: email, subject: 'Private Site Visit Confirmed - Quantum Living Solutions', html });
 }
 
 export async function notifyAdminOfCareer(name: string, email: string, phone: string, role: string, message?: string, resumeUrl?: string) {

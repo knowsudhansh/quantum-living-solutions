@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { PRIVATE_SITE_VISIT } from '../../lib/config/business';
 
 interface Act {
   title: string;
@@ -52,7 +53,7 @@ export function JourneyActContent({ act, index }: JourneyActContentProps) {
               href="/book-demo"
               className="px-6 py-3.5 bg-[HSL(35,30%,45%)] hover:bg-[HSL(35,30%,50%)] text-white text-xs font-mono tracking-wider uppercase rounded-sm transition-colors duration-200 outline-none focus-visible:ring-2 focus-visible:ring-[HSL(210,80%,60%)]"
             >
-              Book Showroom Demo
+              {PRIVATE_SITE_VISIT.label} · {PRIVATE_SITE_VISIT.priceLabel}
             </Link>
             <a
               href="https://wa.me/918130856575"

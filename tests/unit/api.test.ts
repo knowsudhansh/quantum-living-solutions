@@ -126,8 +126,9 @@ describe('Public API Route Handlers Integration Validation', () => {
         name: 'Demo Book Tester',
         email: 'demobooker@test.com',
         phone: '+917777777777',
-        interest: 'Audio / Video',
-        notes: 'Needs integration checks.',
+        location: 'Gorakhpur, Uttar Pradesh',
+        automationCategory: 'Home Automation',
+        automationSelections: ['Audio / Video'],
       };
 
       const req = new Request('http://localhost:3000/api/book-demo', {
@@ -140,8 +141,9 @@ describe('Public API Route Handlers Integration Validation', () => {
       expect([201, 409]).toContain(resBook.status);
 
       if (resBook.status === 201) {
-        const bodyBook = await resBook.json() as { success: boolean; bookingId: string };
+        const bodyBook = await resBook.json() as { success: boolean; bookingId: string; visitPrice: number };
         expect(bodyBook.success).toBe(true);
+        expect(bodyBook.visitPrice).toBe(1000);
 
         // Revert increment and clean up booking
         await prisma.booking.delete({
@@ -154,6 +156,24 @@ describe('Public API Route Handlers Integration Validation', () => {
         }).catch(() => {});
       }
     }
+  });
+
+  it('POST /api/book-demo should require a category-specific automation requirement and location', async () => {
+    const request = new Request('http://localhost:3000/api/book-demo', {
+      method: 'POST',
+      body: JSON.stringify({
+        slotId: '00000000-0000-0000-0000-000000000000',
+        name: 'Visit Tester',
+        email: 'visit@test.com',
+        phone: '+917777777777',
+        location: 'Gorakhpur',
+        automationCategory: 'Home Automation',
+        automationSelections: [],
+      }),
+    });
+
+    const response = await bookDemoPost(request);
+    expect(response.status).toBe(400);
   });
 
 });

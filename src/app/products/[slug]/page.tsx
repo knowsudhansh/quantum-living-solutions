@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { prisma } from '../../../lib/db';
 import { MotionCard, MotionReveal } from '../../../components/ui/motion';
+import { PRIVATE_SITE_VISIT } from '../../../lib/config/business';
 
 export const dynamic = 'force-dynamic';
 
@@ -227,7 +228,7 @@ export default async function PublicProductDetailPage({ params }: Props) {
                 href="/book-demo"
                 className="qls-button qls-button-primary w-full"
               >
-                Book Showroom Demo
+                {PRIVATE_SITE_VISIT.label} · {PRIVATE_SITE_VISIT.priceLabel}
               </Link>
               <Link
                 href="/contact"
@@ -237,6 +238,14 @@ export default async function PublicProductDetailPage({ params }: Props) {
               </Link>
             </div>
           </MotionCard>
+
+          {product.extendedWarrantyAvailable && (
+            <MotionCard className="qls-card qls-card-hover border-[HSL(35,30%,45%)]/55 bg-[HSL(35,30%,45%)]/10 p-5 transition-colors duration-300 hover:bg-[HSL(35,30%,45%)]/15">
+              <p className="font-mono text-[10px] uppercase tracking-wider text-[HSL(35,30%,62%)]">
+                ✔ Extended Warranty Available
+              </p>
+            </MotionCard>
+          )}
 
           {/* Detailed Specifications Specifications Accordion Grid */}
           {Object.keys(specsByGroup).length > 0 && (

@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { getIconForSlug } from './solution-icons';
+import { PRIVATE_SITE_VISIT } from '../../lib/config/business';
 
 interface SolutionDetailHeroProps {
   title: string;
@@ -53,7 +54,7 @@ export function SolutionDetailHero({ title, slug, shortDescription, index }: Sol
             href="/book-demo"
             className="flex-1 text-center bg-[HSL(35,35%,25%)] hover:bg-[HSL(35,35%,30%)] dark:bg-[HSL(210,80%,60%)] dark:hover:bg-[HSL(210,80%,65%)] text-white dark:text-zinc-950 px-6 py-4 rounded-sm text-xs font-mono tracking-wider uppercase transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-[HSL(210,80%,60%)] outline-none"
           >
-            Request Showroom Demo
+            {PRIVATE_SITE_VISIT.label} · {PRIVATE_SITE_VISIT.priceLabel}
           </Link>
           <Link
             href="/contact"

@@ -4,6 +4,9 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname,
   },
+  outputFileTracingExcludes: {
+    "*": ["./next.config.ts"],
+  },
   async headers() {
     const isProd = process.env.NODE_ENV === "production";
     const headersList = [
@@ -28,7 +31,7 @@ const nextConfig: NextConfig = {
     if (isProd) {
       headersList.push({
         key: "Strict-Transport-Security",
-        value: "max-age=31536000",
+        value: "max-age=63072000; includeSubDomains; preload",
       });
     }
 

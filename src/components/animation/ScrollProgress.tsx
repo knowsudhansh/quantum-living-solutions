@@ -1,13 +1,14 @@
 'use client';
 
-import { motion, useReducedMotion, useScroll, useSpring } from 'framer-motion';
+import { motion, useScroll, useSpring } from 'framer-motion';
+import { useMotionSystem } from './MotionProvider';
 
 interface ScrollProgressProps {
   className?: string;
 }
 
 export function ScrollProgress({ className = '' }: ScrollProgressProps) {
-  const reducedMotion = useReducedMotion();
+  const { reducedMotion } = useMotionSystem();
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, { stiffness: 140, damping: 24, mass: 0.4 });
 

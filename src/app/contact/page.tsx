@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { useToast } from '../../components/utils/toast';
 import { MotionReveal, MotionPresencePanel } from '../../components/ui/motion';
+import { SocialLinks } from '../../components/social/social-links';
 import { BUSINESS_CONTACT } from '../../lib/config/business';
 
 export default function ContactPage() {
@@ -157,6 +158,18 @@ export default function ContactPage() {
               </div>
             </div>
           </div>
+
+          <MotionReveal className="border-t border-zinc-800/80 pt-8" delay={0.08}>
+            <h3 className="text-xs font-mono uppercase tracking-widest text-zinc-500 mb-4 select-none">
+              FOLLOW QUANTUM LIVING SOLUTIONS
+            </h3>
+            <div className="border border-white/10 bg-white/[0.03] p-5">
+              <p className="mb-5 text-sm leading-6 text-foreground/70">
+                Follow our studio updates, project details, and automation ideas.
+              </p>
+              <SocialLinks size="lg" showLabels />
+            </div>
+          </MotionReveal>
         </div>
 
         {/* Inquiry form (Right) */}

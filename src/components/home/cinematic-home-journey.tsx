@@ -2,22 +2,28 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion, useMotionValue, useSpring } from 'framer-motion';
+import dynamic from 'next/dynamic';
+import { AnimatePresence, motion, useMotionValue, useSpring } from 'framer-motion';
 import {
   ArrowDown,
   ArrowRight,
-  BatteryCharging,
+  Cctv,
+  ChartNoAxesColumnIncreasing,
   Coffee,
   DoorOpen,
   Fingerprint,
+  Lock,
   Moon,
   Play,
+  Projector,
   ShieldCheck,
+  Sparkles,
   SunMedium,
+  Thermometer,
   Volume2,
   Zap,
 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import {
   FloatingElement,
   CursorGlow,
@@ -27,12 +33,23 @@ import {
   SectionReveal,
   useMotionSystem,
 } from '@/components/animation';
+import { SocialLinks } from '@/components/social/social-links';
 import { useGSAP } from '@/hooks/useGSAP';
 import { founder } from '@/lib/config/founder';
 import { PRIVATE_SITE_VISIT } from '@/lib/config/business';
 import { registerGSAP } from '@/lib/gsap';
 import type gsap from 'gsap';
 import { useRouter } from 'next/navigation';
+
+const LuxuryVillaExperience = dynamic(
+  () => import('./luxury-villa-experience').then((module) => module.LuxuryVillaExperience),
+  { ssr: false, loading: () => null },
+);
+
+const ProductPedestalExperience = dynamic(
+  () => import('./luxury-villa-experience').then((module) => module.ProductPedestalExperience),
+  { ssr: false, loading: () => null },
+);
 
 interface FeaturedProduct {
   id: string;
@@ -64,6 +81,19 @@ interface VillaSceneProps {
   reverse?: boolean;
 }
 
+interface CinematicSceneProps {
+  id: string;
+  act: string;
+  title: string;
+  copy: string;
+  image: string;
+  imageAlt: string;
+  children: React.ReactNode;
+  reverse?: boolean;
+  copyClassName?: string;
+  overlay?: 'warm' | 'night' | 'cinema' | 'secure' | 'energy';
+}
+
 const sceneImages = {
   entry: '/images/morning.jpg',
   living: '/images/evening.jpg',
@@ -81,6 +111,48 @@ const livingControls = [
   { label: 'Scenes', icon: Moon },
   { label: 'Music', icon: Volume2 },
   { label: 'Security', icon: ShieldCheck },
+];
+
+const kitchenRoutines = [
+  { label: 'Coffee', value: 'Brewing', icon: Coffee },
+  { label: 'Cabinet LED', value: 'Warm 42%', icon: SunMedium },
+  { label: 'Touch Panel', value: 'Active', icon: Zap },
+];
+
+const bedroomControls = [
+  { label: 'Curtains', value: 'Closing', icon: Moon },
+  { label: 'Climate', value: '22 degrees', icon: Thermometer },
+  { label: 'Night Mode', value: 'Enabled', icon: Sparkles },
+];
+
+const securitySignals = [
+  { label: 'Door lock', value: 'Secured', icon: Lock },
+  { label: 'Camera', value: 'Tracking', icon: Cctv },
+  { label: 'Motion', value: 'Clear', icon: ShieldCheck },
+];
+
+const energyMetrics = [
+  { label: 'Solar production', value: '4.8 kW' },
+  { label: 'Battery storage', value: '78%' },
+  { label: 'Home usage', value: '2.1 kW' },
+  { label: 'Grid draw', value: '0.4 kW' },
+];
+
+const subscribeHydration = () => () => undefined;
+const getHydratedSnapshot = () => true;
+const getServerHydrationSnapshot = () => false;
+
+function useHasHydrated() {
+  return useSyncExternalStore(subscribeHydration, getHydratedSnapshot, getServerHydrationSnapshot);
+}
+
+const smartHomeControls = [
+  { label: 'Lighting', icon: SunMedium },
+  { label: 'Curtains', icon: DoorOpen },
+  { label: 'Climate', icon: Thermometer },
+  { label: 'Security', icon: ShieldCheck },
+  { label: 'Entertainment', icon: Volume2 },
+  { label: 'Energy', icon: Zap },
 ];
 
 function VillaScene({ id, act, title, copy, image, imageAlt, children, reverse = false }: VillaSceneProps) {
@@ -126,57 +198,78 @@ function SceneInterface({ label, value, icon: Icon }: { label: string; value: st
   );
 }
 
-function ProductFloat({ product, index }: { product: FeaturedProduct; index: number }) {
-  const rotation = index % 2 === 0 ? -3 : 3;
+function CinematicScene({
+  id,
+  act,
+  title,
+  copy,
+  image,
+  imageAlt,
+  children,
+  reverse = false,
+  copyClassName = '',
+  overlay = 'warm',
+}: CinematicSceneProps) {
+  const overlayClass = {
+    warm: 'bg-[radial-gradient(ellipse_at_70%_48%,rgba(185,145,82,0.28),transparent_42%)]',
+    night: 'bg-[radial-gradient(ellipse_at_68%_36%,rgba(61,98,133,0.3),transparent_42%)]',
+    cinema: 'bg-[radial-gradient(ellipse_at_50%_58%,rgba(185,145,82,0.18),transparent_48%)]',
+    secure: 'bg-[radial-gradient(ellipse_at_70%_40%,rgba(82,168,255,0.2),transparent_44%)]',
+    energy: 'bg-[radial-gradient(ellipse_at_68%_50%,rgba(185,145,82,0.22),transparent_44%)]',
+  }[overlay];
 
   return (
-    <FloatingElement distance={index === 1 ? 7 : 10} duration={5 + index} className="h-full">
-      <Link
-        href={`/products/${product.slug}`}
-        className="group block h-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[color:var(--blue)]"
-        aria-label={`View ${product.title}`}
-      >
-        <motion.article
-          className="relative flex h-full min-h-[20rem] flex-col justify-end overflow-hidden border border-white/10 bg-zinc-900/60 p-5"
-          initial={{ rotate: rotation }}
-          whileHover={{ rotate: 0, y: -8 }}
-          transition={{ type: 'spring', stiffness: 180, damping: 18 }}
+    <section id={id} className="relative isolate overflow-hidden border-t border-white/10" data-cinematic-scene>
+      <div data-scene-stage className="relative min-h-[100svh] overflow-hidden px-5 py-16 sm:px-8 lg:h-[100svh] lg:px-12 lg:py-20">
+        <div data-scene-media className="absolute -inset-[4%] will-change-transform">
+          <Image src={image} alt={imageAlt} fill sizes="100vw" className="object-cover" loading="lazy" />
+        </div>
+        <div className="absolute inset-0 bg-[#080a0d]/55" />
+        <div data-scene-glow className={`absolute inset-0 ${overlayClass}`} aria-hidden="true" />
+        <div data-scene-reflection className="pointer-events-none absolute -left-[46%] top-0 h-full w-[42%] -skew-x-12 bg-white/10 opacity-0 will-change-transform" aria-hidden="true" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#080a0d] via-transparent to-black/30" />
+        <div
+          className={`relative z-10 mx-auto grid min-h-[calc(100svh-8rem)] max-w-[96rem] grid-cols-1 items-end gap-10 lg:grid-cols-12 lg:items-center lg:gap-14 ${
+            reverse ? 'lg:[&>*:first-child]:col-start-8 lg:[&>*:last-child]:col-start-1' : ''
+          }`}
         >
-          {product.coverImage ? (
-            <Image
-              src={product.coverImage.fileUrl}
-              alt={product.title}
-              fill
-              sizes="(max-width: 768px) 88vw, (max-width: 1280px) 42vw, 25vw"
-              className="object-cover opacity-65 transition duration-700 group-hover:scale-105 group-hover:opacity-80"
-              loading="lazy"
-              unoptimized={product.coverImage.fileUrl.startsWith('/uploads/')}
-            />
-          ) : (
-            <div className="absolute inset-0 bg-[linear-gradient(135deg,#161b20,#080a0d)]" />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#080a0d] via-[#080a0d]/35 to-transparent" />
-          <div className="relative">
-            <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-[color:var(--gold-bright)]">{product.category.name}</p>
-            <h3 className="mt-2 text-xl font-light text-white">{product.title}</h3>
-            <p className="mt-3 text-sm leading-6 text-zinc-300">{product.subtitle || product.brand?.name || 'Automation hardware'}</p>
-            <span className="mt-5 inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-white transition group-hover:text-[color:var(--gold-bright)]">
-              View specification <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-            </span>
+          <div data-scene-copy className={`max-w-xl will-change-transform lg:col-span-5 ${reverse ? 'lg:row-start-1' : ''} ${copyClassName}`}>
+            <span className="qls-eyebrow">{act}</span>
+            <h2 className="qls-section-title text-4xl sm:text-6xl lg:text-7xl">{title}</h2>
+            <p className="mt-6 text-base leading-8 text-foreground/84 sm:text-lg">{copy}</p>
           </div>
-        </motion.article>
-      </Link>
-    </FloatingElement>
+          <div data-scene-panel className={`will-change-transform lg:col-span-7 ${reverse ? 'lg:col-start-1 lg:row-start-1' : ''}`}>
+            {children}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SceneMetric({ label, value, icon: Icon }: { label: string; value: string; icon: typeof Zap }) {
+  return (
+    <motion.div
+      className="border border-white/10 bg-[#080a0d]/70 p-4"
+      whileHover={{ y: -3, borderColor: 'rgba(185,145,82,0.58)' }}
+      transition={{ type: 'spring', stiffness: 220, damping: 20 }}
+    >
+      <Icon className="h-4 w-4 text-[color:var(--gold-bright)]" aria-hidden="true" />
+      <p className="mt-4 font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-500">{label}</p>
+      <p className="mt-1 text-sm text-white">{value}</p>
+    </motion.div>
   );
 }
 
 function HeroLine({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
-  const { reducedMotion } = useMotionSystem();
+  const { reducedMotion: prefersReducedMotion } = useMotionSystem();
+  const hasHydrated = useHasHydrated();
+  const reducedMotion = hasHydrated && prefersReducedMotion;
 
   return (
-    <span className="block overflow-hidden">
+    <span className="block overflow-hidden pb-[0.09em] pt-[0.02em]">
       <span
-        className={reducedMotion ? 'block' : 'hero-line-reveal block'}
+        className={reducedMotion ? 'block leading-[1.04]' : 'hero-line-reveal block leading-[1.04]'}
         style={reducedMotion ? undefined : { animationDelay: `${delay}s` }}
       >
         {children}
@@ -215,9 +308,271 @@ function LivingControlButton({
   );
 }
 
+function PremiumHomeLoader({ reducedMotion }: { reducedMotion: boolean }) {
+  return (
+    <motion.div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-[#080a0d]"
+      role="status"
+      aria-live="polite"
+      initial={{ opacity: 1 }}
+      exit={reducedMotion ? { opacity: 0 } : { opacity: 0, filter: 'blur(12px)', scale: 1.02 }}
+      transition={{ duration: reducedMotion ? 0.18 : 0.75, ease: [0.16, 1, 0.3, 1] }}
+    >
+      <div className="w-full max-w-xs px-6 text-center">
+        <motion.div
+          className="mx-auto flex h-16 w-16 items-center justify-center overflow-hidden border border-white/10 bg-white/[0.03]"
+          animate={reducedMotion ? undefined : { opacity: [0.72, 1, 0.72] }}
+          transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+        >
+          <Image src="/brand/qls-logo.jpg" alt="" width={48} height={48} className="h-12 w-12 object-cover" priority />
+        </motion.div>
+        <p className="mt-6 text-lg font-light tracking-wide text-white">Quantum Living Solutions</p>
+        <div className="mt-5 h-px overflow-hidden bg-white/10" aria-hidden="true">
+          <motion.span
+            className="block h-full bg-[color:var(--gold-bright)]"
+            initial={{ x: '-100%' }}
+            animate={{ x: '0%' }}
+            transition={{ duration: reducedMotion ? 0.12 : 1, ease: [0.16, 1, 0.3, 1] }}
+          />
+        </div>
+        <span className="sr-only">Loading the interactive villa experience.</span>
+      </div>
+    </motion.div>
+  );
+}
+
+function HolographicControlOverlay() {
+  const { reducedMotion: prefersReducedMotion } = useMotionSystem();
+  const hasHydrated = useHasHydrated();
+  const reducedMotion = hasHydrated && prefersReducedMotion;
+
+  return (
+    <div className="hidden justify-self-end lg:col-span-3 lg:block">
+      <div className="relative overflow-hidden border border-white/15 bg-[#080a0d]/48 p-4 shadow-[0_24px_70px_rgba(0,0,0,0.35)] backdrop-blur-xl">
+        <div className="pointer-events-none absolute -left-1/3 top-0 h-full w-1/3 -skew-x-12 bg-white/10" aria-hidden="true" />
+        <p className="font-mono text-[9px] uppercase tracking-[0.17em] text-[color:var(--gold-bright)]">Interactive home control</p>
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          {smartHomeControls.map(({ label, icon: Icon }) => (
+            <motion.button
+              key={label}
+              type="button"
+              className="group flex min-h-14 items-center gap-2 border border-white/10 bg-white/[0.035] px-3 text-left text-zinc-300 transition-colors hover:border-[color:var(--gold-bright)]/60 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--gold-bright)]"
+              whileHover={reducedMotion ? undefined : { y: -2 }}
+              whileTap={reducedMotion ? undefined : { scale: 0.98 }}
+              aria-label={`${label} smart home control preview`}
+            >
+              <Icon className="h-4 w-4 shrink-0 text-[color:var(--gold-bright)] transition-transform group-hover:scale-110" aria-hidden="true" />
+              <span className="font-mono text-[9px] uppercase tracking-[0.12em]">{label}</span>
+            </motion.button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LuxuryProductShowcase({ products, onExplore, onBook }: { products: FeaturedProduct[]; onExplore: () => void; onBook: () => void }) {
+  const visibleProducts = products.slice(0, 4);
+
+  return (
+    <section id="products" className="relative isolate overflow-hidden border-t border-white/10 bg-[#080a0d] px-5 py-24 sm:px-8 lg:px-12 lg:py-32" data-cinematic-scene>
+      <div data-scene-stage className="relative mx-auto grid min-h-[100svh] max-w-[96rem] grid-cols-1 items-center gap-12 lg:h-[100svh] lg:grid-cols-12 lg:gap-16">
+        <div data-scene-glow className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_70%_40%,rgba(185,145,82,0.18),transparent_46%)]" aria-hidden="true" />
+        <div data-scene-copy className="relative z-10 max-w-2xl will-change-transform lg:col-span-4">
+          <span className="qls-eyebrow">Scene 10 / Product collection</span>
+          <h2 className="qls-section-title text-4xl sm:text-6xl lg:text-7xl">Objects that disappear into the architecture.</h2>
+          <p className="mt-6 text-base leading-8 text-foreground/78 sm:text-lg">
+            Controllers, touch panels, sensors and interfaces presented as refined instruments for the residence.
+          </p>
+          <div className="mt-10 flex flex-col gap-3 sm:flex-row lg:flex-col xl:flex-row">
+            <MagneticButton className="qls-button qls-button-primary" strength={0.15} onClick={onExplore}>
+              Explore Collection <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </MagneticButton>
+            <MagneticButton className="qls-button qls-button-secondary" strength={0.15} onClick={onBook}>
+              Book Private Visit
+            </MagneticButton>
+          </div>
+        </div>
+
+        <div data-scene-panel className="relative z-10 min-h-[34rem] lg:col-span-8 lg:min-h-[42rem]">
+          <ProductPedestalExperience productCount={visibleProducts.length || 4} />
+          <div className="absolute inset-x-[8%] bottom-[10%] h-px bg-gradient-to-r from-transparent via-[color:var(--gold-bright)]/70 to-transparent shadow-[0_0_34px_rgba(185,145,82,0.45)]" />
+          {visibleProducts.length > 0 ? (
+            <div className="relative h-full min-h-[34rem]">
+              {visibleProducts.map((product, index) => {
+                const positions = [
+                  'left-[2%] top-[6%] lg:left-[4%] lg:top-[10%]',
+                  'right-[5%] top-[16%] lg:right-[10%] lg:top-[4%]',
+                  'left-[12%] bottom-[5%] lg:left-[22%] lg:bottom-[8%]',
+                  'right-[0%] bottom-[0%] lg:right-[4%] lg:bottom-[14%]',
+                ];
+                return (
+                  <FloatingElement key={product.id} distance={6 + index * 1.5} duration={5.2 + index * 0.45} className={`absolute w-[72%] max-w-[20rem] sm:w-[42%] ${positions[index]}`}>
+                    <Link href={`/products/${product.slug}`} aria-label={`View ${product.title}`} className="group block focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[color:var(--gold-bright)]">
+                      <motion.article
+                        data-floating-product
+                        className="relative overflow-hidden border border-white/12 bg-[#080a0d]/78 p-4 shadow-[0_28px_80px_rgba(0,0,0,0.42)] will-change-transform"
+                        whileHover={{ y: -8, rotate: 0, borderColor: 'rgba(185,145,82,0.72)' }}
+                        transition={{ type: 'spring', stiffness: 180, damping: 18 }}
+                        style={{ rotate: index % 2 === 0 ? '-2deg' : '2deg' }}
+                      >
+                        <div className="relative aspect-[4/3] overflow-hidden bg-zinc-950">
+                          {product.coverImage ? (
+                            <Image src={product.coverImage.fileUrl} alt={product.title} fill sizes="(max-width: 768px) 72vw, 24vw" className="object-cover opacity-80 transition duration-700 group-hover:scale-105" loading="lazy" unoptimized={product.coverImage.fileUrl.startsWith('/uploads/')} />
+                          ) : (
+                            <div className="absolute inset-0 bg-[linear-gradient(135deg,#151b24,#080a0d)]" />
+                          )}
+                          <div className="absolute inset-0 bg-gradient-to-t from-[#080a0d]/78 to-transparent" />
+                        </div>
+                        <div className="pt-4">
+                          <p className="font-mono text-[9px] uppercase tracking-[0.17em] text-[color:var(--gold-bright)]">{product.category.name}</p>
+                          <h3 className="mt-2 text-lg font-light text-white">{product.title}</h3>
+                          <p className="mt-2 max-h-10 overflow-hidden text-xs leading-5 text-zinc-400">{product.subtitle || product.brand?.name || 'Automation hardware'}</p>
+                        </div>
+                      </motion.article>
+                    </Link>
+                  </FloatingElement>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="flex min-h-[28rem] items-center justify-center border-y border-white/10 text-sm text-zinc-400">
+              Published products will appear in this floating collection.
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function CollaborationStory({ leadPartner }: { leadPartner?: Partner }) {
+  return (
+    <section id="collaboration" className="relative isolate overflow-hidden border-t border-white/10 px-5 py-24 text-center sm:px-8 lg:px-12 lg:py-32" data-cinematic-scene>
+      <div data-scene-stage className="relative mx-auto flex min-h-[100svh] max-w-5xl flex-col items-center justify-center">
+        <div data-scene-glow className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(185,145,82,0.18),transparent_54%)]" aria-hidden="true" />
+        <div data-scene-copy className="relative z-10 will-change-transform">
+          <span className="qls-eyebrow">Scene 11 / Engineering collaboration</span>
+          <h2 className="qls-section-title text-4xl sm:text-6xl lg:text-7xl">Intelligence starts in the wiring.</h2>
+        </div>
+        <div data-scene-panel className="relative z-10 mt-16 w-full max-w-3xl will-change-transform">
+          <div className="border border-white/10 bg-[#080a0d]/70 p-6 sm:p-10">
+            <p className="text-2xl font-light text-white sm:text-4xl">Quantum Living Solutions</p>
+            <div className="mx-auto my-8 flex w-px flex-col items-center" aria-hidden="true">
+              <span data-scene-line className="h-20 w-px origin-top bg-[color:var(--gold-bright)] shadow-[0_0_28px_rgba(185,145,82,0.72)]" />
+              <span className="mt-[-0.25rem] h-2.5 w-2.5 rounded-full border border-[color:var(--gold-bright)] bg-[#080a0d] shadow-[0_0_24px_rgba(185,145,82,0.72)]" />
+            </div>
+            <div className="mx-auto flex min-h-24 items-center justify-center">
+              {leadPartner?.logo ? (
+                <Image src={leadPartner.logo.fileUrl} alt={`${leadPartner.name} logo`} width={240} height={110} className="h-20 w-auto object-contain" unoptimized={leadPartner.logo.fileUrl.startsWith('/uploads/')} />
+              ) : (
+                <p className="text-2xl font-light text-white sm:text-4xl">RCS Electricals</p>
+              )}
+            </div>
+            <p className="mt-8 text-xl font-light text-white sm:text-3xl">Building Intelligent Homes Together</p>
+            {leadPartner && <a href={leadPartner.websiteUrl} target="_blank" rel="noopener noreferrer" className="qls-text-link mt-8 inline-flex">Meet {leadPartner.name}</a>}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FounderEditorial() {
+  return (
+    <section id="founder" className="relative isolate overflow-hidden border-t border-white/10 bg-[#0b0e12] px-5 py-24 sm:px-8 lg:px-12 lg:py-32" data-cinematic-scene>
+      <div data-scene-stage className="relative mx-auto grid min-h-[100svh] max-w-[96rem] grid-cols-1 items-center gap-12 lg:h-[100svh] lg:grid-cols-12 lg:gap-16">
+        <div data-scene-glow className="absolute inset-0 bg-[radial-gradient(ellipse_at_24%_44%,rgba(185,145,82,0.14),transparent_44%)]" aria-hidden="true" />
+        <div data-scene-copy className="relative z-10 will-change-transform lg:col-span-5">
+          <span className="qls-eyebrow">Scene 12 / Founder story</span>
+          <h2 className="qls-section-title text-4xl sm:text-6xl lg:text-7xl">The discipline behind the calm.</h2>
+          <blockquote className="mt-10 border-l border-[color:var(--gold-bright)] pl-6 text-2xl font-light leading-relaxed text-white sm:text-3xl">
+            &ldquo;{founder.quote}&rdquo;
+          </blockquote>
+          <Link href="/about" className="qls-text-link mt-9 inline-flex items-center gap-2">
+            Read our story <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </Link>
+        </div>
+        <div data-scene-panel className="relative z-10 grid gap-8 will-change-transform md:grid-cols-[0.78fr_1fr] lg:col-span-7">
+          <div className="relative aspect-[4/5] overflow-hidden border border-white/10 bg-zinc-900">
+            <Image src={founder.portraitUrl} alt={`${founder.name}, ${founder.designation}`} fill className="object-cover" unoptimized />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#080a0d]/38 to-transparent" />
+          </div>
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[color:var(--gold-bright)]">{founder.designation}</p>
+            <h3 className="mt-3 text-3xl font-light text-white sm:text-4xl">{founder.name}</h3>
+            <p className="mt-6 text-base leading-8 text-foreground/75">{founder.biography[0]}</p>
+            <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
+              {founder.experience.map((item) => (
+                <motion.div key={item.label} className="border border-white/10 bg-white/[0.03] p-4" whileHover={{ y: -3, borderColor: 'rgba(185,145,82,0.56)' }}>
+                  <p className="font-mono text-[9px] uppercase tracking-[0.15em] text-zinc-500">{item.label}</p>
+                  <p className="mt-2 text-sm leading-6 text-white">{item.value}</p>
+                </motion.div>
+              ))}
+            </div>
+            <ol className="mt-8 border-l border-white/10 pl-7">
+              {founder.timeline.map((item) => (
+                <li key={item.title} className="relative pb-7 last:pb-0">
+                  <span className="absolute -left-[2.04rem] top-1.5 h-2.5 w-2.5 rounded-full border border-[color:var(--gold-bright)] bg-[#0b0e12]" />
+                  <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--gold-bright)]">{item.year}</p>
+                  <h4 className="mt-2 text-lg text-white">{item.title}</h4>
+                  <p className="mt-2 text-sm leading-6 text-foreground/65">{item.description}</p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function DemoFinale({ onBook, onContact }: { onBook: () => void; onContact: () => void }) {
+  const { reducedMotion } = useMotionSystem();
+
+  return (
+    <section id="demo" className="relative isolate flex min-h-[100svh] items-center overflow-hidden border-t border-white/10 px-5 py-24 text-center sm:px-8 lg:px-12" data-cinematic-scene>
+      <div data-scene-stage className="relative mx-auto flex min-h-[calc(100svh-8rem)] max-w-5xl items-center justify-center">
+        <div data-scene-glow className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(185,145,82,0.22),transparent_54%)]" aria-hidden="true" />
+        {!reducedMotion && (
+          <div className="pointer-events-none absolute inset-0 hidden overflow-hidden lg:block" aria-hidden="true">
+            {Array.from({ length: 10 }).map((_, index) => (
+              <motion.span
+                key={index}
+                className="absolute h-1 w-1 rounded-full bg-[color:var(--gold-bright)]/55"
+                style={{ left: `${8 + index * 9}%`, top: `${20 + (index % 5) * 13}%` }}
+                animate={{ y: [0, -16, 0], opacity: [0.12, 0.7, 0.12] }}
+                transition={{ duration: 4.5 + index * 0.2, repeat: Infinity, ease: 'easeInOut' }}
+              />
+            ))}
+          </div>
+        )}
+        <div data-scene-copy className="relative z-10 border border-white/10 bg-[#080a0d]/78 p-7 shadow-[0_30px_90px_rgba(0,0,0,0.42)] will-change-transform sm:p-12">
+          <span className="qls-eyebrow">Scene 13 / Private demonstration</span>
+          <h2 className="qls-section-title text-4xl sm:text-6xl lg:text-7xl">Experience Smart Living</h2>
+          <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-foreground/75 sm:text-lg">
+            Book your private demonstration and walk through lighting, climate, security and entertainment scenes with our engineering team.
+          </p>
+          <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-foreground/58">{PRIVATE_SITE_VISIT.adjustmentNote}</p>
+          <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
+            <MagneticButton className="qls-button qls-button-primary" strength={0.18} onClick={onBook}>
+              Book Your Private Demonstration <Play className="h-3.5 w-3.5" aria-hidden="true" />
+            </MagneticButton>
+            <MagneticButton className="qls-button qls-button-secondary" strength={0.18} onClick={onContact}>
+              Talk to our team
+            </MagneticButton>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export function CinematicHomeJourney() {
   const journeyRef = useRef<HTMLDivElement>(null);
-  const { reducedMotion } = useMotionSystem();
+  const { reducedMotion: prefersReducedMotion } = useMotionSystem();
+  const hasHydrated = useHasHydrated();
+  const reducedMotion = hasHydrated && prefersReducedMotion;
   const router = useRouter();
   const heroMouseX = useSpring(useMotionValue(0), { stiffness: 70, damping: 24, mass: 0.8 });
   const heroMouseY = useSpring(useMotionValue(0), { stiffness: 70, damping: 24, mass: 0.8 });
@@ -226,6 +581,19 @@ export function CinematicHomeJourney() {
   const [products, setProducts] = useState<FeaturedProduct[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
   const [activeLivingControl, setActiveLivingControl] = useState('Lighting');
+  const [showLoader, setShowLoader] = useState(true);
+
+  useEffect(() => {
+    let timeout: number | undefined;
+    const frame = window.requestAnimationFrame(() => {
+      timeout = window.setTimeout(() => setShowLoader(false), reducedMotion ? 120 : 1050);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      if (timeout !== undefined) window.clearTimeout(timeout);
+    };
+  }, [reducedMotion]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -486,10 +854,76 @@ export function CinematicHomeJourney() {
     return () => media.revert();
   }, [reducedMotion]);
 
+  useEffect(() => {
+    const root = journeyRef.current;
+    if (!root || reducedMotion) return undefined;
+
+    const { gsap, ScrollTrigger } = registerGSAP();
+    const media = gsap.matchMedia();
+
+    media.add('(min-width: 1024px)', () => {
+      const timelines: gsap.core.Timeline[] = [];
+
+      root.querySelectorAll<HTMLElement>('[data-cinematic-scene]').forEach((scene) => {
+        const stage = scene.querySelector<HTMLElement>('[data-scene-stage]');
+        const mediaLayer = scene.querySelector<HTMLElement>('[data-scene-media]');
+        const copy = scene.querySelector<HTMLElement>('[data-scene-copy]');
+        const panel = scene.querySelector<HTMLElement>('[data-scene-panel]');
+        const glow = scene.querySelector<HTMLElement>('[data-scene-glow]');
+        const reflection = scene.querySelector<HTMLElement>('[data-scene-reflection]');
+        const lines = scene.querySelectorAll<HTMLElement>('[data-scene-line]');
+        const products = scene.querySelectorAll<HTMLElement>('[data-floating-product]');
+
+        if (!stage) return;
+
+        const timeline = gsap.timeline({
+          scrollTrigger: {
+            trigger: scene,
+            start: 'top top',
+            end: '+=185%',
+            scrub: 0.95,
+            pin: stage,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
+          },
+        });
+
+        if (mediaLayer) timeline.fromTo(mediaLayer, { scale: 1.03, yPercent: 3 }, { scale: 1.13, yPercent: -4, ease: 'none' }, 0);
+        if (glow) timeline.fromTo(glow, { autoAlpha: 0.35 }, { autoAlpha: 0.88, ease: 'none' }, 0.08);
+        if (copy) timeline.fromTo(copy, { autoAlpha: 0, yPercent: 9 }, { autoAlpha: 1, yPercent: 0, ease: 'none' }, 0.16);
+        if (panel) timeline.fromTo(panel, { autoAlpha: 0, yPercent: 7, scale: 0.985 }, { autoAlpha: 1, yPercent: 0, scale: 1, ease: 'none' }, 0.28);
+        if (reflection) timeline.to(reflection, { xPercent: 150, autoAlpha: 0.46, ease: 'none' }, 0.42);
+        if (lines.length) timeline.fromTo(lines, { scaleY: 0 }, { scaleY: 1, stagger: 0.08, ease: 'none' }, 0.34);
+        if (products.length) {
+          timeline.fromTo(products, { autoAlpha: 0, yPercent: 12, rotate: -4 }, { autoAlpha: 1, yPercent: 0, rotate: 0, stagger: 0.08, ease: 'none' }, 0.26);
+          timeline.to(products, { yPercent: -6, stagger: 0.04, ease: 'none' }, 0.62);
+        }
+
+        timelines.push(timeline);
+      });
+
+      const refreshFrame = window.requestAnimationFrame(() => ScrollTrigger.refresh());
+
+      return () => {
+        window.cancelAnimationFrame(refreshFrame);
+        timelines.forEach((timeline) => timeline.kill());
+      };
+    });
+
+    return () => media.revert();
+  }, [reducedMotion]);
+
   const leadPartner = partners.find((partner) => partner.name.toLowerCase().includes('rcs')) ?? partners[0];
 
   return (
-    <div ref={journeyRef} className="overflow-x-clip bg-[#080a0d] text-foreground">
+    <motion.div
+      ref={journeyRef}
+      className="overflow-x-clip bg-[#080a0d] text-foreground"
+      initial={reducedMotion ? false : { opacity: 0, filter: 'blur(10px)', scale: 1.01 }}
+      animate={reducedMotion ? undefined : { opacity: 1, filter: 'blur(0px)', scale: 1 }}
+      transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+    >
+      <AnimatePresence>{showLoader && <PremiumHomeLoader reducedMotion={reducedMotion} />}</AnimatePresence>
       <ScrollProgress />
       <CursorGlow size={280} className="z-20 opacity-20" />
 
@@ -506,6 +940,7 @@ export function CinematicHomeJourney() {
           <motion.div data-hero-image className="absolute -inset-[4%]" style={reducedMotion ? undefined : { x: heroMouseX, y: heroMouseY }}>
             <Image src="/images/cinematic/villa-arrival.png" alt="Quantum Living Solutions luxury smart villa at dusk" fill priority sizes="100vw" className="object-cover" />
           </motion.div>
+          <LuxuryVillaExperience />
           <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(4,6,9,0.9)_0%,rgba(4,6,9,0.48)_45%,rgba(4,6,9,0.14)_100%)]" />
           <motion.div aria-hidden="true" className="absolute inset-0 bg-[radial-gradient(ellipse_at_76%_40%,rgba(185,145,82,0.27),transparent_28%),radial-gradient(ellipse_at_20%_20%,rgba(61,98,133,0.22),transparent_36%)]" animate={reducedMotion ? undefined : { opacity: [0.54, 0.85, 0.54], scale: [1, 1.06, 1] }} transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }} />
           <div data-hero-overlay className="absolute inset-0 bg-gradient-to-t from-[#080a0d] via-transparent to-black/25" />
@@ -523,7 +958,7 @@ export function CinematicHomeJourney() {
           <div data-hero-content className="relative z-10 mx-auto grid w-full max-w-[96rem] grid-cols-1 gap-12 px-5 pb-14 pt-32 sm:px-8 lg:grid-cols-12 lg:items-end lg:px-12 lg:pb-20">
             <div className="max-w-5xl lg:col-span-9">
               <p className="mb-7 font-mono text-[10px] uppercase tracking-[0.2em] text-[color:var(--gold-bright)]">Private residence / Gorakhpur</p>
-              <h1 className="max-w-5xl text-5xl font-light leading-[0.94] text-white sm:text-7xl lg:text-[6.55rem]">
+              <h1 className="max-w-5xl text-5xl font-light leading-[1.02] text-white sm:text-7xl lg:text-[6.55rem]">
                 <HeroLine>Quantum Living</HeroLine>
                 <HeroLine delay={0.12}>Solutions</HeroLine>
               </h1>
@@ -540,6 +975,7 @@ export function CinematicHomeJourney() {
               <p className="font-mono text-[9px] uppercase tracking-[0.17em] text-[color:var(--gold-bright)]">Residence status</p>
               <div className="mt-3 flex items-end gap-3"><span className="h-2 w-2 rounded-full bg-[color:var(--gold-bright)] shadow-[0_0_14px_rgba(185,145,82,0.85)]" /><span className="text-sm text-white">Arrival scene ready</span></div>
             </FloatingElement>
+            <HolographicControlOverlay />
             <div className="flex items-center gap-4 font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-200 lg:col-span-12">
               <span className="h-px w-12 bg-[color:var(--gold-bright)]" />
               Scroll to enter <ArrowDown className="h-4 w-4 animate-bounce" aria-hidden="true" />
@@ -660,99 +1096,123 @@ export function CinematicHomeJourney() {
         </div>
       </section>
 
-      <VillaScene id="kitchen" act="Scene 05 / Kitchen" title="The kitchen comes alive quietly." copy="A single touch starts a familiar morning: task lighting rises, the coffee routine begins and the room holds the right level of ambient light." image={sceneImages.kitchen} imageAlt="Premium smart kitchen" >
-        <div className="flex items-center gap-4 border-l border-[color:var(--gold)] pl-4"><Coffee className="h-5 w-5 text-[color:var(--gold-bright)]" aria-hidden="true" /><p className="font-mono text-xs uppercase tracking-[0.15em] text-zinc-200">Morning routine / ready</p></div>
-      </VillaScene>
-
-      <VillaScene id="bedroom" act="Scene 06 / Bedroom" title="Night mode, without interruption." copy="Shades settle for privacy, the climate adjusts for rest and every layer of the suite becomes quieter as the day closes." image={sceneImages.bedroom} imageAlt="Calm bedroom with automated curtains" reverse>
-        <div className="flex items-center gap-4 border-l border-[color:var(--gold)] pl-4"><Moon className="h-5 w-5 text-[color:var(--gold-bright)]" aria-hidden="true" /><p className="font-mono text-xs uppercase tracking-[0.15em] text-zinc-200">Night scene / 22 degrees</p></div>
-      </VillaScene>
-
-      <VillaScene id="theater" act="Scene 07 / Home theater" title="The room becomes cinema." copy="The projector lowers, the screen becomes the focus and sound arrives from every direction with a single, considered command." image={sceneImages.theater} imageAlt="Private home theater with cinema lighting">
-        <div className="flex max-w-sm items-end gap-1.5 border-b border-white/10 pb-4" aria-label="Active speaker levels">
-          {[20, 46, 72, 54, 88, 64, 38, 58, 30, 70].map((height, index) => <motion.span key={index} className="w-full bg-[color:var(--gold-bright)]/75" animate={reducedMotion ? undefined : { height: [`${height * 0.55}px`, `${height}px`, `${height * 0.65}px`] }} transition={{ duration: 1.2 + index * 0.04, repeat: Infinity, repeatType: 'mirror' }} style={{ height: `${height * 0.55}px` }} />)}
-          <Volume2 className="ml-3 h-5 w-5 shrink-0 text-[color:var(--gold-bright)]" aria-hidden="true" />
-        </div>
-      </VillaScene>
-
-      <VillaScene id="security" act="Scene 08 / Security center" title="Protection stays in the background." copy="Fingerprint access, camera coverage and door status live in one clear security view, ready when you need to check in." image={sceneImages.security} imageAlt="Smart home security and surveillance system" reverse>
-        <div className="grid max-w-md grid-cols-2 gap-5 border-y border-white/10 py-5"><SceneInterface label="Perimeter" value="Secured" icon={ShieldCheck} /><SceneInterface label="Access" value="Verified" icon={Fingerprint} /></div>
-      </VillaScene>
-
-      <VillaScene id="energy" act="Scene 09 / Energy" title="Every watt has a place." copy="See solar production, household load and battery storage at a glance, then let practical schedules reduce unnecessary draw." image={sceneImages.energy} imageAlt="Energy management dashboard" >
-        <div className="grid max-w-md grid-cols-3 gap-4 border-y border-white/10 py-5"><SceneInterface label="Solar" value="4.8 kW" icon={SunMedium} /><SceneInterface label="Home" value="2.1 kW" icon={Zap} /><SceneInterface label="Storage" value="78%" icon={BatteryCharging} /></div>
-      </VillaScene>
-
-      <section id="products" className="relative overflow-hidden border-t border-white/10 bg-[#0b0e12] px-5 py-24 sm:px-8 lg:px-12 lg:py-32">
-        <div className="mx-auto max-w-[96rem]">
-          <SectionReveal className="max-w-3xl">
-            <span className="qls-eyebrow">Scene 10 / Product collection</span>
-            <h2 className="qls-section-title text-4xl sm:text-6xl">The objects behind the experience.</h2>
-            <p className="mt-6 max-w-2xl text-base leading-8 text-foreground/75 sm:text-lg">A selected collection of controllers, interfaces and sensors, presented as part of the architecture rather than an afterthought.</p>
-          </SectionReveal>
-          {products.length > 0 ? (
-            <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-              {products.map((product, index) => <ProductFloat key={product.id} product={product} index={index} />)}
+      <CinematicScene id="kitchen" act="Scene 05 / Smart kitchen" title="The morning routine begins before you ask." copy="The camera enters a warm kitchen as under-cabinet LEDs rise, the coffee machine wakes and the touch panel brings every daily scene within reach." image={sceneImages.kitchen} imageAlt="Luxury smart kitchen with warm task lighting" overlay="warm">
+        <div className="relative min-h-[32rem] overflow-hidden border border-white/10 bg-[#080a0d]/72 p-5 shadow-[0_30px_90px_rgba(0,0,0,0.42)]">
+          <div className="absolute inset-x-[8%] top-[28%] h-px bg-[color:var(--gold-bright)]/80 shadow-[0_0_30px_rgba(185,145,82,0.9)]" aria-hidden="true" />
+          <div data-scene-line className="absolute left-[18%] top-[34%] h-28 w-px origin-top bg-[color:var(--gold-bright)]/80 shadow-[0_0_22px_rgba(185,145,82,0.8)]" aria-hidden="true" />
+          <div className="absolute left-[10%] top-[52%] h-16 w-16 rounded-full border border-[color:var(--gold-bright)]/55 bg-[#080a0d]/80" aria-hidden="true">
+            <Coffee className="absolute left-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 text-[color:var(--gold-bright)]" />
+          </div>
+          {!reducedMotion && <motion.span className="absolute left-[17%] top-[42%] h-20 w-7 rounded-full bg-white/10 blur-md" animate={{ y: [18, -22, 18], opacity: [0, 0.55, 0] }} transition={{ duration: 3.4, repeat: Infinity, ease: 'easeInOut' }} aria-hidden="true" />}
+          <div className="ml-auto grid max-w-md grid-cols-1 gap-3 sm:grid-cols-3">
+            {kitchenRoutines.map((item) => <SceneMetric key={item.label} {...item} />)}
+          </div>
+          <div className="absolute bottom-5 right-5 w-72 border border-white/10 bg-black/35 p-4">
+            <p className="font-mono text-[9px] uppercase tracking-[0.17em] text-[color:var(--gold-bright)]">Touch panel</p>
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              {['Coffee', 'Island', 'Dining', 'Away'].map((label) => <span key={label} className="border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-white">{label}</span>)}
             </div>
-          ) : (
-            <div className="mt-14 border-y border-white/10 py-10 text-sm text-zinc-400">Our published collection is being prepared for viewing.</div>
-          )}
-          <Link href="/products" className="qls-button qls-button-primary mt-12">Explore product catalog <ArrowRight className="h-4 w-4" aria-hidden="true" /></Link>
-        </div>
-      </section>
-
-      <section id="collaboration" className="border-t border-white/10 px-5 py-24 sm:px-8 lg:px-12 lg:py-32">
-        <div className="mx-auto max-w-5xl text-center">
-          <SectionReveal>
-            <span className="qls-eyebrow">Scene 11 / Engineering collaboration</span>
-            <h2 className="qls-section-title text-4xl sm:text-6xl">Designed together, built to last.</h2>
-          </SectionReveal>
-          <div className="mx-auto mt-16 flex max-w-3xl flex-col items-center">
-            <p className="text-2xl font-light text-white sm:text-4xl">Quantum Living Solutions</p>
-            <motion.div className="my-6 h-16 w-px bg-[color:var(--gold-bright)]" initial={{ scaleY: 0 }} whileInView={{ scaleY: 1 }} viewport={{ once: true }} transition={{ duration: reducedMotion ? 0 : 0.85 }} />
-            {leadPartner?.logo ? <Image src={leadPartner.logo.fileUrl} alt={`${leadPartner.name} logo`} width={220} height={100} className="h-20 w-auto object-contain" unoptimized={leadPartner.logo.fileUrl.startsWith('/uploads/')} /> : <p className="text-2xl font-light text-white sm:text-4xl">RCS Electricals</p>}
-            <p className="mt-7 text-base leading-8 text-foreground/75 sm:text-lg">Building intelligent homes together.</p>
-            {leadPartner && <a href={leadPartner.websiteUrl} target="_blank" rel="noopener noreferrer" className="qls-text-link mt-7">Meet {leadPartner.name}</a>}
           </div>
         </div>
-      </section>
+      </CinematicScene>
 
-      <section id="founder" className="border-t border-white/10 bg-[#0b0e12] px-5 py-24 sm:px-8 lg:px-12 lg:py-32">
-        <div className="mx-auto grid max-w-[96rem] grid-cols-1 gap-12 lg:grid-cols-12 lg:items-start lg:gap-16">
-          <SectionReveal className="lg:col-span-5">
-            <span className="qls-eyebrow">Scene 12 / Founder story</span>
-            <h2 className="qls-section-title text-4xl sm:text-6xl">Engineering that feels natural.</h2>
-            <blockquote className="mt-10 border-l border-[color:var(--gold-bright)] pl-6 text-2xl font-light leading-relaxed text-white sm:text-3xl">&ldquo;{founder.quote}&rdquo;</blockquote>
-            <Link href="/about" className="qls-text-link mt-9 inline-flex items-center gap-2">Read our story <ArrowRight className="h-4 w-4" aria-hidden="true" /></Link>
-          </SectionReveal>
-          <div className="lg:col-span-7">
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-[0.78fr_1fr] md:items-end">
-              <div className="relative aspect-[4/5] overflow-hidden border border-white/10 bg-zinc-900"><Image src={founder.portraitUrl} alt={`${founder.name}, ${founder.designation}`} fill className="object-cover" unoptimized /></div>
-              <SectionReveal as="article" className="pb-2">
-                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[color:var(--gold-bright)]">{founder.designation}</p>
-                <h3 className="mt-3 text-3xl font-light text-white sm:text-4xl">{founder.name}</h3>
-                <p className="mt-6 text-base leading-8 text-foreground/75">{founder.biography[0]}</p>
-              </SectionReveal>
+      <CinematicScene id="bedroom" act="Scene 06 / Bedroom" title="Night mode arrives quietly." copy="Curtains close, climate drops into a comfortable range and warm ambient light turns the suite into a private retreat." image={sceneImages.bedroom} imageAlt="Luxury bedroom prepared for night mode" reverse overlay="night">
+        <div className="relative min-h-[32rem] overflow-hidden border border-white/10 bg-[#080a0d]/72 p-5 shadow-[0_30px_90px_rgba(0,0,0,0.42)]">
+          <div className="absolute inset-y-0 left-0 w-[30%] bg-[#121821]/92" aria-hidden="true" />
+          <div className="absolute inset-y-0 right-0 w-[30%] bg-[#121821]/92" aria-hidden="true" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(185,145,82,0.2),transparent_48%)]" />
+          <div className="relative ml-auto grid max-w-lg grid-cols-1 gap-3 sm:grid-cols-3">
+            {bedroomControls.map((item) => <SceneMetric key={item.label} {...item} />)}
+          </div>
+          <div className="absolute bottom-8 left-8 right-8 border-t border-white/10 pt-5">
+            <div className="flex items-end gap-4">
+              <p className="text-5xl font-light text-white">22</p>
+              <div className="pb-2">
+                <p className="font-mono text-[9px] uppercase tracking-[0.17em] text-[color:var(--gold-bright)]">degrees</p>
+                <p className="text-sm text-zinc-300">Sleep climate active</p>
+              </div>
             </div>
-            <ol className="mt-14 border-l border-white/10 pl-7">
-              {founder.timeline.map((item) => <li key={item.title} className="relative pb-10 last:pb-0"><span className="absolute -left-[2.04rem] top-1.5 h-2.5 w-2.5 rounded-full border border-[color:var(--gold-bright)] bg-[#0b0e12]" /><p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--gold-bright)]">{item.year}</p><h4 className="mt-2 text-lg text-white">{item.title}</h4><p className="mt-2 text-sm leading-6 text-foreground/65">{item.description}</p></li>)}
-            </ol>
           </div>
         </div>
-      </section>
+      </CinematicScene>
 
-      <section id="demo" className="relative isolate overflow-hidden border-t border-white/10 px-5 py-24 text-center sm:px-8 lg:px-12 lg:py-36">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(185,145,82,0.16),transparent_52%)]" />
-        <SectionReveal className="relative mx-auto max-w-3xl">
-          <span className="qls-eyebrow">Scene 13 / Private site visit</span>
-          <h2 className="qls-section-title text-4xl sm:text-6xl">Experience your future home in person.</h2>
-          <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-foreground/75 sm:text-lg">Plan a private site visit with our engineering team. {PRIVATE_SITE_VISIT.adjustmentNote}</p>
-          <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
-            <Link href="/book-demo" className="qls-button qls-button-primary">{PRIVATE_SITE_VISIT.label} · {PRIVATE_SITE_VISIT.priceLabel} <Play className="h-3.5 w-3.5" aria-hidden="true" /></Link>
-            <Link href="/contact" className="qls-button qls-button-secondary">Talk to our team</Link>
+      <CinematicScene id="theater" act="Scene 07 / Home theater" title="The room becomes cinema." copy="The projector descends, the screen lowers and sound arrives as a composed field around the room." image={sceneImages.theater} imageAlt="Private home theater with cinema lighting" overlay="cinema">
+        <div className="relative min-h-[32rem] overflow-hidden border border-white/10 bg-[#030507]/88 p-5 shadow-[0_30px_90px_rgba(0,0,0,0.5)]">
+          <div data-scene-line className="mx-auto h-20 w-px origin-top bg-[color:var(--gold-bright)] shadow-[0_0_24px_rgba(185,145,82,0.75)]" aria-hidden="true" />
+          <div className="mx-auto flex h-14 w-28 items-center justify-center border border-white/10 bg-black/60"><Projector className="h-6 w-6 text-[color:var(--gold-bright)]" aria-hidden="true" /></div>
+          <div className="mx-auto mt-8 aspect-[16/7] max-w-2xl border border-white/10 bg-black shadow-[0_0_70px_rgba(185,145,82,0.16)_inset]" />
+          <div className="mx-auto mt-8 flex max-w-lg items-end gap-1.5" aria-label="Dolby speaker visualization">
+            {[28, 46, 72, 58, 90, 64, 38, 74, 52, 84, 44, 62].map((height, index) => <motion.span key={index} className="w-full bg-[color:var(--gold-bright)]/75" animate={reducedMotion ? undefined : { height: [`${height * 0.45}px`, `${height}px`, `${height * 0.58}px`] }} transition={{ duration: 1.4 + index * 0.04, repeat: Infinity, repeatType: 'mirror' }} style={{ height: `${height * 0.45}px` }} />)}
+            <Volume2 className="ml-3 h-5 w-5 shrink-0 text-[color:var(--gold-bright)]" aria-hidden="true" />
           </div>
+        </div>
+      </CinematicScene>
+
+      <CinematicScene id="security" act="Scene 08 / Security center" title="Protection stays quiet until it matters." copy="Fingerprint access, rotating camera coverage and lock status live inside one clear security dashboard." image={sceneImages.security} imageAlt="Smart home security and surveillance system" reverse overlay="secure">
+        <div className="relative min-h-[32rem] overflow-hidden border border-white/10 bg-[#080a0d]/78 p-5 shadow-[0_30px_90px_rgba(0,0,0,0.42)]">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-[0.8fr_1fr]">
+            <div className="flex min-h-64 items-center justify-center border border-white/10 bg-black/32">
+              <motion.div className="relative h-36 w-36 rounded-full border border-[color:var(--gold-bright)]/60" animate={reducedMotion ? undefined : { rotate: 360 }} transition={{ duration: 12, repeat: Infinity, ease: 'linear' }}>
+                <Fingerprint className="absolute left-1/2 top-1/2 h-14 w-14 -translate-x-1/2 -translate-y-1/2 text-[color:var(--gold-bright)]" aria-hidden="true" />
+                <span className="absolute inset-x-8 top-7 h-px bg-[color:var(--gold-bright)] shadow-[0_0_18px_rgba(185,145,82,0.85)]" />
+              </motion.div>
+            </div>
+            <div className="grid grid-cols-1 gap-3">
+              {securitySignals.map((item) => <SceneMetric key={item.label} {...item} />)}
+              <div className="border border-white/10 bg-black/30 p-4">
+                <p className="font-mono text-[9px] uppercase tracking-[0.17em] text-[color:var(--gold-bright)]">AI security dashboard</p>
+                <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs text-zinc-300">
+                  <span className="border border-white/10 py-3">North gate</span>
+                  <span className="border border-white/10 py-3">Driveway</span>
+                  <span className="border border-white/10 py-3">Lobby</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </CinematicScene>
+
+      <CinematicScene id="energy" act="Scene 09 / Energy intelligence" title="Every watt has a visible path." copy="Solar production, battery charge, grid draw and household load resolve into a calm energy command view." image={sceneImages.energy} imageAlt="Energy management dashboard in a premium workspace" overlay="energy">
+        <div className="relative min-h-[32rem] overflow-hidden border border-white/10 bg-[#080a0d]/78 p-5 shadow-[0_30px_90px_rgba(0,0,0,0.42)]">
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {energyMetrics.map((metric) => (
+              <div key={metric.label} className="border border-white/10 bg-black/28 p-4">
+                <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-500">{metric.label}</p>
+                <p className="mt-3 text-2xl font-light text-white">{metric.value}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 flex h-56 items-end gap-3 border-b border-white/10 px-2" aria-label="Animated energy usage chart">
+            {[36, 58, 44, 76, 62, 92, 68, 82, 48, 64, 72, 54].map((height, index) => (
+              <motion.span key={index} className="w-full bg-gradient-to-t from-[color:var(--gold)] to-[color:var(--gold-bright)]" animate={reducedMotion ? undefined : { height: [`${height * 0.65}%`, `${height}%`, `${height * 0.78}%`] }} transition={{ duration: 2.2 + index * 0.05, repeat: Infinity, repeatType: 'mirror' }} style={{ height: `${height * 0.65}%` }} />
+            ))}
+          </div>
+          <div className="mt-6 flex items-center gap-3 text-sm text-zinc-300"><ChartNoAxesColumnIncreasing className="h-5 w-5 text-[color:var(--gold-bright)]" aria-hidden="true" /> Load shifting active / battery priority enabled</div>
+        </div>
+      </CinematicScene>
+
+      <LuxuryProductShowcase products={products} onExplore={() => router.push('/products')} onBook={() => router.push('/book-demo')} />
+
+      <CollaborationStory leadPartner={leadPartner} />
+
+      <FounderEditorial />
+
+      <DemoFinale onBook={() => router.push('/book-demo')} onContact={() => router.push('/contact')} />
+
+      <section className="border-t border-white/10 bg-[#080a0d] px-5 py-16 sm:px-8 lg:px-12">
+        <SectionReveal className="mx-auto flex max-w-[96rem] flex-col items-start justify-between gap-8 sm:flex-row sm:items-center">
+          <div className="max-w-2xl">
+            <span className="qls-eyebrow">Follow the studio</span>
+            <h2 className="mt-3 text-2xl font-light tracking-tight text-white sm:text-3xl">
+              See the next intelligent space take shape.
+            </h2>
+            <p className="mt-4 text-sm leading-7 text-foreground/65 sm:text-base">
+              Follow Quantum Living Solutions for project updates, automation ideas, and behind-the-scenes installation details.
+            </p>
+          </div>
+          <SocialLinks size="md" showLabels className="shrink-0" />
         </SectionReveal>
       </section>
-    </div>
+    </motion.div>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, useContext, useMemo, useSyncExternalStore } from 'react';
 import { MotionConfig, useReducedMotion } from 'framer-motion';
 
 interface MotionContextValue {
@@ -12,10 +12,14 @@ interface MotionContextValue {
 }
 
 const MotionContext = createContext<MotionContextValue | null>(null);
+const subscribeHydration = () => () => undefined;
+const getHydratedSnapshot = () => true;
+const getServerHydrationSnapshot = () => false;
 
 export function MotionProvider({ children }: { children: React.ReactNode }) {
   const prefersReducedMotion = useReducedMotion();
-  const reducedMotion = Boolean(prefersReducedMotion);
+  const hasHydrated = useSyncExternalStore(subscribeHydration, getHydratedSnapshot, getServerHydrationSnapshot);
+  const reducedMotion = hasHydrated && Boolean(prefersReducedMotion);
 
   const value = useMemo<MotionContextValue>(
     () => ({

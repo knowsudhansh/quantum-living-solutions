@@ -1,7 +1,8 @@
 'use client';
 
-import { motion, useReducedMotion, useSpring } from 'framer-motion';
+import { motion, useSpring } from 'framer-motion';
 import { useMouse } from '@/hooks/useMouse';
+import { useMotionSystem } from './MotionProvider';
 
 interface CursorGlowProps {
   className?: string;
@@ -9,7 +10,7 @@ interface CursorGlowProps {
 }
 
 export function CursorGlow({ className = '', size = 360 }: CursorGlowProps) {
-  const reducedMotion = useReducedMotion();
+  const { reducedMotion } = useMotionSystem();
   const { x, y } = useMouse(!reducedMotion);
   const springX = useSpring(x - size / 2, { stiffness: 120, damping: 30, mass: 0.4 });
   const springY = useSpring(y - size / 2, { stiffness: 120, damping: 30, mass: 0.4 });

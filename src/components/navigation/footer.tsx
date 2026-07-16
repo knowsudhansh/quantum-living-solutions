@@ -3,6 +3,7 @@ import Link from 'next/link';
 import NewsletterFooterForm from './newsletter-footer-form';
 import { PartnerCollaborations } from '../partners/partner-collaborations';
 import { BUSINESS_CONTACT, PRIVATE_SITE_VISIT } from '../../lib/config/business';
+import { SocialLinks } from '../social/social-links';
 
 
 export default function Footer() {
@@ -145,6 +146,13 @@ export default function Footer() {
                 </Link>
               </li>
             </ul>
+          </div>
+
+          <div>
+            <h2 className="text-sm font-semibold tracking-wider text-[HSL(40,30%,95%)] uppercase mb-4">
+              Follow Us
+            </h2>
+            <SocialLinks size="sm" />
           </div>
 
           <div>

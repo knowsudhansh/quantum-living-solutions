@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useRef } from 'react';
-import { motion, useMotionValue, useReducedMotion, useSpring, type HTMLMotionProps } from 'framer-motion';
+import { motion, useMotionValue, useSpring, type HTMLMotionProps } from 'framer-motion';
+import { useMotionSystem } from './MotionProvider';
 
 type MagneticButtonProps = Omit<HTMLMotionProps<'button'>, 'style' | 'children'> & {
   children: React.ReactNode;
@@ -17,7 +18,7 @@ export function MagneticButton({
   ...props
 }: MagneticButtonProps) {
   const ref = useRef<HTMLButtonElement | null>(null);
-  const reducedMotion = useReducedMotion();
+  const { reducedMotion } = useMotionSystem();
   const x = useSpring(useMotionValue(0), { stiffness: 220, damping: 18, mass: 0.6 });
   const y = useSpring(useMotionValue(0), { stiffness: 220, damping: 18, mass: 0.6 });
 

@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import React, { useRef, useEffect, useState } from 'react';
 
 interface ScrollScrubVideoProps {
@@ -77,11 +78,13 @@ export function ScrollScrubVideo({
         {actImages.map((src, idx) => {
           const isActive = idx === activeAct;
           return (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               key={idx}
               src={src}
               alt={`Act transition frame ${idx + 1}`}
+              fill
+              sizes="100vw"
+              loading="lazy"
               className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
                 isActive ? 'opacity-40' : 'opacity-0'
               }`}

@@ -6,7 +6,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import * as THREE from 'three';
 import { useMotionSystem } from '@/components/animation/MotionProvider';
-import { registerGSAP } from '@/lib/gsap';
 import { isWebGLAvailable } from '@/lib/utils/capability';
 
 type WebGLGateProps = {
@@ -17,11 +16,6 @@ type WebGLGateProps = {
 
 type VillaSceneProps = {
   quality: 'standard' | 'low';
-};
-
-type ProductPedestalSceneProps = {
-  quality: 'standard' | 'low';
-  productCount: number;
 };
 
 function useWebGLGate() {
@@ -55,89 +49,76 @@ function useWebGLGate() {
 
 function WebGLGate({ children, className = '', label }: WebGLGateProps) {
   const quality = useWebGLGate();
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const [active, setActive] = useState(false);
+  const [mountedQuality, setMountedQuality] = useState<'standard' | 'low' | null>(null);
 
   useEffect(() => {
-    if (quality === 'off') {
-      const frame = window.requestAnimationFrame(() => setActive(false));
+    if (mountedQuality === null && quality !== 'off') {
+      const frame = window.requestAnimationFrame(() => setMountedQuality(quality));
       return () => window.cancelAnimationFrame(frame);
     }
 
-    const node = containerRef.current;
-    if (!node || !('IntersectionObserver' in window)) {
-      const frame = window.requestAnimationFrame(() => setActive(true));
-      return () => window.cancelAnimationFrame(frame);
-    }
+    return undefined;
+  }, [mountedQuality, quality]);
 
-    const observer = new IntersectionObserver(
-      ([entry]) => setActive(Boolean(entry?.isIntersecting)),
-      { root: null, rootMargin: '35% 0px', threshold: 0.01 },
-    );
-
-    const handleVisibility = () => {
-      if (document.visibilityState === 'hidden') {
-        setActive(false);
-        return;
-      }
-
-      const rect = node.getBoundingClientRect();
-      setActive(rect.bottom > -window.innerHeight * 0.35 && rect.top < window.innerHeight * 1.35);
-    };
-
-    observer.observe(node);
-    document.addEventListener('visibilitychange', handleVisibility);
-
-    return () => {
-      observer.disconnect();
-      document.removeEventListener('visibilitychange', handleVisibility);
-    };
-  }, [quality]);
-
-  if (quality === 'off') return null;
+  if (mountedQuality === null) return null;
 
   return (
-    <div ref={containerRef} className={className} aria-hidden="true" data-webgl-layer={label} data-quality={quality} data-active={active}>
-      {active ? children(quality) : null}
+    <div className={className} aria-hidden="true" data-webgl-layer={label} data-quality={mountedQuality} data-active="true">
+      {children(mountedQuality)}
     </div>
   );
 }
 
 function ScrollCameraRig({ quality }: VillaSceneProps) {
   const { camera } = useThree();
-  const scrollProgress = useRef(0);
   const pointer = useRef({ x: 0, y: 0 });
+  const scrollable = useRef(1);
   const target = useMemo(() => new THREE.Vector3(), []);
   const lookAt = useMemo(() => new THREE.Vector3(0, 0.55, 0), []);
   const fog = useRef<THREE.FogExp2>(null);
   const light = useRef<THREE.PointLight>(null);
 
   useEffect(() => {
-    const { ScrollTrigger } = registerGSAP();
-    const trigger = ScrollTrigger.create({
-      trigger: document.body,
-      start: 'top top',
-      end: 'bottom bottom',
-      scrub: 1,
-      onUpdate: (self) => {
-        scrollProgress.current = self.progress;
-      },
-    });
+    let resizeFrame = 0;
+
+    const updateScrollable = () => {
+      scrollable.current = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    };
+
+    const scheduleScrollableUpdate = () => {
+      if (resizeFrame) window.cancelAnimationFrame(resizeFrame);
+      resizeFrame = window.requestAnimationFrame(() => {
+        resizeFrame = 0;
+        updateScrollable();
+      });
+    };
 
     const handlePointer = (event: PointerEvent) => {
       pointer.current.x = (event.clientX / window.innerWidth - 0.5) * 2;
       pointer.current.y = (event.clientY / window.innerHeight - 0.5) * 2;
     };
 
+    scheduleScrollableUpdate();
     window.addEventListener('pointermove', handlePointer, { passive: true });
+    window.addEventListener('resize', scheduleScrollableUpdate, { passive: true });
+    window.addEventListener('orientationchange', scheduleScrollableUpdate, { passive: true });
+    window.addEventListener('pageshow', scheduleScrollableUpdate, { passive: true });
+    document.addEventListener('visibilitychange', scheduleScrollableUpdate);
+    window.visualViewport?.addEventListener('resize', scheduleScrollableUpdate, { passive: true });
+
     return () => {
+      if (resizeFrame) window.cancelAnimationFrame(resizeFrame);
       window.removeEventListener('pointermove', handlePointer);
-      trigger.kill();
+      window.removeEventListener('resize', scheduleScrollableUpdate);
+      window.removeEventListener('orientationchange', scheduleScrollableUpdate);
+      window.removeEventListener('pageshow', scheduleScrollableUpdate);
+      document.removeEventListener('visibilitychange', scheduleScrollableUpdate);
+      window.visualViewport?.removeEventListener('resize', scheduleScrollableUpdate);
     };
   }, []);
 
   useFrame((state, delta) => {
-    const progress = scrollProgress.current;
+    const progress = Math.min(1, Math.max(0, window.scrollY / scrollable.current));
     const timeOfDay = Math.min(1, Math.max(0, progress * 1.35));
     const warmth = THREE.MathUtils.lerp(0.82, 1.55, timeOfDay);
     const dusk = Math.sin(timeOfDay * Math.PI);
@@ -236,7 +217,6 @@ function HolographicControls() {
 function VillaScene({ quality }: VillaSceneProps) {
   return (
     <>
-      <color attach="background" args={['#080a0d']} />
       <ambientLight intensity={0.34} color="#d9c4a1" />
       <spotLight position={[-3.8, 4.5, 3.2]} angle={0.45} penumbra={0.85} intensity={2.2} color="#d9aa65" castShadow={quality === 'standard'} />
       <ScrollCameraRig quality={quality} />
@@ -248,56 +228,12 @@ function VillaScene({ quality }: VillaSceneProps) {
   );
 }
 
-function ProductPedestalScene({ quality, productCount }: ProductPedestalSceneProps) {
-  const group = useRef<THREE.Group>(null);
-  const count = Math.max(1, Math.min(productCount, 4));
-
-  useFrame((state) => {
-    if (!group.current) return;
-    group.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.22) * 0.08;
-  });
-
-  return (
-    <>
-      <ambientLight intensity={0.35} color="#f2d9ad" />
-      <spotLight position={[0, 5, 2.8]} angle={0.42} penumbra={0.9} intensity={2.8} color="#d2a25a" />
-      <group ref={group} position={[0, -0.85, 0]}>
-        {Array.from({ length: count }).map((_, index) => {
-          const angle = (index / count) * Math.PI * 2;
-          const x = Math.cos(angle) * 1.8;
-          const z = Math.sin(angle) * 0.75;
-          return (
-            <Float key={index} speed={0.8 + index * 0.1} rotationIntensity={0.12} floatIntensity={0.18}>
-              <group position={[x, 0, z]} rotation={[0, -angle * 0.35, 0]}>
-                <mesh position={[0, 0.08, 0]}>
-                  <cylinderGeometry args={[0.42, 0.54, 0.16, 48]} />
-                  <MeshReflectorMaterial blur={[220, 70]} mixBlur={0.7} mixStrength={0.35} color="#0d1016" metalness={0.52} roughness={0.22} />
-                </mesh>
-                <mesh position={[0, 0.46, 0]} castShadow>
-                  <boxGeometry args={[0.44, 0.62, 0.08]} />
-                  <meshStandardMaterial color="#10151c" metalness={0.45} roughness={0.2} emissive="#b99152" emissiveIntensity={0.12} />
-                </mesh>
-                <mesh position={[0, 0.46, 0.046]}>
-                  <boxGeometry args={[0.34, 0.46, 0.012]} />
-                  <meshStandardMaterial color="#d8c7a3" emissive="#d4a556" emissiveIntensity={0.26} transparent opacity={0.42} />
-                </mesh>
-              </group>
-            </Float>
-          );
-        })}
-      </group>
-      {quality === 'standard' && <Sparkles count={28} speed={0.14} size={1} scale={[4.5, 1.8, 2.5]} position={[0, 0.3, 0]} color="#d5a85f" opacity={0.22} />}
-      <ContactShadows position={[0, -0.88, 0]} opacity={0.32} blur={2.4} scale={5.5} far={3} />
-    </>
-  );
-}
-
 export function LuxuryVillaExperience() {
   return (
     <WebGLGate className="pointer-events-none absolute inset-0 z-[1] hidden opacity-70 mix-blend-screen lg:block" label="luxury-villa-hero">
       {(quality) => (
         <Canvas
-          shadows={quality === 'standard'}
+          shadows={quality === 'standard' ? { type: THREE.PCFShadowMap } : false}
           dpr={quality === 'standard' ? [1, 1.45] : [1, 1]}
           camera={{ position: [3.8, 2.2, 5.8], fov: 42, near: 0.1, far: 60 }}
           gl={{ alpha: true, antialias: quality === 'standard', powerPreference: 'high-performance' }}
@@ -305,30 +241,10 @@ export function LuxuryVillaExperience() {
             gl.outputColorSpace = THREE.SRGBColorSpace;
             gl.toneMapping = THREE.ACESFilmicToneMapping;
             gl.toneMappingExposure = 1.05;
+            gl.setClearColor(0x000000, 0);
           }}
         >
           <VillaScene quality={quality} />
-        </Canvas>
-      )}
-    </WebGLGate>
-  );
-}
-
-export function ProductPedestalExperience({ productCount }: { productCount: number }) {
-  return (
-    <WebGLGate className="pointer-events-none absolute inset-0 hidden opacity-80 lg:block" label="product-pedestals">
-      {(quality) => (
-        <Canvas
-          shadows={quality === 'standard'}
-          dpr={quality === 'standard' ? [1, 1.35] : [1, 1]}
-          camera={{ position: [0, 1.65, 4.8], fov: 42, near: 0.1, far: 40 }}
-          gl={{ alpha: true, antialias: quality === 'standard', powerPreference: 'high-performance' }}
-          onCreated={({ gl }) => {
-            gl.outputColorSpace = THREE.SRGBColorSpace;
-            gl.toneMapping = THREE.ACESFilmicToneMapping;
-          }}
-        >
-          <ProductPedestalScene quality={quality} productCount={productCount} />
         </Canvas>
       )}
     </WebGLGate>

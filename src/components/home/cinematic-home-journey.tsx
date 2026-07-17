@@ -2,10 +2,8 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import dynamic from 'next/dynamic';
-import { AnimatePresence, motion, useMotionValue, useSpring } from 'framer-motion';
+import { motion, useMotionValue, useSpring } from 'framer-motion';
 import {
-  ArrowDown,
   ArrowRight,
   Cctv,
   ChartNoAxesColumnIncreasing,
@@ -24,30 +22,14 @@ import {
   Zap,
 } from 'lucide-react';
 import { memo, useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import { CursorGlow } from '@/components/animation/CursorGlow';
 import { FloatingElement } from '@/components/animation/FloatingElement';
 import { MagneticButton } from '@/components/animation/MagneticButton';
-import { Parallax } from '@/components/animation/Parallax';
-import { ScrollProgress } from '@/components/animation/ScrollProgress';
-import { SectionReveal } from '@/components/animation/SectionReveal';
 import { useMotionSystem } from '@/components/animation/MotionProvider';
+import { SectionReveal } from '@/components/animation/SectionReveal';
 import { SocialLinks } from '@/components/social/social-links';
-import { useGSAP } from '@/hooks/useGSAP';
 import { founder } from '@/lib/config/founder';
 import { PRIVATE_SITE_VISIT } from '@/lib/config/business';
-import { registerGSAP } from '@/lib/gsap';
-import type gsap from 'gsap';
 import { useRouter } from 'next/navigation';
-
-const LuxuryVillaExperience = dynamic(
-  () => import('./luxury-villa-experience').then((module) => module.LuxuryVillaExperience),
-  { ssr: false, loading: () => null },
-);
-
-const ProductPedestalExperience = dynamic(
-  () => import('./luxury-villa-experience').then((module) => module.ProductPedestalExperience),
-  { ssr: false, loading: () => null },
-);
 
 interface FeaturedProduct {
   id: string;
@@ -144,53 +126,18 @@ function useHasHydrated() {
   return useSyncExternalStore(subscribeHydration, getHydratedSnapshot, getServerHydrationSnapshot);
 }
 
-function useDesktopWebGLReady(reducedMotion: boolean) {
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return undefined;
-
-    if (reducedMotion) {
-      const frame = window.requestAnimationFrame(() => setReady(false));
-      return () => window.cancelAnimationFrame(frame);
-    }
-
-    const media = window.matchMedia('(min-width: 1200px)');
-    const update = () => setReady(media.matches);
-
-    const frame = window.requestAnimationFrame(update);
-    media.addEventListener('change', update);
-
-    return () => {
-      window.cancelAnimationFrame(frame);
-      media.removeEventListener('change', update);
-    };
-  }, [reducedMotion]);
-
-  return ready;
-}
-
-const smartHomeControls = [
-  { label: 'Lighting', icon: SunMedium },
-  { label: 'Curtains', icon: DoorOpen },
-  { label: 'Climate', icon: Thermometer },
-  { label: 'Security', icon: ShieldCheck },
-  { label: 'Entertainment', icon: Volume2 },
-  { label: 'Energy', icon: Zap },
-];
-
 function VillaScene({ id, act, title, copy, image, imageAlt, children, reverse = false }: VillaSceneProps) {
   return (
     <section id={id} className="villa-scene relative isolate overflow-hidden border-t border-white/10" data-villa-scene>
       <div className="mx-auto grid min-h-[46rem] max-w-[96rem] grid-cols-1 items-center gap-10 px-5 py-20 sm:px-8 lg:min-h-[54rem] lg:grid-cols-12 lg:gap-14 lg:px-12">
-        <div className={`relative z-10 max-w-xl lg:col-span-5 ${reverse ? 'lg:col-start-8 lg:row-start-1' : ''}`}>
+        <div data-scene-copy className={`relative z-10 max-w-xl lg:col-span-5 ${reverse ? 'lg:col-start-8 lg:row-start-1' : ''}`}>
           <span className="qls-eyebrow">{act}</span>
           <h2 className="qls-section-title text-4xl sm:text-5xl lg:text-6xl">{title}</h2>
           <p className="mt-6 max-w-lg text-base leading-8 text-foreground/78 sm:text-lg">{copy}</p>
           <div className="mt-8">{children}</div>
         </div>
 
-        <div className={`relative min-h-[22rem] overflow-hidden border border-white/10 bg-zinc-950 sm:min-h-[30rem] lg:col-span-7 lg:min-h-[37rem] ${reverse ? 'lg:col-start-1 lg:row-start-1' : ''}`}>
+        <div data-scene-panel className={`relative min-h-[22rem] overflow-hidden border border-white/10 bg-zinc-950 sm:min-h-[30rem] lg:col-span-7 lg:min-h-[37rem] ${reverse ? 'lg:col-start-1 lg:row-start-1' : ''}`}>
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_65%_30%,rgba(185,145,82,0.18),transparent_38%)]" />
           <Image
             src={image}
@@ -201,7 +148,7 @@ function VillaScene({ id, act, title, copy, image, imageAlt, children, reverse =
             loading="lazy"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#080a0d] via-transparent to-black/25" />
-          <div className="absolute inset-x-0 bottom-0 border-t border-white/10 bg-black/20 px-5 py-4 font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-300 backdrop-blur-sm">
+          <div className="absolute inset-x-0 bottom-0 border-t border-white/10 bg-black/45 px-5 py-4 font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-300">
             Quantum scene control / {act.replace('Scene ', '')}
           </div>
         </div>
@@ -244,7 +191,7 @@ function CinematicScene({
 
   return (
     <section id={id} className="relative isolate overflow-hidden border-t border-white/10" data-cinematic-scene>
-      <div data-scene-stage className="relative min-h-[100svh] overflow-hidden px-5 py-16 sm:px-8 lg:h-[100svh] lg:px-12 lg:py-20">
+      <div data-scene-stage className="qls-cinematic-stage relative overflow-hidden px-5 py-16 sm:px-8 lg:px-12 lg:py-20">
         <div data-scene-media className="absolute -inset-[4%] will-change-transform">
           <Image src={image} alt={imageAlt} fill sizes="100vw" className="object-cover" loading="lazy" />
         </div>
@@ -253,7 +200,7 @@ function CinematicScene({
         <div data-scene-reflection className="pointer-events-none absolute -left-[46%] top-0 h-full w-[42%] -skew-x-12 bg-white/10 opacity-0 will-change-transform" aria-hidden="true" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#080a0d] via-transparent to-black/30" />
         <div
-          className={`relative z-10 mx-auto grid min-h-[calc(100svh-8rem)] max-w-[96rem] grid-cols-1 items-end gap-10 lg:grid-cols-12 lg:items-center lg:gap-14 ${
+          className={`qls-cinematic-inner relative z-10 mx-auto grid max-w-[96rem] grid-cols-1 items-end gap-10 lg:grid-cols-12 lg:items-center lg:gap-14 ${
             reverse ? 'lg:[&>*:first-child]:col-start-8 lg:[&>*:last-child]:col-start-1' : ''
           }`}
         >
@@ -285,23 +232,6 @@ const SceneMetric = memo(function SceneMetric({ label, value, icon: Icon }: { la
   );
 });
 
-function HeroLine({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
-  const { reducedMotion: prefersReducedMotion } = useMotionSystem();
-  const hasHydrated = useHasHydrated();
-  const reducedMotion = hasHydrated && prefersReducedMotion;
-
-  return (
-    <span className="block overflow-hidden pb-[0.09em] pt-[0.02em]">
-      <span
-        className={reducedMotion ? 'block leading-[1.04]' : 'hero-line-reveal block leading-[1.04]'}
-        style={reducedMotion ? undefined : { animationDelay: `${delay}s` }}
-      >
-        {children}
-      </span>
-    </span>
-  );
-}
-
 function LivingControlButton({
   label,
   icon: Icon,
@@ -332,85 +262,20 @@ function LivingControlButton({
   );
 }
 
-function PremiumHomeLoader({ reducedMotion }: { reducedMotion: boolean }) {
-  return (
-    <motion.div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-[#080a0d]"
-      role="status"
-      aria-live="polite"
-      initial={{ opacity: 1 }}
-      exit={reducedMotion ? { opacity: 0 } : { opacity: 0, filter: 'blur(12px)', scale: 1.02 }}
-      transition={{ duration: reducedMotion ? 0.18 : 0.75, ease: [0.16, 1, 0.3, 1] }}
-    >
-      <div className="w-full max-w-xs px-6 text-center">
-        <motion.div
-          className="mx-auto flex h-16 w-16 items-center justify-center overflow-hidden border border-white/10 bg-white/[0.03]"
-          animate={reducedMotion ? undefined : { opacity: [0.72, 1, 0.72] }}
-          transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
-        >
-          <Image src="/brand/qls-logo.jpg" alt="" width={48} height={48} className="h-12 w-12 object-cover" loading="eager" />
-        </motion.div>
-        <p className="mt-6 text-lg font-light tracking-wide text-white">Quantum Living Solutions</p>
-        <div className="mt-5 h-px overflow-hidden bg-white/10" aria-hidden="true">
-          <motion.span
-            className="block h-full bg-[color:var(--gold-bright)]"
-            initial={{ x: '-100%' }}
-            animate={{ x: '0%' }}
-            transition={{ duration: reducedMotion ? 0.12 : 1, ease: [0.16, 1, 0.3, 1] }}
-          />
-        </div>
-        <span className="sr-only">Loading the interactive villa experience.</span>
-      </div>
-    </motion.div>
-  );
-}
-
-function HolographicControlOverlay() {
-  const { reducedMotion: prefersReducedMotion } = useMotionSystem();
-  const hasHydrated = useHasHydrated();
-  const reducedMotion = hasHydrated && prefersReducedMotion;
-
-  return (
-    <div className="hidden justify-self-end lg:col-span-3 lg:block">
-      <div className="relative overflow-hidden border border-white/15 bg-[#080a0d]/48 p-4 shadow-[0_24px_70px_rgba(0,0,0,0.35)] backdrop-blur-xl">
-        <div className="pointer-events-none absolute -left-1/3 top-0 h-full w-1/3 -skew-x-12 bg-white/10" aria-hidden="true" />
-        <p className="font-mono text-[9px] uppercase tracking-[0.17em] text-[color:var(--gold-bright)]">Interactive home control</p>
-        <div className="mt-4 grid grid-cols-2 gap-2">
-          {smartHomeControls.map(({ label, icon: Icon }) => (
-            <motion.button
-              key={label}
-              type="button"
-              className="group flex min-h-14 items-center gap-2 border border-white/10 bg-white/[0.035] px-3 text-left text-zinc-300 transition-colors hover:border-[color:var(--gold-bright)]/60 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--gold-bright)]"
-              whileHover={reducedMotion ? undefined : { y: -2 }}
-              whileTap={reducedMotion ? undefined : { scale: 0.98 }}
-              aria-label={`${label} smart home control preview`}
-            >
-              <Icon className="h-4 w-4 shrink-0 text-[color:var(--gold-bright)] transition-transform group-hover:scale-110" aria-hidden="true" />
-              <span className="font-mono text-[9px] uppercase tracking-[0.12em]">{label}</span>
-            </motion.button>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 const LuxuryProductShowcase = memo(function LuxuryProductShowcase({
   products,
   onExplore,
   onBook,
-  enableWebGL,
 }: {
   products: FeaturedProduct[];
   onExplore: () => void;
   onBook: () => void;
-  enableWebGL: boolean;
 }) {
   const visibleProducts = products.slice(0, 4);
 
   return (
     <section id="products" className="relative isolate overflow-hidden border-t border-white/10 bg-[#080a0d] px-5 py-24 sm:px-8 lg:px-12 lg:py-32" data-cinematic-scene>
-      <div data-scene-stage className="relative mx-auto grid min-h-[100svh] max-w-[96rem] grid-cols-1 items-center gap-12 lg:h-[100svh] lg:grid-cols-12 lg:gap-16">
+      <div data-scene-stage className="qls-cinematic-stage relative mx-auto grid max-w-[96rem] grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-16">
         <div data-scene-glow className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_70%_40%,rgba(185,145,82,0.18),transparent_46%)]" aria-hidden="true" />
         <div data-scene-copy className="relative z-10 max-w-2xl will-change-transform lg:col-span-4">
           <span className="qls-eyebrow">Scene 10 / Product collection</span>
@@ -429,7 +294,6 @@ const LuxuryProductShowcase = memo(function LuxuryProductShowcase({
         </div>
 
         <div data-scene-panel className="relative z-10 min-h-[34rem] lg:col-span-8 lg:min-h-[42rem]">
-          {enableWebGL && <ProductPedestalExperience productCount={visibleProducts.length || 4} />}
           <div className="absolute inset-x-[8%] bottom-[10%] h-px bg-gradient-to-r from-transparent via-[color:var(--gold-bright)]/70 to-transparent shadow-[0_0_34px_rgba(185,145,82,0.45)]" />
           {visibleProducts.length > 0 ? (
             <div className="relative h-full min-h-[34rem]">
@@ -483,7 +347,7 @@ const LuxuryProductShowcase = memo(function LuxuryProductShowcase({
 const CollaborationStory = memo(function CollaborationStory({ leadPartner }: { leadPartner?: Partner }) {
   return (
     <section id="collaboration" className="relative isolate overflow-hidden border-t border-white/10 px-5 py-24 text-center sm:px-8 lg:px-12 lg:py-32" data-cinematic-scene>
-      <div data-scene-stage className="relative mx-auto flex min-h-[100svh] max-w-5xl flex-col items-center justify-center">
+      <div data-scene-stage className="qls-cinematic-stage relative mx-auto flex max-w-5xl flex-col items-center justify-center">
         <div data-scene-glow className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(185,145,82,0.18),transparent_54%)]" aria-hidden="true" />
         <div data-scene-copy className="relative z-10 will-change-transform">
           <span className="qls-eyebrow">Scene 11 / Engineering collaboration</span>
@@ -515,7 +379,7 @@ const CollaborationStory = memo(function CollaborationStory({ leadPartner }: { l
 const FounderEditorial = memo(function FounderEditorial() {
   return (
     <section id="founder" className="relative isolate overflow-hidden border-t border-white/10 bg-[#0b0e12] px-5 py-24 sm:px-8 lg:px-12 lg:py-32" data-cinematic-scene>
-      <div data-scene-stage className="relative mx-auto grid min-h-[100svh] max-w-[96rem] grid-cols-1 items-center gap-12 lg:h-[100svh] lg:grid-cols-12 lg:gap-16">
+      <div data-scene-stage className="qls-cinematic-stage relative mx-auto grid max-w-[96rem] grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-16">
         <div data-scene-glow className="absolute inset-0 bg-[radial-gradient(ellipse_at_24%_44%,rgba(185,145,82,0.14),transparent_44%)]" aria-hidden="true" />
         <div data-scene-copy className="relative z-10 will-change-transform lg:col-span-5">
           <span className="qls-eyebrow">Scene 12 / Founder story</span>
@@ -573,8 +437,8 @@ const DemoFinale = memo(function DemoFinale({ onBook, onContact }: { onBook: () 
   const { reducedMotion } = useMotionSystem();
 
   return (
-    <section id="demo" className="relative isolate flex min-h-[100svh] items-center overflow-hidden border-t border-white/10 px-5 py-24 text-center sm:px-8 lg:px-12" data-cinematic-scene>
-      <div data-scene-stage className="relative mx-auto flex min-h-[calc(100svh-8rem)] max-w-5xl items-center justify-center">
+    <section id="demo" className="qls-cinematic-stage relative isolate flex items-center overflow-hidden border-t border-white/10 px-5 py-24 text-center sm:px-8 lg:px-12" data-cinematic-scene>
+      <div data-scene-stage className="qls-cinematic-inner relative mx-auto flex max-w-5xl items-center justify-center">
         <div data-scene-glow className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(185,145,82,0.22),transparent_54%)]" aria-hidden="true" />
         {!reducedMotion && (
           <div className="pointer-events-none absolute inset-0 hidden overflow-hidden lg:block" aria-hidden="true">
@@ -616,27 +480,26 @@ export function CinematicHomeJourney() {
   const hasHydrated = useHasHydrated();
   const reducedMotion = hasHydrated && prefersReducedMotion;
   const router = useRouter();
-  const heroMouseX = useSpring(useMotionValue(0), { stiffness: 70, damping: 24, mass: 0.8 });
-  const heroMouseY = useSpring(useMotionValue(0), { stiffness: 70, damping: 24, mass: 0.8 });
   const livingMouseX = useSpring(useMotionValue(0), { stiffness: 62, damping: 22, mass: 0.85 });
   const livingMouseY = useSpring(useMotionValue(0), { stiffness: 62, damping: 22, mass: 0.85 });
-  const enableWebGL = useDesktopWebGLReady(reducedMotion);
+  const livingBoundsRef = useRef<{ left: number; top: number; width: number; height: number } | null>(null);
   const [products, setProducts] = useState<FeaturedProduct[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
   const [activeLivingControl, setActiveLivingControl] = useState('Lighting');
-  const [showLoader, setShowLoader] = useState(true);
 
   useEffect(() => {
-    let timeout: number | undefined;
-    const frame = window.requestAnimationFrame(() => {
-      timeout = window.setTimeout(() => setShowLoader(false), reducedMotion ? 120 : 1050);
-    });
+    const clearBounds = () => {
+      livingBoundsRef.current = null;
+    };
+
+    window.addEventListener('resize', clearBounds, { passive: true });
+    window.addEventListener('orientationchange', clearBounds, { passive: true });
 
     return () => {
-      window.cancelAnimationFrame(frame);
-      if (timeout !== undefined) window.clearTimeout(timeout);
+      window.removeEventListener('resize', clearBounds);
+      window.removeEventListener('orientationchange', clearBounds);
     };
-  }, [reducedMotion]);
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -683,336 +546,21 @@ export function CinematicHomeJourney() {
     };
   }, []);
 
-  useEffect(() => {
-    if (reducedMotion) return undefined;
-
-    const { ScrollTrigger } = registerGSAP();
-    const frame = window.requestAnimationFrame(() => ScrollTrigger.refresh());
-
-    return () => window.cancelAnimationFrame(frame);
-  }, [products.length, partners.length, reducedMotion]);
-
-  useGSAP(
-    () => {
-      const root = journeyRef.current;
-      if (!root || reducedMotion) return;
-
-      const { gsap } = registerGSAP();
-      const media = root.querySelectorAll<HTMLElement>('.villa-scene-media');
-      const timelines: gsap.core.Animation[] = [];
-
-      media.forEach((element) => {
-        timelines.push(gsap.to(element, {
-          yPercent: -8,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: element.closest('[data-villa-scene]'),
-            start: 'top bottom',
-            end: 'bottom top',
-            scrub: 1.1,
-          },
-        }));
-      });
-
-      return () => timelines.forEach((timeline) => timeline.kill());
-    },
-    { scope: journeyRef, dependencies: [reducedMotion] },
-  );
-
-  useEffect(() => {
-    const root = journeyRef.current;
-    if (!root || reducedMotion) return undefined;
-
-    const { gsap, ScrollTrigger } = registerGSAP();
-    const context = gsap.context(() => {
-      const heroLights = root.querySelectorAll<HTMLElement>('[data-hero-light]');
-      const heroGatePanels = root.querySelectorAll<HTMLElement>('[data-hero-gate-panel]');
-      const heroImage = root.querySelector<HTMLElement>('[data-hero-image]');
-      const heroContent = root.querySelector<HTMLElement>('[data-hero-content]');
-      const heroOverlay = root.querySelector<HTMLElement>('[data-hero-overlay]');
-
-      const timeline = gsap.timeline({
-        scrollTrigger: {
-          trigger: '#home-hero',
-          start: 'top top',
-          end: 'bottom top',
-          scrub: 0.85,
-          invalidateOnRefresh: true,
-        },
-      });
-
-      timeline
-        .to(heroGatePanels[0], { xPercent: -82, ease: 'none' }, 0)
-        .to(heroGatePanels[1], { xPercent: 82, ease: 'none' }, 0)
-        .to(heroLights, { autoAlpha: 1, stagger: 0.08, ease: 'none' }, 0.12)
-        .to(heroImage, { scale: 1.12, yPercent: -4, ease: 'none' }, 0)
-        .to(heroContent, { yPercent: -18, autoAlpha: 0, ease: 'none' }, 0.46)
-        .to(heroOverlay, { autoAlpha: 0.72, ease: 'none' }, 0.38);
-    }, root);
-    const refreshFrame = window.requestAnimationFrame(() => ScrollTrigger.refresh());
-
-    return () => {
-      window.cancelAnimationFrame(refreshFrame);
-      context.revert();
-    };
-  }, [reducedMotion]);
-
-  useEffect(() => {
-    const entrance = document.getElementById('arrival');
-    if (!entrance || reducedMotion) return undefined;
-
-    const { gsap } = registerGSAP();
-    const media = gsap.matchMedia();
-
-    media.add('(min-width: 1200px)', () => {
-      const stage = entrance.querySelector<HTMLElement>('[data-entry-stage]');
-      const exterior = entrance.querySelector<HTMLElement>('[data-entry-exterior]');
-      const interior = entrance.querySelector<HTMLElement>('[data-entry-interior]');
-      const doors = entrance.querySelectorAll<HTMLElement>('[data-entry-door]');
-      const fingerprint = entrance.querySelector<HTMLElement>('[data-entry-fingerprint]');
-      const scan = entrance.querySelector<HTMLElement>('[data-entry-scan]');
-      const warmLight = entrance.querySelector<HTMLElement>('[data-entry-warm-light]');
-      const reflection = entrance.querySelector<HTMLElement>('[data-entry-reflection]');
-      const ambient = entrance.querySelector<HTMLElement>('[data-entry-ambient]');
-      const copy = entrance.querySelector<HTMLElement>('[data-entry-copy]');
-
-      if (!stage || !exterior || !interior || doors.length < 2) return undefined;
-
-      const timeline = gsap.timeline({
-        scrollTrigger: {
-          trigger: entrance,
-          start: 'top top',
-          end: '+=150%',
-          scrub: 0.9,
-          pin: stage,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-        },
-      });
-
-      timeline
-        .set([interior, warmLight, ambient, copy], { autoAlpha: 0 })
-        .set(fingerprint, { autoAlpha: 0.28, scale: 0.82 })
-        .to(exterior, { scale: 1.2, yPercent: -5, ease: 'none' }, 0)
-        .to(fingerprint, { autoAlpha: 1, scale: 1, ease: 'none' }, 0.1)
-        .to(scan, { yPercent: 840, autoAlpha: 1, ease: 'none' }, 0.17)
-        .to(fingerprint, { autoAlpha: 0, scale: 1.18, ease: 'none' }, 0.33)
-        .to(doors[0], { xPercent: -108, ease: 'none' }, 0.38)
-        .to(doors[1], { xPercent: 108, ease: 'none' }, 0.38)
-        .to(warmLight, { autoAlpha: 0.92, ease: 'none' }, 0.43)
-        .to(exterior, { autoAlpha: 0.08, ease: 'none' }, 0.53)
-        .to(interior, { autoAlpha: 1, scale: 1, ease: 'none' }, 0.53)
-        .to(reflection, { xPercent: 145, autoAlpha: 0.56, ease: 'none' }, 0.63)
-        .to(ambient, { autoAlpha: 1, ease: 'none' }, 0.67)
-        .to(copy, { autoAlpha: 1, yPercent: -8, ease: 'none' }, 0.73);
-
-      return () => timeline.kill();
-    });
-
-    return () => media.revert();
-  }, [reducedMotion]);
-
-  useEffect(() => {
-    const living = document.getElementById('living');
-    if (!living || reducedMotion) return undefined;
-
-    const { gsap } = registerGSAP();
-    const media = gsap.matchMedia();
-
-    media.add('(min-width: 1200px)', () => {
-      const stage = living.querySelector<HTMLElement>('[data-living-stage]');
-      const image = living.querySelector<HTMLElement>('[data-living-image]');
-      const dimmer = living.querySelector<HTMLElement>('[data-living-dimmer]');
-      const ceiling = living.querySelector<HTMLElement>('[data-living-ceiling]');
-      const lamps = living.querySelectorAll<HTMLElement>('[data-living-lamp]');
-      const curtains = living.querySelectorAll<HTMLElement>('[data-living-curtain]');
-      const daylight = living.querySelector<HTMLElement>('[data-living-daylight]');
-      const ledStrips = living.querySelectorAll<HTMLElement>('[data-living-led]');
-      const golden = living.querySelector<HTMLElement>('[data-living-golden]');
-      const rays = living.querySelector<HTMLElement>('[data-living-rays]');
-      const reflection = living.querySelector<HTMLElement>('[data-living-reflection]');
-      const interfacePanel = living.querySelector<HTMLElement>('[data-living-interface]');
-      const copy = living.querySelector<HTMLElement>('[data-living-copy]');
-      const temperature24 = living.querySelector<HTMLElement>('[data-temperature-24]');
-      const temperature22 = living.querySelector<HTMLElement>('[data-temperature-22]');
-      const comfort = living.querySelector<HTMLElement>('[data-comfort-mode]');
-
-      if (!stage || !image || !dimmer || !interfacePanel || !copy) return undefined;
-
-      const timeline = gsap.timeline({
-        scrollTrigger: {
-          trigger: living,
-          start: 'top top',
-          end: '+=180%',
-          scrub: 0.9,
-          pin: stage,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-        },
-      });
-
-      timeline
-        .set([ceiling, lamps, daylight, ledStrips, golden, rays, interfacePanel, copy, temperature22, comfort], { autoAlpha: 0 })
-        .set(temperature24, { autoAlpha: 1 })
-        .to(image, { scale: 1.075, yPercent: -2, ease: 'none' }, 0)
-        .to(dimmer, { autoAlpha: 0.38, ease: 'none' }, 0.08)
-        .to(ceiling, { autoAlpha: 0.92, ease: 'none' }, 0.14)
-        .to(lamps, { autoAlpha: 1, stagger: 0.09, ease: 'none' }, 0.22)
-        .to(curtains[0], { xPercent: -105, ease: 'none' }, 0.31)
-        .to(curtains[1], { xPercent: 105, ease: 'none' }, 0.31)
-        .to(daylight, { autoAlpha: 0.82, ease: 'none' }, 0.39)
-        .to(rays, { autoAlpha: 0.58, ease: 'none' }, 0.43)
-        .to(ledStrips, { autoAlpha: 1, stagger: 0.08, ease: 'none' }, 0.48)
-        .to(interfacePanel, { autoAlpha: 1, ease: 'none' }, 0.56)
-        .to(temperature24, { autoAlpha: 0, ease: 'none' }, 0.62)
-        .to(temperature22, { autoAlpha: 1, ease: 'none' }, 0.66)
-        .to(comfort, { autoAlpha: 1, ease: 'none' }, 0.72)
-        .to(golden, { autoAlpha: 0.9, ease: 'none' }, 0.76)
-        .to(reflection, { xPercent: 150, autoAlpha: 0.55, ease: 'none' }, 0.78)
-        .to(copy, { autoAlpha: 1, yPercent: -8, ease: 'none' }, 0.68);
-
-      return () => timeline.kill();
-    });
-
-    return () => media.revert();
-  }, [reducedMotion]);
-
-  useEffect(() => {
-    const root = journeyRef.current;
-    if (!root || reducedMotion) return undefined;
-
-    const { gsap, ScrollTrigger } = registerGSAP();
-    const media = gsap.matchMedia();
-
-    media.add('(min-width: 1200px)', () => {
-      const timelines: gsap.core.Timeline[] = [];
-
-      root.querySelectorAll<HTMLElement>('[data-cinematic-scene]').forEach((scene) => {
-        const stage = scene.querySelector<HTMLElement>('[data-scene-stage]');
-        const mediaLayer = scene.querySelector<HTMLElement>('[data-scene-media]');
-        const copy = scene.querySelector<HTMLElement>('[data-scene-copy]');
-        const panel = scene.querySelector<HTMLElement>('[data-scene-panel]');
-        const glow = scene.querySelector<HTMLElement>('[data-scene-glow]');
-        const reflection = scene.querySelector<HTMLElement>('[data-scene-reflection]');
-        const lines = scene.querySelectorAll<HTMLElement>('[data-scene-line]');
-        const products = scene.querySelectorAll<HTMLElement>('[data-floating-product]');
-
-        if (!stage) return;
-
-        const timeline = gsap.timeline({
-          scrollTrigger: {
-            trigger: scene,
-            start: 'top top',
-            end: '+=145%',
-            scrub: 0.95,
-            pin: stage,
-            anticipatePin: 1,
-            invalidateOnRefresh: true,
-          },
-        });
-
-        if (mediaLayer) timeline.fromTo(mediaLayer, { scale: 1.03, yPercent: 3 }, { scale: 1.13, yPercent: -4, ease: 'none' }, 0);
-        if (glow) timeline.fromTo(glow, { autoAlpha: 0.35 }, { autoAlpha: 0.88, ease: 'none' }, 0.08);
-        if (copy) timeline.fromTo(copy, { autoAlpha: 0, yPercent: 9 }, { autoAlpha: 1, yPercent: 0, ease: 'none' }, 0.16);
-        if (panel) timeline.fromTo(panel, { autoAlpha: 0, yPercent: 7, scale: 0.985 }, { autoAlpha: 1, yPercent: 0, scale: 1, ease: 'none' }, 0.28);
-        if (reflection) timeline.to(reflection, { xPercent: 150, autoAlpha: 0.46, ease: 'none' }, 0.42);
-        if (lines.length) timeline.fromTo(lines, { scaleY: 0 }, { scaleY: 1, stagger: 0.08, ease: 'none' }, 0.34);
-        if (products.length) {
-          timeline.fromTo(products, { autoAlpha: 0, yPercent: 12, rotate: -4 }, { autoAlpha: 1, yPercent: 0, rotate: 0, stagger: 0.08, ease: 'none' }, 0.26);
-          timeline.to(products, { yPercent: -6, stagger: 0.04, ease: 'none' }, 0.62);
-        }
-
-        timelines.push(timeline);
-      });
-
-      const refreshFrame = window.requestAnimationFrame(() => ScrollTrigger.refresh());
-
-      return () => {
-        window.cancelAnimationFrame(refreshFrame);
-        timelines.forEach((timeline) => timeline.kill());
-      };
-    });
-
-    return () => media.revert();
-  }, [reducedMotion]);
-
   const leadPartner = partners.find((partner) => partner.name.toLowerCase().includes('rcs')) ?? partners[0];
   const goToBookDemo = useCallback(() => router.push('/book-demo'), [router]);
   const goToContact = useCallback(() => router.push('/contact'), [router]);
-  const goToExperience = useCallback(() => router.push('/experience'), [router]);
   const goToProducts = useCallback(() => router.push('/products'), [router]);
 
   return (
     <motion.div
       ref={journeyRef}
       className="overflow-x-clip bg-[#080a0d] text-foreground"
-      initial={reducedMotion ? false : { opacity: 0, filter: 'blur(10px)', scale: 1.01 }}
-      animate={reducedMotion ? undefined : { opacity: 1, filter: 'blur(0px)', scale: 1 }}
+      initial={reducedMotion ? false : { opacity: 0, scale: 1.01 }}
+      animate={reducedMotion ? undefined : { opacity: 1, scale: 1 }}
       transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
     >
-      <AnimatePresence>{showLoader && <PremiumHomeLoader reducedMotion={reducedMotion} />}</AnimatePresence>
-      <ScrollProgress />
-      <CursorGlow size={280} className="z-20 opacity-20" />
-
-      <section id="home-hero" className={`relative isolate overflow-hidden border-b border-white/10 ${reducedMotion ? 'min-h-[100svh]' : 'h-[145svh]'}`}>
-        <div className={`relative flex min-h-[100svh] items-end overflow-hidden ${reducedMotion ? '' : 'sticky top-0 h-[100svh]'}`} onPointerMove={(event) => {
-          if (reducedMotion || event.pointerType === 'touch') return;
-          const bounds = event.currentTarget.getBoundingClientRect();
-          heroMouseX.set(((event.clientX - bounds.left) / bounds.width - 0.5) * 14);
-          heroMouseY.set(((event.clientY - bounds.top) / bounds.height - 0.5) * 10);
-        }} onPointerLeave={() => {
-          heroMouseX.set(0);
-          heroMouseY.set(0);
-        }}>
-          <motion.div data-hero-image className="absolute -inset-[4%]" style={reducedMotion ? undefined : { x: heroMouseX, y: heroMouseY }}>
-            <Image src="/images/cinematic/villa-arrival.png" alt="Quantum Living Solutions luxury smart villa at dusk" fill priority sizes="100vw" className="object-cover" />
-          </motion.div>
-          {enableWebGL && <LuxuryVillaExperience />}
-          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(4,6,9,0.9)_0%,rgba(4,6,9,0.48)_45%,rgba(4,6,9,0.14)_100%)]" />
-          <motion.div aria-hidden="true" className="absolute inset-0 bg-[radial-gradient(ellipse_at_76%_40%,rgba(185,145,82,0.27),transparent_28%),radial-gradient(ellipse_at_20%_20%,rgba(61,98,133,0.22),transparent_36%)]" animate={reducedMotion ? undefined : { opacity: [0.54, 0.85, 0.54], scale: [1, 1.06, 1] }} transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }} />
-          <div data-hero-overlay className="absolute inset-0 bg-gradient-to-t from-[#080a0d] via-transparent to-black/25" />
-          <div className="absolute inset-x-0 bottom-[9%] hidden h-44 lg:block" aria-hidden="true">
-            <div data-hero-gate-panel className="absolute left-0 top-0 h-full w-[26%] border-r border-white/15 bg-zinc-950/75" />
-            <div data-hero-gate-panel className="absolute left-[25%] top-0 h-full w-[26%] border-l border-white/15 bg-zinc-950/75" />
-          </div>
-          <div className="absolute bottom-[19%] right-[9%] hidden items-end gap-4 lg:flex" aria-hidden="true">
-            {Array.from({ length: 8 }).map((_, index) => <span key={index} data-hero-light className="h-10 w-1 bg-[color:var(--gold-bright)] opacity-20 shadow-[0_0_24px_rgba(185,145,82,0.85)]" />)}
-          </div>
-          {!reducedMotion && <div className="pointer-events-none absolute inset-0 hidden overflow-hidden lg:block" aria-hidden="true">
-            {Array.from({ length: 7 }).map((_, index) => <motion.span key={index} className="absolute h-1 w-1 rounded-full bg-[color:var(--gold-bright)]/60" style={{ left: `${18 + index * 11}%`, top: `${20 + (index % 4) * 16}%` }} animate={{ y: [0, -18 - index * 2, 0], opacity: [0, 0.7, 0] }} transition={{ duration: 4.8 + index * 0.35, repeat: Infinity, delay: index * 0.45, ease: 'easeInOut' }} />)}
-          </div>}
-          <Parallax speed={0.08} className="pointer-events-none absolute right-[8%] top-[18%] hidden h-56 w-56 rounded-full border border-[color:var(--gold)]/30 lg:block"><span aria-hidden="true" /></Parallax>
-          <div data-hero-content className="relative z-10 mx-auto grid w-full max-w-[96rem] grid-cols-1 gap-12 px-5 pb-14 pt-32 sm:px-8 lg:grid-cols-12 lg:items-end lg:px-12 lg:pb-20">
-            <div className="max-w-5xl lg:col-span-9">
-              <p className="mb-7 font-mono text-[10px] uppercase tracking-[0.2em] text-[color:var(--gold-bright)]">Private residence / Gorakhpur</p>
-              <h1 className="max-w-5xl text-5xl font-light leading-[1.02] text-white sm:text-7xl lg:text-[6.55rem]">
-                <HeroLine>Quantum Living</HeroLine>
-                <HeroLine delay={0.12}>Solutions</HeroLine>
-              </h1>
-              <h2 className="mt-6 max-w-3xl text-2xl font-light leading-tight text-zinc-100 sm:text-4xl lg:text-5xl">
-                <HeroLine delay={0.28}>Architecting Intelligent Luxury Living</HeroLine>
-              </h2>
-              <p className="mt-8 max-w-xl text-base leading-8 text-zinc-100 sm:text-lg">A private residence where light, climate, privacy, security and entertainment respond as one considered system.</p>
-              <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-                <MagneticButton className="qls-button qls-button-primary" strength={0.18} onClick={goToBookDemo}>{PRIVATE_SITE_VISIT.label} · {PRIVATE_SITE_VISIT.priceLabel} <ArrowRight className="h-4 w-4" aria-hidden="true" /></MagneticButton>
-                <MagneticButton className="qls-button border border-white/35 bg-white/10 text-white hover:border-white/70" strength={0.18} onClick={goToExperience}>Explore Experience <Play className="h-3.5 w-3.5" aria-hidden="true" /></MagneticButton>
-              </div>
-            </div>
-            <FloatingElement distance={5} duration={5.5} className="hidden justify-self-end border border-white/15 bg-[#080a0d]/70 p-4 lg:block lg:col-span-3">
-              <p className="font-mono text-[9px] uppercase tracking-[0.17em] text-[color:var(--gold-bright)]">Residence status</p>
-              <div className="mt-3 flex items-end gap-3"><span className="h-2 w-2 rounded-full bg-[color:var(--gold-bright)] shadow-[0_0_14px_rgba(185,145,82,0.85)]" /><span className="text-sm text-white">Arrival scene ready</span></div>
-            </FloatingElement>
-            <HolographicControlOverlay />
-            <div className="flex items-center gap-4 font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-200 lg:col-span-12">
-              <span className="h-px w-12 bg-[color:var(--gold-bright)]" />
-              Scroll to enter <ArrowDown className="h-4 w-4 animate-bounce" aria-hidden="true" />
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section id="arrival" className="relative isolate overflow-hidden border-b border-white/10" data-villa-scene>
-        <div data-entry-stage className="relative flex min-h-[100svh] items-end overflow-hidden px-5 py-14 sm:px-8 lg:h-[100svh] lg:px-12 lg:py-20">
+        <div data-entry-stage className="qls-cinematic-stage relative flex items-end overflow-hidden px-5 py-14 sm:px-8 lg:px-12 lg:py-20">
           <div data-entry-exterior className="absolute -inset-[5%] will-change-transform">
             <Image src="/images/cinematic/villa-arrival.png" alt="Approaching a luxury smart home entrance" fill sizes="100vw" className="object-cover" />
           </div>
@@ -1026,9 +574,9 @@ export function CinematicHomeJourney() {
           {!reducedMotion && <>
             <div className="absolute inset-y-[14%] left-[30%] hidden w-[19%] border-r border-white/20 bg-zinc-950/88 lg:block will-change-transform" data-entry-door aria-hidden="true" />
             <div className="absolute inset-y-[14%] left-[49%] hidden w-[19%] border-l border-white/20 bg-zinc-950/88 lg:block will-change-transform" data-entry-door aria-hidden="true" />
-            <div data-entry-fingerprint className="absolute left-[47.5%] top-[45%] hidden h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[color:var(--gold-bright)]/80 bg-[#080a0d]/70 lg:block overflow-hidden will-change-transform" aria-hidden="true">
-              <Fingerprint className="absolute left-1/2 top-1/2 h-9 w-9 -translate-x-1/2 -translate-y-1/2 text-[color:var(--gold-bright)]" />
-              <span data-entry-scan className="absolute inset-x-3 top-2 h-px bg-[color:var(--gold-bright)] opacity-0 shadow-[0_0_18px_rgba(185,145,82,0.95)]" />
+            <div data-entry-fingerprint className="absolute left-[48.5%] top-[48%] hidden h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full border border-emerald-200/25 bg-[#07110d]/42 lg:block overflow-hidden will-change-transform" aria-hidden="true">
+              <Fingerprint className="absolute left-1/2 top-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 text-emerald-100/60" />
+              <span data-entry-scan className="absolute inset-2 rounded-full border border-emerald-200/20 opacity-0 shadow-[0_0_18px_rgba(116,211,152,0.55)]" />
             </div>
           </>}
           <div className="absolute inset-0 bg-gradient-to-t from-[#080a0d] via-transparent to-black/20" />
@@ -1056,14 +604,20 @@ export function CinematicHomeJourney() {
       <section id="living" className="relative isolate overflow-hidden border-b border-white/10" data-villa-scene>
         <div
           data-living-stage
-          className="relative min-h-[100svh] overflow-hidden px-5 py-14 sm:px-8 lg:h-[100svh] lg:px-12 lg:py-20"
+          className="qls-cinematic-stage relative overflow-hidden px-5 py-14 sm:px-8 lg:px-12 lg:py-20"
+          onPointerEnter={(event) => {
+            const { left, top, width, height } = event.currentTarget.getBoundingClientRect();
+            livingBoundsRef.current = { left, top, width, height };
+          }}
           onPointerMove={(event) => {
             if (reducedMotion || event.pointerType === 'touch') return;
-            const bounds = event.currentTarget.getBoundingClientRect();
+            const bounds = livingBoundsRef.current;
+            if (!bounds) return;
             livingMouseX.set(((event.clientX - bounds.left) / bounds.width - 0.5) * 10);
             livingMouseY.set(((event.clientY - bounds.top) / bounds.height - 0.5) * 8);
           }}
           onPointerLeave={() => {
+            livingBoundsRef.current = null;
             livingMouseX.set(0);
             livingMouseY.set(0);
           }}
@@ -1089,7 +643,7 @@ export function CinematicHomeJourney() {
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-[#080a0d] via-transparent to-black/20" />
 
-          <div data-living-copy className={`relative z-10 mx-auto flex min-h-[calc(100svh-7rem)] max-w-[96rem] items-end ${reducedMotion ? '' : 'lg:translate-y-6 lg:opacity-0'} will-change-transform`}>
+          <div data-living-copy className={`qls-cinematic-inner relative z-10 mx-auto flex max-w-[96rem] items-end ${reducedMotion ? '' : 'lg:translate-y-6 lg:opacity-0'} will-change-transform`}>
             <div className="max-w-xl pb-2">
               <span className="qls-eyebrow">Scene 04 / Intelligent living</span>
               <h2 className="qls-section-title text-4xl sm:text-6xl">The room welcomes you back.</h2>
@@ -1130,7 +684,7 @@ export function CinematicHomeJourney() {
           <div className="absolute left-[10%] top-[52%] h-16 w-16 rounded-full border border-[color:var(--gold-bright)]/55 bg-[#080a0d]/80" aria-hidden="true">
             <Coffee className="absolute left-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 text-[color:var(--gold-bright)]" />
           </div>
-          {!reducedMotion && <motion.span className="absolute left-[17%] top-[42%] h-20 w-7 rounded-full bg-white/10 blur-md" animate={{ y: [18, -22, 18], opacity: [0, 0.55, 0] }} transition={{ duration: 3.4, repeat: Infinity, ease: 'easeInOut' }} aria-hidden="true" />}
+          {!reducedMotion && <motion.span className="absolute left-[17%] top-[42%] h-20 w-7 rounded-full bg-white/16" animate={{ y: [18, -22, 18], opacity: [0, 0.42, 0] }} transition={{ duration: 3.4, repeat: Infinity, ease: 'easeInOut' }} aria-hidden="true" />}
           <div className="ml-auto grid max-w-md grid-cols-1 gap-3 sm:grid-cols-3">
             {kitchenRoutines.map((item) => <SceneMetric key={item.label} {...item} />)}
           </div>
@@ -1168,8 +722,17 @@ export function CinematicHomeJourney() {
           <div data-scene-line className="mx-auto h-20 w-px origin-top bg-[color:var(--gold-bright)] shadow-[0_0_24px_rgba(185,145,82,0.75)]" aria-hidden="true" />
           <div className="mx-auto flex h-14 w-28 items-center justify-center border border-white/10 bg-black/60"><Projector className="h-6 w-6 text-[color:var(--gold-bright)]" aria-hidden="true" /></div>
           <div className="mx-auto mt-8 aspect-[16/7] max-w-2xl border border-white/10 bg-black shadow-[0_0_70px_rgba(185,145,82,0.16)_inset]" />
-          <div className="mx-auto mt-8 flex max-w-lg items-end gap-1.5" aria-label="Dolby speaker visualization">
-            {[28, 46, 72, 58, 90, 64, 38, 74, 52, 84, 44, 62].map((height, index) => <motion.span key={index} className="w-full bg-[color:var(--gold-bright)]/75" animate={reducedMotion ? undefined : { height: [`${height * 0.45}px`, `${height}px`, `${height * 0.58}px`] }} transition={{ duration: 1.4 + index * 0.04, repeat: Infinity, repeatType: 'mirror' }} style={{ height: `${height * 0.45}px` }} />)}
+          <div className="mx-auto mt-8 flex h-24 max-w-lg items-end gap-1.5" aria-label="Dolby speaker visualization">
+            {[28, 46, 72, 58, 90, 64, 38, 74, 52, 84, 44, 62].map((height, index) => (
+              <span key={index} className="flex w-full items-end overflow-hidden" style={{ height: `${height}px` }}>
+                <motion.span
+                  className="block h-full w-full origin-bottom bg-[color:var(--gold-bright)]/75"
+                  animate={reducedMotion ? undefined : { scaleY: [0.45, 1, 0.58] }}
+                  transition={{ duration: 1.4 + index * 0.04, repeat: Infinity, repeatType: 'mirror' }}
+                  style={{ scaleY: 0.45 }}
+                />
+              </span>
+            ))}
             <Volume2 className="ml-3 h-5 w-5 shrink-0 text-[color:var(--gold-bright)]" aria-hidden="true" />
           </div>
         </div>
@@ -1211,14 +774,21 @@ export function CinematicHomeJourney() {
           </div>
           <div className="mt-8 flex h-56 items-end gap-3 border-b border-white/10 px-2" aria-label="Animated energy usage chart">
             {[36, 58, 44, 76, 62, 92, 68, 82, 48, 64, 72, 54].map((height, index) => (
-              <motion.span key={index} className="w-full bg-gradient-to-t from-[color:var(--gold)] to-[color:var(--gold-bright)]" animate={reducedMotion ? undefined : { height: [`${height * 0.65}%`, `${height}%`, `${height * 0.78}%`] }} transition={{ duration: 2.2 + index * 0.05, repeat: Infinity, repeatType: 'mirror' }} style={{ height: `${height * 0.65}%` }} />
+              <span key={index} className="flex w-full items-end overflow-hidden" style={{ height: `${height}%` }}>
+                <motion.span
+                  className="block h-full w-full origin-bottom bg-gradient-to-t from-[color:var(--gold)] to-[color:var(--gold-bright)]"
+                  animate={reducedMotion ? undefined : { scaleY: [0.65, 1, 0.78] }}
+                  transition={{ duration: 2.2 + index * 0.05, repeat: Infinity, repeatType: 'mirror' }}
+                  style={{ scaleY: 0.65 }}
+                />
+              </span>
             ))}
           </div>
           <div className="mt-6 flex items-center gap-3 text-sm text-zinc-300"><ChartNoAxesColumnIncreasing className="h-5 w-5 text-[color:var(--gold-bright)]" aria-hidden="true" /> Load shifting active / battery priority enabled</div>
         </div>
       </CinematicScene>
 
-      <LuxuryProductShowcase products={products} onExplore={goToProducts} onBook={goToBookDemo} enableWebGL={enableWebGL} />
+      <LuxuryProductShowcase products={products} onExplore={goToProducts} onBook={goToBookDemo} />
 
       <CollaborationStory leadPartner={leadPartner} />
 

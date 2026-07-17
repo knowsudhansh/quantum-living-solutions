@@ -6,14 +6,21 @@ export type RenderState =
   | 'LOW_BATTERY'
   | 'WEBGL_UNAVAILABLE';
 
+let cachedWebGLAvailable: boolean | null = null;
+
 export function isWebGLAvailable(mockCanvas?: HTMLCanvasElement): boolean {
   if (typeof window === 'undefined' && !mockCanvas) return false;
+  if (!mockCanvas && cachedWebGLAvailable !== null) return cachedWebGLAvailable;
+
   try {
     const canvas = mockCanvas || document.createElement('canvas');
-    return !!(
+    const available = !!(
       canvas.getContext('webgl') || canvas.getContext('experimental-webgl')
     );
+    if (!mockCanvas) cachedWebGLAvailable = available;
+    return available;
   } catch {
+    if (!mockCanvas) cachedWebGLAvailable = false;
     return false;
   }
 }

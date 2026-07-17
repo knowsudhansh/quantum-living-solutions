@@ -12,7 +12,8 @@
     "test:e2e": "playwright test",
     "validate": "npm run lint && npm run typecheck && npm run test:unit",
     "verify": "npm run validate && npm run build && npm run test:e2e",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "seed:products": "node --env-file=.env prisma/seed-products.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

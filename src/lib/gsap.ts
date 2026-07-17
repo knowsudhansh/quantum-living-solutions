@@ -10,7 +10,7 @@ export function registerGSAP() {
     gsap.registerPlugin(ScrollTrigger);
     ScrollTrigger.config({
       ignoreMobileResize: true,
-      autoRefreshEvents: 'visibilitychange,DOMContentLoaded,load,resize',
+      autoRefreshEvents: 'visibilitychange,DOMContentLoaded,load,resize,pageshow,orientationchange',
     });
     registered = true;
   }

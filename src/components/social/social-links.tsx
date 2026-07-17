@@ -25,6 +25,12 @@ const Instagram = createLucideIcon('Instagram', [
   ['path', { d: 'M16.5 7.5h.01', key: 'instagram-dot' }],
 ]);
 
+const LinkedIn = createLucideIcon('LinkedIn', [
+  ['path', { d: 'M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z', key: 'linkedin-n' }],
+  ['rect', { width: '4', height: '12', x: '2', y: '9', key: 'linkedin-i' }],
+  ['circle', { cx: '4', cy: '4', r: '2', key: 'linkedin-dot' }],
+]);
+
 const socialPlatforms: SocialPlatform[] = [
   {
     name: 'Facebook',
@@ -35,6 +41,11 @@ const socialPlatforms: SocialPlatform[] = [
     name: 'Instagram',
     href: 'https://www.instagram.com/quantum_living_solutions?igsh=MXRncXFoM215eWFuNA==',
     Icon: Instagram,
+  },
+  {
+    name: 'LinkedIn',
+    href: 'https://www.linkedin.com/company/quantum-living-solutions/?viewAsMember=true',
+    Icon: LinkedIn,
   },
 ];
 

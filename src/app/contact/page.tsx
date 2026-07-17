@@ -109,15 +109,30 @@ export default function ContactPage() {
             <p className="text-base text-foreground/90 leading-relaxed font-normal">
               Uttar Pradesh 273008, India
             </p>
-            <div className="mt-4">
-              <a
-                href="https://www.google.com/maps/place/quantumlivingsolutions.com/@26.7378746,83.4347162,16z"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center text-xs font-mono tracking-wider uppercase text-[HSL(210,80%,60%)] hover:text-white transition-colors duration-200 outline-none focus-visible:ring-2 focus-visible:ring-[HSL(210,80%,60%)]"
-              >
-                View on Google Maps &rarr;
-              </a>
+            <div className="mt-6 overflow-hidden border border-white/10 bg-white/[0.03]">
+              <div className="relative aspect-[4/3] min-h-64 w-full bg-zinc-950">
+                <iframe
+                  title="Quantum Living Solutions location on Google Maps"
+                  src={BUSINESS_CONTACT.googleMapsEmbedUrl}
+                  className="absolute inset-0 h-full w-full border-0"
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  allowFullScreen
+                />
+              </div>
+              <div className="flex flex-col gap-3 border-t border-white/10 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-xs leading-5 text-foreground/65">
+                  Open the location in Google Maps for live directions to our office.
+                </p>
+                <a
+                  href={BUSINESS_CONTACT.googleMapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="qls-button qls-button-secondary min-h-0 shrink-0 py-2.5 text-[10px]"
+                >
+                  Get Directions
+                </a>
+              </div>
             </div>
           </div>
 

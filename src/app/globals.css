@@ -12,6 +12,21 @@
   --gold: #9b7a45;
   --gold-bright: #b99152;
   --blue: #52a8ff;
+  --qls-header-height: 61px;
+  --qls-viewport-height: 100vh;
+  --qls-available-height: calc(var(--qls-viewport-height) - var(--qls-header-height));
+}
+
+@supports (height: 100svh) {
+  :root {
+    --qls-viewport-height: 100svh;
+  }
+}
+
+@supports (height: 100dvh) {
+  :root {
+    --qls-viewport-height: 100dvh;
+  }
 }
 
 @theme inline {
@@ -66,6 +81,35 @@ textarea {
 }
 
 @layer components {
+  .qls-cinematic-scroll {
+    min-height: max(54rem, 135vh);
+  }
+
+  @supports (height: 100svh) {
+    .qls-cinematic-scroll {
+      min-height: max(54rem, 135svh);
+    }
+  }
+
+  @supports (height: 100dvh) {
+    .qls-cinematic-scroll {
+      min-height: max(54rem, 135dvh);
+    }
+  }
+
+  .qls-cinematic-stage {
+    min-height: max(42rem, var(--qls-available-height));
+  }
+
+  .qls-cinematic-stage-sticky {
+    position: sticky;
+    top: var(--qls-header-height);
+  }
+
+  .qls-cinematic-inner {
+    min-height: max(34rem, calc(var(--qls-available-height) - 8rem));
+  }
+
   .qls-page {
     width: 100%;
     max-width: 80rem;

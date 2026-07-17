@@ -91,6 +91,7 @@ export async function proxy(request: NextRequest) {
     font-src 'self';
     media-src 'self';
     worker-src 'self' blob:;
+    frame-src 'self' https://www.google.com https://maps.google.com;
     object-src 'none';
     base-uri 'self';
     form-action 'self';

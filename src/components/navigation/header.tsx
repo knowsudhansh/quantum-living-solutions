@@ -201,7 +201,7 @@ export default function Header() {
         <motion.div
           ref={menuRef}
           id="mobile-menu"
-          className="fixed inset-x-0 top-[61px] z-40 h-[calc(100vh-61px)] w-full bg-[HSL(8,10%,4%)]/98 px-6 py-10 flex flex-col lg:hidden"
+          className="fixed inset-x-0 top-[var(--qls-header-height)] z-40 h-[var(--qls-available-height)] w-full overflow-y-auto bg-[HSL(8,10%,4%)]/98 px-6 py-10 flex flex-col lg:hidden"
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}

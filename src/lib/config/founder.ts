@@ -1,7 +1,7 @@
 export const founder = {
   name: 'Raj Kumar Sharma',
   designation: 'Founder, Quantum Living Solutions',
-  portraitUrl: '/images/founder-portrait.svg',
+  portraitUrl: '/images/Raj_Kumar_Sharma.png',
   biography: [
     'Raj Kumar Sharma leads Quantum Living Solutions with a practical engineering mindset: automation should improve comfort, security, and daily routines without making homes feel complicated.',
     'His work brings together consultation, wiring coordination, control programming, and long-term support so homeowners receive systems that are reliable after handover, not only impressive during demonstration.',

@@ -22,7 +22,8 @@ export function SmoothScroll({ options }: { options?: LenisOptions }) {
       refreshFrame = window.requestAnimationFrame(() => {
         refreshFrame = null;
         lenis.resize();
-        ScrollTrigger.refresh();
+        ScrollTrigger.update();
+        ScrollTrigger.refresh(true);
       });
     };
 
@@ -33,6 +34,8 @@ export function SmoothScroll({ options }: { options?: LenisOptions }) {
       }
 
       lenis.start();
+      lenis.resize();
+      ScrollTrigger.update();
       refresh();
     };
 

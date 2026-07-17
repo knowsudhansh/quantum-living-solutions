@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useMemo, useSyncExternalStore } from 'react';
-import { MotionConfig, useReducedMotion } from 'framer-motion';
+import { LazyMotion, MotionConfig, domAnimation, useReducedMotion } from 'framer-motion';
 
 interface MotionContextValue {
   reducedMotion: boolean;
@@ -34,9 +34,11 @@ export function MotionProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <MotionContext.Provider value={value}>
-      <MotionConfig reducedMotion="user" transition={value.transition}>
-        {children}
-      </MotionConfig>
+      <LazyMotion features={domAnimation}>
+        <MotionConfig reducedMotion="user" transition={value.transition}>
+          {children}
+        </MotionConfig>
+      </LazyMotion>
     </MotionContext.Provider>
   );
 }

@@ -1,7 +1,7 @@
 'use client';
 
-import { motion, useSpring } from 'framer-motion';
-import { useMouse } from '@/hooks/useMouse';
+import { useEffect } from 'react';
+import { motion, useMotionValue, useSpring } from 'framer-motion';
 import { useMotionSystem } from './MotionProvider';
 
 interface CursorGlowProps {
@@ -11,9 +11,37 @@ interface CursorGlowProps {
 
 export function CursorGlow({ className = '', size = 360 }: CursorGlowProps) {
   const { reducedMotion } = useMotionSystem();
-  const { x, y } = useMouse(!reducedMotion);
-  const springX = useSpring(x - size / 2, { stiffness: 120, damping: 30, mass: 0.4 });
-  const springY = useSpring(y - size / 2, { stiffness: 120, damping: 30, mass: 0.4 });
+  const pointerX = useMotionValue(-size);
+  const pointerY = useMotionValue(-size);
+  const springX = useSpring(pointerX, { stiffness: 120, damping: 30, mass: 0.4 });
+  const springY = useSpring(pointerY, { stiffness: 120, damping: 30, mass: 0.4 });
+
+  useEffect(() => {
+    if (reducedMotion || typeof window === 'undefined' || !window.matchMedia('(pointer: fine)').matches) return undefined;
+
+    let frame: number | null = null;
+    let latestX = -size;
+    let latestY = -size;
+
+    const commit = () => {
+      frame = null;
+      pointerX.set(latestX - size / 2);
+      pointerY.set(latestY - size / 2);
+    };
+
+    const handlePointerMove = (event: PointerEvent) => {
+      latestX = event.clientX;
+      latestY = event.clientY;
+      if (frame === null) frame = window.requestAnimationFrame(commit);
+    };
+
+    window.addEventListener('pointermove', handlePointerMove, { passive: true });
+
+    return () => {
+      window.removeEventListener('pointermove', handlePointerMove);
+      if (frame !== null) window.cancelAnimationFrame(frame);
+    };
+  }, [pointerX, pointerY, reducedMotion, size]);
 
   if (reducedMotion) return null;
 

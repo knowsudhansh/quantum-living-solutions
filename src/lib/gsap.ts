@@ -8,6 +8,10 @@ let registered = false;
 export function registerGSAP() {
   if (!registered) {
     gsap.registerPlugin(ScrollTrigger);
+    ScrollTrigger.config({
+      ignoreMobileResize: true,
+      autoRefreshEvents: 'visibilitychange,DOMContentLoaded,load,resize',
+    });
     registered = true;
   }
 

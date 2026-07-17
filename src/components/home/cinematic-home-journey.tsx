@@ -23,16 +23,14 @@ import {
   Volume2,
   Zap,
 } from 'lucide-react';
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import {
-  FloatingElement,
-  CursorGlow,
-  MagneticButton,
-  Parallax,
-  ScrollProgress,
-  SectionReveal,
-  useMotionSystem,
-} from '@/components/animation';
+import { memo, useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { CursorGlow } from '@/components/animation/CursorGlow';
+import { FloatingElement } from '@/components/animation/FloatingElement';
+import { MagneticButton } from '@/components/animation/MagneticButton';
+import { Parallax } from '@/components/animation/Parallax';
+import { ScrollProgress } from '@/components/animation/ScrollProgress';
+import { SectionReveal } from '@/components/animation/SectionReveal';
+import { useMotionSystem } from '@/components/animation/MotionProvider';
 import { SocialLinks } from '@/components/social/social-links';
 import { useGSAP } from '@/hooks/useGSAP';
 import { founder } from '@/lib/config/founder';
@@ -146,6 +144,32 @@ function useHasHydrated() {
   return useSyncExternalStore(subscribeHydration, getHydratedSnapshot, getServerHydrationSnapshot);
 }
 
+function useDesktopWebGLReady(reducedMotion: boolean) {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+
+    if (reducedMotion) {
+      const frame = window.requestAnimationFrame(() => setReady(false));
+      return () => window.cancelAnimationFrame(frame);
+    }
+
+    const media = window.matchMedia('(min-width: 1200px)');
+    const update = () => setReady(media.matches);
+
+    const frame = window.requestAnimationFrame(update);
+    media.addEventListener('change', update);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      media.removeEventListener('change', update);
+    };
+  }, [reducedMotion]);
+
+  return ready;
+}
+
 const smartHomeControls = [
   { label: 'Lighting', icon: SunMedium },
   { label: 'Curtains', icon: DoorOpen },
@@ -247,7 +271,7 @@ function CinematicScene({
   );
 }
 
-function SceneMetric({ label, value, icon: Icon }: { label: string; value: string; icon: typeof Zap }) {
+const SceneMetric = memo(function SceneMetric({ label, value, icon: Icon }: { label: string; value: string; icon: typeof Zap }) {
   return (
     <motion.div
       className="border border-white/10 bg-[#080a0d]/70 p-4"
@@ -259,7 +283,7 @@ function SceneMetric({ label, value, icon: Icon }: { label: string; value: strin
       <p className="mt-1 text-sm text-white">{value}</p>
     </motion.div>
   );
-}
+});
 
 function HeroLine({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
   const { reducedMotion: prefersReducedMotion } = useMotionSystem();
@@ -324,7 +348,7 @@ function PremiumHomeLoader({ reducedMotion }: { reducedMotion: boolean }) {
           animate={reducedMotion ? undefined : { opacity: [0.72, 1, 0.72] }}
           transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
         >
-          <Image src="/brand/qls-logo.jpg" alt="" width={48} height={48} className="h-12 w-12 object-cover" priority />
+          <Image src="/brand/qls-logo.jpg" alt="" width={48} height={48} className="h-12 w-12 object-cover" loading="eager" />
         </motion.div>
         <p className="mt-6 text-lg font-light tracking-wide text-white">Quantum Living Solutions</p>
         <div className="mt-5 h-px overflow-hidden bg-white/10" aria-hidden="true">
@@ -371,7 +395,17 @@ function HolographicControlOverlay() {
   );
 }
 
-function LuxuryProductShowcase({ products, onExplore, onBook }: { products: FeaturedProduct[]; onExplore: () => void; onBook: () => void }) {
+const LuxuryProductShowcase = memo(function LuxuryProductShowcase({
+  products,
+  onExplore,
+  onBook,
+  enableWebGL,
+}: {
+  products: FeaturedProduct[];
+  onExplore: () => void;
+  onBook: () => void;
+  enableWebGL: boolean;
+}) {
   const visibleProducts = products.slice(0, 4);
 
   return (
@@ -395,7 +429,7 @@ function LuxuryProductShowcase({ products, onExplore, onBook }: { products: Feat
         </div>
 
         <div data-scene-panel className="relative z-10 min-h-[34rem] lg:col-span-8 lg:min-h-[42rem]">
-          <ProductPedestalExperience productCount={visibleProducts.length || 4} />
+          {enableWebGL && <ProductPedestalExperience productCount={visibleProducts.length || 4} />}
           <div className="absolute inset-x-[8%] bottom-[10%] h-px bg-gradient-to-r from-transparent via-[color:var(--gold-bright)]/70 to-transparent shadow-[0_0_34px_rgba(185,145,82,0.45)]" />
           {visibleProducts.length > 0 ? (
             <div className="relative h-full min-h-[34rem]">
@@ -444,9 +478,9 @@ function LuxuryProductShowcase({ products, onExplore, onBook }: { products: Feat
       </div>
     </section>
   );
-}
+});
 
-function CollaborationStory({ leadPartner }: { leadPartner?: Partner }) {
+const CollaborationStory = memo(function CollaborationStory({ leadPartner }: { leadPartner?: Partner }) {
   return (
     <section id="collaboration" className="relative isolate overflow-hidden border-t border-white/10 px-5 py-24 text-center sm:px-8 lg:px-12 lg:py-32" data-cinematic-scene>
       <div data-scene-stage className="relative mx-auto flex min-h-[100svh] max-w-5xl flex-col items-center justify-center">
@@ -476,9 +510,9 @@ function CollaborationStory({ leadPartner }: { leadPartner?: Partner }) {
       </div>
     </section>
   );
-}
+});
 
-function FounderEditorial() {
+const FounderEditorial = memo(function FounderEditorial() {
   return (
     <section id="founder" className="relative isolate overflow-hidden border-t border-white/10 bg-[#0b0e12] px-5 py-24 sm:px-8 lg:px-12 lg:py-32" data-cinematic-scene>
       <div data-scene-stage className="relative mx-auto grid min-h-[100svh] max-w-[96rem] grid-cols-1 items-center gap-12 lg:h-[100svh] lg:grid-cols-12 lg:gap-16">
@@ -495,7 +529,15 @@ function FounderEditorial() {
         </div>
         <div data-scene-panel className="relative z-10 grid gap-8 will-change-transform md:grid-cols-[0.78fr_1fr] lg:col-span-7">
           <div className="relative aspect-[4/5] overflow-hidden border border-white/10 bg-zinc-900">
-            <Image src={founder.portraitUrl} alt={`${founder.name}, ${founder.designation}`} fill className="object-cover" unoptimized />
+            <Image
+              src={founder.portraitUrl}
+              alt={`${founder.name}, ${founder.designation}`}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 38vw, 28vw"
+              className="object-cover"
+              loading="lazy"
+              unoptimized
+            />
             <div className="absolute inset-0 bg-gradient-to-t from-[#080a0d]/38 to-transparent" />
           </div>
           <div>
@@ -525,9 +567,9 @@ function FounderEditorial() {
       </div>
     </section>
   );
-}
+});
 
-function DemoFinale({ onBook, onContact }: { onBook: () => void; onContact: () => void }) {
+const DemoFinale = memo(function DemoFinale({ onBook, onContact }: { onBook: () => void; onContact: () => void }) {
   const { reducedMotion } = useMotionSystem();
 
   return (
@@ -566,7 +608,7 @@ function DemoFinale({ onBook, onContact }: { onBook: () => void; onContact: () =
       </div>
     </section>
   );
-}
+});
 
 export function CinematicHomeJourney() {
   const journeyRef = useRef<HTMLDivElement>(null);
@@ -578,6 +620,7 @@ export function CinematicHomeJourney() {
   const heroMouseY = useSpring(useMotionValue(0), { stiffness: 70, damping: 24, mass: 0.8 });
   const livingMouseX = useSpring(useMotionValue(0), { stiffness: 62, damping: 22, mass: 0.85 });
   const livingMouseY = useSpring(useMotionValue(0), { stiffness: 62, damping: 22, mass: 0.85 });
+  const enableWebGL = useDesktopWebGLReady(reducedMotion);
   const [products, setProducts] = useState<FeaturedProduct[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
   const [activeLivingControl, setActiveLivingControl] = useState('Lighting');
@@ -620,9 +663,34 @@ export function CinematicHomeJourney() {
       }
     }
 
-    void loadHomepageData();
-    return () => controller.abort();
+    let idleCallback: number | undefined;
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+
+    if ('requestIdleCallback' in window) {
+      idleCallback = window.requestIdleCallback(() => void loadHomepageData(), { timeout: 1800 });
+    } else {
+      timeout = setTimeout(() => void loadHomepageData(), 700);
+    }
+
+    return () => {
+      controller.abort();
+      if (idleCallback !== undefined && 'cancelIdleCallback' in window) {
+        window.cancelIdleCallback(idleCallback);
+      }
+      if (timeout !== undefined) {
+        clearTimeout(timeout);
+      }
+    };
   }, []);
+
+  useEffect(() => {
+    if (reducedMotion) return undefined;
+
+    const { ScrollTrigger } = registerGSAP();
+    const frame = window.requestAnimationFrame(() => ScrollTrigger.refresh());
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [products.length, partners.length, reducedMotion]);
 
   useGSAP(
     () => {
@@ -669,6 +737,7 @@ export function CinematicHomeJourney() {
           start: 'top top',
           end: 'bottom top',
           scrub: 0.85,
+          invalidateOnRefresh: true,
         },
       });
 
@@ -689,59 +758,13 @@ export function CinematicHomeJourney() {
   }, [reducedMotion]);
 
   useEffect(() => {
-    const hero = document.getElementById('home-hero');
-    if (!hero || reducedMotion) return undefined;
-
-    const heroImage = hero.querySelector<HTMLElement>('[data-hero-image]');
-    const heroContent = hero.querySelector<HTMLElement>('[data-hero-content]');
-    const heroOverlay = hero.querySelector<HTMLElement>('[data-hero-overlay]');
-    const heroLights = hero.querySelectorAll<HTMLElement>('[data-hero-light]');
-    const heroGatePanels = hero.querySelectorAll<HTMLElement>('[data-hero-gate-panel]');
-    let frame: number | null = null;
-
-    const updateHero = () => {
-      frame = null;
-      const travel = Math.max(hero.offsetHeight - window.innerHeight, 1);
-      const progress = Math.min(Math.max((window.scrollY - hero.offsetTop) / travel, 0), 1);
-
-      if (heroImage) heroImage.style.transform = `scale(${1 + progress * 0.12}) translate3d(0, ${progress * -4}%, 0)`;
-      if (heroContent) {
-        heroContent.style.opacity = String(1 - Math.max((progress - 0.46) / 0.54, 0));
-        heroContent.style.transform = `translate3d(0, ${progress * -18}%, 0)`;
-      }
-      if (heroOverlay) heroOverlay.style.opacity = String(1 - progress * 0.28);
-      heroGatePanels.forEach((panel, index) => {
-        const direction = index === 0 ? -1 : 1;
-        panel.style.transform = `translate3d(${direction * progress * 82}%, 0, 0)`;
-      });
-      heroLights.forEach((light, index) => {
-        light.style.opacity = String(Math.min(1, Math.max(0.2, progress * 1.8 - index * 0.09)));
-      });
-    };
-
-    const requestUpdate = () => {
-      if (frame === null) frame = window.requestAnimationFrame(updateHero);
-    };
-
-    requestUpdate();
-    window.addEventListener('scroll', requestUpdate, { passive: true });
-    window.addEventListener('resize', requestUpdate);
-
-    return () => {
-      window.removeEventListener('scroll', requestUpdate);
-      window.removeEventListener('resize', requestUpdate);
-      if (frame !== null) window.cancelAnimationFrame(frame);
-    };
-  }, [reducedMotion]);
-
-  useEffect(() => {
     const entrance = document.getElementById('arrival');
     if (!entrance || reducedMotion) return undefined;
 
     const { gsap } = registerGSAP();
     const media = gsap.matchMedia();
 
-    media.add('(min-width: 1024px)', () => {
+    media.add('(min-width: 1200px)', () => {
       const stage = entrance.querySelector<HTMLElement>('[data-entry-stage]');
       const exterior = entrance.querySelector<HTMLElement>('[data-entry-exterior]');
       const interior = entrance.querySelector<HTMLElement>('[data-entry-interior]');
@@ -759,7 +782,7 @@ export function CinematicHomeJourney() {
         scrollTrigger: {
           trigger: entrance,
           start: 'top top',
-          end: '+=180%',
+          end: '+=150%',
           scrub: 0.9,
           pin: stage,
           anticipatePin: 1,
@@ -796,7 +819,7 @@ export function CinematicHomeJourney() {
     const { gsap } = registerGSAP();
     const media = gsap.matchMedia();
 
-    media.add('(min-width: 1024px)', () => {
+    media.add('(min-width: 1200px)', () => {
       const stage = living.querySelector<HTMLElement>('[data-living-stage]');
       const image = living.querySelector<HTMLElement>('[data-living-image]');
       const dimmer = living.querySelector<HTMLElement>('[data-living-dimmer]');
@@ -820,7 +843,7 @@ export function CinematicHomeJourney() {
         scrollTrigger: {
           trigger: living,
           start: 'top top',
-          end: '+=220%',
+          end: '+=180%',
           scrub: 0.9,
           pin: stage,
           anticipatePin: 1,
@@ -861,7 +884,7 @@ export function CinematicHomeJourney() {
     const { gsap, ScrollTrigger } = registerGSAP();
     const media = gsap.matchMedia();
 
-    media.add('(min-width: 1024px)', () => {
+    media.add('(min-width: 1200px)', () => {
       const timelines: gsap.core.Timeline[] = [];
 
       root.querySelectorAll<HTMLElement>('[data-cinematic-scene]').forEach((scene) => {
@@ -880,7 +903,7 @@ export function CinematicHomeJourney() {
           scrollTrigger: {
             trigger: scene,
             start: 'top top',
-            end: '+=185%',
+            end: '+=145%',
             scrub: 0.95,
             pin: stage,
             anticipatePin: 1,
@@ -914,6 +937,10 @@ export function CinematicHomeJourney() {
   }, [reducedMotion]);
 
   const leadPartner = partners.find((partner) => partner.name.toLowerCase().includes('rcs')) ?? partners[0];
+  const goToBookDemo = useCallback(() => router.push('/book-demo'), [router]);
+  const goToContact = useCallback(() => router.push('/contact'), [router]);
+  const goToExperience = useCallback(() => router.push('/experience'), [router]);
+  const goToProducts = useCallback(() => router.push('/products'), [router]);
 
   return (
     <motion.div
@@ -940,7 +967,7 @@ export function CinematicHomeJourney() {
           <motion.div data-hero-image className="absolute -inset-[4%]" style={reducedMotion ? undefined : { x: heroMouseX, y: heroMouseY }}>
             <Image src="/images/cinematic/villa-arrival.png" alt="Quantum Living Solutions luxury smart villa at dusk" fill priority sizes="100vw" className="object-cover" />
           </motion.div>
-          <LuxuryVillaExperience />
+          {enableWebGL && <LuxuryVillaExperience />}
           <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(4,6,9,0.9)_0%,rgba(4,6,9,0.48)_45%,rgba(4,6,9,0.14)_100%)]" />
           <motion.div aria-hidden="true" className="absolute inset-0 bg-[radial-gradient(ellipse_at_76%_40%,rgba(185,145,82,0.27),transparent_28%),radial-gradient(ellipse_at_20%_20%,rgba(61,98,133,0.22),transparent_36%)]" animate={reducedMotion ? undefined : { opacity: [0.54, 0.85, 0.54], scale: [1, 1.06, 1] }} transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }} />
           <div data-hero-overlay className="absolute inset-0 bg-gradient-to-t from-[#080a0d] via-transparent to-black/25" />
@@ -967,8 +994,8 @@ export function CinematicHomeJourney() {
               </h2>
               <p className="mt-8 max-w-xl text-base leading-8 text-zinc-100 sm:text-lg">A private residence where light, climate, privacy, security and entertainment respond as one considered system.</p>
               <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-                <MagneticButton className="qls-button qls-button-primary" strength={0.18} onClick={() => router.push('/book-demo')}>{PRIVATE_SITE_VISIT.label} · {PRIVATE_SITE_VISIT.priceLabel} <ArrowRight className="h-4 w-4" aria-hidden="true" /></MagneticButton>
-                <MagneticButton className="qls-button border border-white/35 bg-white/10 text-white hover:border-white/70" strength={0.18} onClick={() => router.push('/experience')}>Explore Experience <Play className="h-3.5 w-3.5" aria-hidden="true" /></MagneticButton>
+                <MagneticButton className="qls-button qls-button-primary" strength={0.18} onClick={goToBookDemo}>{PRIVATE_SITE_VISIT.label} · {PRIVATE_SITE_VISIT.priceLabel} <ArrowRight className="h-4 w-4" aria-hidden="true" /></MagneticButton>
+                <MagneticButton className="qls-button border border-white/35 bg-white/10 text-white hover:border-white/70" strength={0.18} onClick={goToExperience}>Explore Experience <Play className="h-3.5 w-3.5" aria-hidden="true" /></MagneticButton>
               </div>
             </div>
             <FloatingElement distance={5} duration={5.5} className="hidden justify-self-end border border-white/15 bg-[#080a0d]/70 p-4 lg:block lg:col-span-3">
@@ -1191,13 +1218,13 @@ export function CinematicHomeJourney() {
         </div>
       </CinematicScene>
 
-      <LuxuryProductShowcase products={products} onExplore={() => router.push('/products')} onBook={() => router.push('/book-demo')} />
+      <LuxuryProductShowcase products={products} onExplore={goToProducts} onBook={goToBookDemo} enableWebGL={enableWebGL} />
 
       <CollaborationStory leadPartner={leadPartner} />
 
       <FounderEditorial />
 
-      <DemoFinale onBook={() => router.push('/book-demo')} onContact={() => router.push('/contact')} />
+      <DemoFinale onBook={goToBookDemo} onContact={goToContact} />
 
       <section className="border-t border-white/10 bg-[#080a0d] px-5 py-16 sm:px-8 lg:px-12">
         <SectionReveal className="mx-auto flex max-w-[96rem] flex-col items-start justify-between gap-8 sm:flex-row sm:items-center">

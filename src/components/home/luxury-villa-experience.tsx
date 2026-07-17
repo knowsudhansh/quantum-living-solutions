@@ -5,7 +5,7 @@ import { ContactShadows, Float, MeshReflectorMaterial, Sparkles } from '@react-t
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import * as THREE from 'three';
-import { useMotionSystem } from '@/components/animation';
+import { useMotionSystem } from '@/components/animation/MotionProvider';
 import { registerGSAP } from '@/lib/gsap';
 import { isWebGLAvailable } from '@/lib/utils/capability';
 
@@ -34,7 +34,7 @@ function useWebGLGate() {
       return () => window.cancelAnimationFrame(frame);
     }
 
-    const media = window.matchMedia('(min-width: 1024px)');
+    const media = window.matchMedia('(min-width: 1200px)');
 
     const evaluate = () => {
       const nav = navigator as Navigator & { deviceMemory?: number };
@@ -55,12 +55,50 @@ function useWebGLGate() {
 
 function WebGLGate({ children, className = '', label }: WebGLGateProps) {
   const quality = useWebGLGate();
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [active, setActive] = useState(false);
+
+  useEffect(() => {
+    if (quality === 'off') {
+      const frame = window.requestAnimationFrame(() => setActive(false));
+      return () => window.cancelAnimationFrame(frame);
+    }
+
+    const node = containerRef.current;
+    if (!node || !('IntersectionObserver' in window)) {
+      const frame = window.requestAnimationFrame(() => setActive(true));
+      return () => window.cancelAnimationFrame(frame);
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setActive(Boolean(entry?.isIntersecting)),
+      { root: null, rootMargin: '35% 0px', threshold: 0.01 },
+    );
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'hidden') {
+        setActive(false);
+        return;
+      }
+
+      const rect = node.getBoundingClientRect();
+      setActive(rect.bottom > -window.innerHeight * 0.35 && rect.top < window.innerHeight * 1.35);
+    };
+
+    observer.observe(node);
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      observer.disconnect();
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
+  }, [quality]);
 
   if (quality === 'off') return null;
 
   return (
-    <div className={className} aria-hidden="true" data-webgl-layer={label} data-quality={quality}>
-      {children(quality)}
+    <div ref={containerRef} className={className} aria-hidden="true" data-webgl-layer={label} data-quality={quality} data-active={active}>
+      {active ? children(quality) : null}
     </div>
   );
 }

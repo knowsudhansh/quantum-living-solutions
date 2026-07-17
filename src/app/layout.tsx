@@ -3,7 +3,8 @@ import "./globals.css";
 import Header from "../components/navigation/header";
 import Footer from "../components/navigation/footer";
 import { ScrollReveal } from "../components/utils/scroll-reveal";
-import { MotionProvider, SmoothScroll } from "../components/animation";
+import { MotionProvider } from "../components/animation/MotionProvider";
+import { SmoothScroll } from "../components/animation/SmoothScroll";
 
 const siteUrl = process.env.NEXTAUTH_URL || "https://quantumlivingsolutions.com";
 

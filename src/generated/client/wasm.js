@@ -213,10 +213,24 @@ exports.Prisma.CareerApplicationScalarFieldEnum = {
   email: 'email',
   phone: 'phone',
   role: 'role',
+  positionSlug: 'positionSlug',
+  source: 'source',
+  location: 'location',
+  experienceYears: 'experienceYears',
+  currentCompany: 'currentCompany',
+  portfolioUrl: 'portfolioUrl',
+  linkedinUrl: 'linkedinUrl',
+  skills: 'skills',
+  availability: 'availability',
   message: 'message',
   resumeUrl: 'resumeUrl',
+  resumeFileName: 'resumeFileName',
+  resumeMimeType: 'resumeMimeType',
+  resumeSize: 'resumeSize',
   status: 'status',
-  createdAt: 'createdAt'
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.NewsletterSubscriberScalarFieldEnum = {

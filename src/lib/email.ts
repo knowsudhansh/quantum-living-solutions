@@ -113,16 +113,60 @@ export async function sendDemoAutoReply(name: string, email: string, slotTime: s
   return sendEmail({ to: email, subject: 'Private Site Visit Confirmed - Quantum Living Solutions', html });
 }
 
-export async function notifyAdminOfCareer(name: string, email: string, phone: string, role: string, message?: string, resumeUrl?: string) {
+interface CareerNotificationApplication {
+  name: string;
+  email: string;
+  phone: string;
+  role: string;
+  positionSlug?: string | null;
+  location?: string | null;
+  experienceYears?: number | null;
+  currentCompany?: string | null;
+  portfolioUrl?: string | null;
+  linkedinUrl?: string | null;
+  skills?: string[];
+  message?: string | null;
+  resumeUrl: string;
+}
+
+function escapeHtml(value: string | number | null | undefined) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+export async function notifyAdminOfCareer(application: CareerNotificationApplication) {
   const html = `
     <h2>New Career Candidate Application</h2>
-    <p><strong>Applicant Name:</strong> ${name}</p>
-    <p><strong>Email:</strong> ${email}</p>
-    <p><strong>Phone:</strong> ${phone}</p>
-    <p><strong>Target Position:</strong> ${role}</p>
-    <p><strong>Cover message:</strong> ${message || 'None'}</p>
-    <p><strong>Resume Attachment Path:</strong> <a href="${resumeUrl || '#'}">${resumeUrl || 'Not provided'}</a></p>
+    <p><strong>Applicant Name:</strong> ${escapeHtml(application.name)}</p>
+    <p><strong>Email:</strong> ${escapeHtml(application.email)}</p>
+    <p><strong>Phone:</strong> ${escapeHtml(application.phone)}</p>
+    <p><strong>Target Position:</strong> ${escapeHtml(application.role)}</p>
+    <p><strong>Position Type:</strong> ${escapeHtml(application.positionSlug || 'careers')}</p>
+    <p><strong>Location:</strong> ${escapeHtml(application.location || 'Not provided')}</p>
+    <p><strong>Experience:</strong> ${escapeHtml(application.experienceYears ?? 'Not provided')} years</p>
+    <p><strong>Current Company:</strong> ${escapeHtml(application.currentCompany || 'Not provided')}</p>
+    <p><strong>Skills:</strong> ${escapeHtml(application.skills?.join(', ') || 'Not provided')}</p>
+    <p><strong>Portfolio:</strong> ${application.portfolioUrl ? `<a href="${escapeHtml(application.portfolioUrl)}">${escapeHtml(application.portfolioUrl)}</a>` : 'Not provided'}</p>
+    <p><strong>LinkedIn:</strong> ${application.linkedinUrl ? `<a href="${escapeHtml(application.linkedinUrl)}">${escapeHtml(application.linkedinUrl)}</a>` : 'Not provided'}</p>
+    <p><strong>Cover message:</strong> ${escapeHtml(application.message || 'None')}</p>
+    <p><strong>Resume:</strong> <a href="${escapeHtml(application.resumeUrl)}">${escapeHtml(application.resumeUrl)}</a></p>
     <hr />
   `;
-  return sendEmail({ to: ADMIN_EMAIL, subject: `Career Application Intake: ${name} (${role})`, html });
+  return sendEmail({ to: ADMIN_EMAIL, subject: `Career Application Intake: ${application.name} (${application.role})`, html });
+}
+
+export async function sendCareerAutoReply(name: string, email: string, role: string) {
+  const html = `
+    <p>Dear ${escapeHtml(name)},</p>
+    <p>Thank you for applying for <strong>${escapeHtml(role)}</strong> at Quantum Living Solutions.</p>
+    <p>We have received your application and resume. If your profile matches the current requirement, our team will contact you shortly.</p>
+    <br />
+    <p>Best regards,</p>
+    <p><strong>Quantum Living Solutions Team</strong></p>
+  `;
+  return sendEmail({ to: email, subject: 'Application received - Quantum Living Solutions', html });
 }

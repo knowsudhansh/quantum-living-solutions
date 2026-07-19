@@ -198,6 +198,7 @@ export function CinematicHomeHero() {
   return (
     <motion.div
       className="overflow-x-clip bg-[#080a0d] text-foreground"
+      data-home-hero-root
       initial={reducedMotion ? false : { opacity: 0, scale: 1.01 }}
       animate={reducedMotion ? undefined : { opacity: 1, scale: 1 }}
       transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}

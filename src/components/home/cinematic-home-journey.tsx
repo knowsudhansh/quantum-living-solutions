@@ -555,6 +555,7 @@ export function CinematicHomeJourney() {
     <motion.div
       ref={journeyRef}
       className="overflow-x-clip bg-[#080a0d] text-foreground"
+      data-home-journey-root
       initial={reducedMotion ? false : { opacity: 0, scale: 1.01 }}
       animate={reducedMotion ? undefined : { opacity: 1, scale: 1 }}
       transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
@@ -796,7 +797,7 @@ export function CinematicHomeJourney() {
 
       <DemoFinale onBook={goToBookDemo} onContact={goToContact} />
 
-      <section className="border-t border-white/10 bg-[#080a0d] px-5 py-16 sm:px-8 lg:px-12">
+      <section className="border-t border-white/10 bg-[#080a0d] px-5 py-16 sm:px-8 lg:px-12" data-cinematic-scene>
         <SectionReveal className="mx-auto flex max-w-[96rem] flex-col items-start justify-between gap-8 sm:flex-row sm:items-center">
           <div className="max-w-2xl">
             <span className="qls-eyebrow">Follow the studio</span>

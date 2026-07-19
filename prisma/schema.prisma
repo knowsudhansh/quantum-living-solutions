@@ -154,16 +154,34 @@ model Payment {
 
 // Career Application storage
 model CareerApplication {
-  id        String   @id @default(uuid()) @db.Uuid
-  name      String   @db.VarChar(100)
-  email     String   @db.VarChar(255)
-  phone     String   @db.VarChar(50)
-  role      String   @db.VarChar(100)
-  message   String?  @db.Text
-  resumeUrl String   @map("resume_url") @db.VarChar(512)
-  status    String   @default("SUBMITTED") @db.VarChar(50)
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  id             String   @id @default(uuid()) @db.Uuid
+  name           String   @db.VarChar(100)
+  email          String   @db.VarChar(255)
+  phone          String   @db.VarChar(50)
+  role           String   @db.VarChar(100)
+  positionSlug   String   @default("other-opportunities") @map("position_slug") @db.VarChar(120)
+  source         String   @default("CAREERS") @db.VarChar(50)
+  location       String?  @db.VarChar(255)
+  experienceYears Int?    @map("experience_years")
+  currentCompany String?  @map("current_company") @db.VarChar(255)
+  portfolioUrl   String?  @map("portfolio_url") @db.VarChar(512)
+  linkedinUrl    String?  @map("linkedin_url") @db.VarChar(512)
+  skills         String[] @default([])
+  availability   String?  @db.VarChar(100)
+  message        String?  @db.Text
+  resumeUrl      String   @map("resume_url") @db.VarChar(512)
+  resumeFileName String?  @map("resume_file_name") @db.VarChar(255)
+  resumeMimeType String?  @map("resume_mime_type") @db.VarChar(120)
+  resumeSize     Int?     @map("resume_size")
+  status         String   @default("SUBMITTED") @db.VarChar(50)
+  notes          String?  @db.Text
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
+  @@index([email])
+  @@index([role])
+  @@index([positionSlug])
+  @@index([status])
   @@map("career_applications")
 }
 

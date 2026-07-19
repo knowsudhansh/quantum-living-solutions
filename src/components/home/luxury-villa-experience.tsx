@@ -118,19 +118,24 @@ function ScrollCameraRig({ quality }: VillaSceneProps) {
   }, []);
 
   useFrame((state, delta) => {
-    const progress = Math.min(1, Math.max(0, window.scrollY / scrollable.current));
+    const cinematicWindow = window as Window & { __qlsHomeTimelineProgress?: number };
+    const scrollProgress = Math.min(1, Math.max(0, window.scrollY / scrollable.current));
+    const progress = Math.min(1, Math.max(0, cinematicWindow.__qlsHomeTimelineProgress ?? scrollProgress));
     const timeOfDay = Math.min(1, Math.max(0, progress * 1.35));
     const warmth = THREE.MathUtils.lerp(0.82, 1.55, timeOfDay);
     const dusk = Math.sin(timeOfDay * Math.PI);
+    const breath = quality === 'low' ? 0.008 : 0.018;
+    const driftX = Math.sin(state.clock.elapsedTime * 0.32) * breath;
+    const driftY = Math.cos(state.clock.elapsedTime * 0.26) * breath * 0.55;
 
     target.set(
-      THREE.MathUtils.lerp(3.8, -1.2, progress) + pointer.current.x * 0.16,
-      THREE.MathUtils.lerp(2.2, 1.35, progress) - pointer.current.y * 0.08,
+      THREE.MathUtils.lerp(3.8, -1.2, progress) + pointer.current.x * 0.16 + driftX,
+      THREE.MathUtils.lerp(2.2, 1.35, progress) - pointer.current.y * 0.08 + driftY,
       THREE.MathUtils.lerp(5.8, 2.9, progress),
     );
 
-    camera.position.lerp(target, 1 - Math.exp(-delta * 2.4));
-    lookAt.set(pointer.current.x * 0.14, 0.62 - pointer.current.y * 0.08, 0);
+    camera.position.lerp(target, 1 - Math.exp(-delta * 2.05));
+    lookAt.set(pointer.current.x * 0.14 + driftX * 0.35, 0.62 - pointer.current.y * 0.08 + driftY * 0.25, 0);
     camera.lookAt(lookAt);
 
     if (light.current) {

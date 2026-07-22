@@ -3,6 +3,7 @@
 import { useLayoutEffect, useRef, useSyncExternalStore } from 'react';
 import { useMotionSystem } from '@/components/animation/MotionProvider';
 import { registerGSAP } from '@/lib/gsap';
+import { getCinematicInputProfile, isTouchCinematicProfile } from '@/lib/utils/input-device';
 import type gsap from 'gsap';
 import { CinematicHomeHero } from './cinematic-home-hero';
 import { CinematicHomeJourney } from './cinematic-home-journey';
@@ -10,27 +11,81 @@ import { CinematicHomeJourney } from './cinematic-home-journey';
 const subscribeHydration = () => () => undefined;
 const getHydratedSnapshot = () => true;
 const getServerHydrationSnapshot = () => false;
+const getServerInputSnapshot = () => 'desktop' as const;
+
+function subscribeInputProfile(onStoreChange: () => void) {
+  if (typeof window === 'undefined') return () => undefined;
+
+  let frame = 0;
+  const notify = () => {
+    if (frame) return;
+    frame = window.requestAnimationFrame(() => {
+      frame = 0;
+      onStoreChange();
+    });
+  };
+
+  window.addEventListener('orientationchange', notify, { passive: true });
+  window.addEventListener('resize', notify, { passive: true });
+
+  return () => {
+    if (frame) window.cancelAnimationFrame(frame);
+    window.removeEventListener('orientationchange', notify);
+    window.removeEventListener('resize', notify);
+  };
+}
 
 function useHasHydrated() {
   return useSyncExternalStore(subscribeHydration, getHydratedSnapshot, getServerHydrationSnapshot);
 }
 
+function useCinematicInputProfile() {
+  return useSyncExternalStore(subscribeInputProfile, getCinematicInputProfile, getServerInputSnapshot);
+}
+
 export function CinematicHomeExperience() {
   const rootRef = useRef<HTMLDivElement>(null);
+  const initializedRef = useRef(false);
   const { reducedMotion: prefersReducedMotion } = useMotionSystem();
   const hasHydrated = useHasHydrated();
+  const inputProfile = useCinematicInputProfile();
   const reducedMotion = hasHydrated && prefersReducedMotion;
+  const isTouchExperience = hasHydrated && isTouchCinematicProfile(inputProfile);
+  const useNaturalFlow = reducedMotion || isTouchExperience;
 
   useLayoutEffect(() => {
     const root = rootRef.current;
     if (!root || reducedMotion) return undefined;
 
+    const runtimeInputProfile = getCinematicInputProfile();
+    const runtimeIsTouchExperience = isTouchCinematicProfile(runtimeInputProfile);
+
+    if (runtimeIsTouchExperience) {
+      const { ScrollTrigger } = registerGSAP();
+      ScrollTrigger.getById('home-cinematic-master')?.kill(true);
+      root.dataset.cinematicInput = runtimeInputProfile;
+      root.dataset.cinematicMode = 'touch-flow';
+
+      return () => {
+        delete root.dataset.cinematicInput;
+        delete root.dataset.cinematicMode;
+      };
+    }
+
     const scrollRestoration = window.history.scrollRestoration;
     window.history.scrollRestoration = 'manual';
-    window.scrollTo(0, 0);
+    if (!initializedRef.current) {
+      initializedRef.current = true;
+      window.scrollTo(0, 0);
+    }
 
     const { gsap, ScrollTrigger } = registerGSAP();
     const context = gsap.context(() => {
+      root.dataset.cinematicInput = runtimeInputProfile;
+      root.dataset.cinematicMode = 'desktop-scrub';
+
+      ScrollTrigger.getById('home-cinematic-master')?.kill(true);
+
       const cinematicWindow = window as Window & { __qlsHomeTimelineProgress?: number };
       cinematicWindow.__qlsHomeTimelineProgress = 0;
 
@@ -42,6 +97,8 @@ export function CinematicHomeExperience() {
           start: 'top top',
           end: 'bottom bottom',
           scrub: 1.05,
+          anticipatePin: 0,
+          fastScrollEnd: false,
           invalidateOnRefresh: true,
         },
       });
@@ -259,6 +316,8 @@ export function CinematicHomeExperience() {
       const refreshFrame = window.requestAnimationFrame(() => ScrollTrigger.refresh());
       return () => {
         window.cancelAnimationFrame(refreshFrame);
+        delete root.dataset.cinematicInput;
+        delete root.dataset.cinematicMode;
         delete cinematicWindow.__qlsHomeTimelineProgress;
       };
     }, root);
@@ -267,15 +326,15 @@ export function CinematicHomeExperience() {
       window.history.scrollRestoration = scrollRestoration;
       context.revert();
     };
-  }, [reducedMotion]);
+  }, [inputProfile, isTouchExperience, reducedMotion]);
 
   return (
     <div
       ref={rootRef}
-      className={reducedMotion ? 'overflow-x-clip bg-[#080a0d] text-foreground' : 'qls-home-scroll-track overflow-x-clip text-foreground'}
+      className={useNaturalFlow ? 'qls-home-mobile-flow overflow-x-clip bg-[#080a0d] text-foreground' : 'qls-home-scroll-track overflow-x-clip text-foreground'}
       data-home-cinematic-root
     >
-      <div className={reducedMotion ? undefined : 'qls-home-cinematic-viewport'}>
+      <div className={useNaturalFlow ? 'qls-home-mobile-flow-inner' : 'qls-home-cinematic-viewport'}>
         <CinematicHomeHero />
         <CinematicHomeJourney />
       </div>

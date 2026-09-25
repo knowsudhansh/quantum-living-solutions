@@ -71,6 +71,7 @@
   - [ ] Build lead profiles viewer and status transitions dashboard
   - [ ] Implement payment audit ledger search screens
   - [ ] Code applicant resume uploader and parser endpoints
+  - [x] Move career resumes to private Blob storage with authenticated admin preview/download
 
 - [ ] **PHASE 9 — Notifications and Operations**
   - [ ] Configure Resend email gateway integration
@@ -98,3 +99,34 @@
 - [ ] **PHASE 14 — Existing Website Replacement**
   - [ ] Set 301 redirects
   - [ ] Verify search engines indexing paths
+
+
+## Ownership migration: code-level preparation (2026-09-14)
+
+- [x] Audit repository, account coupling, environment usage, authentication, database and uploads.
+- [x] Scan local/source files and reachable history without disclosing credentials.
+- [x] Update blank environment template and preserve/extend ignore rules.
+- [x] Record evidence and unresolved migration conditions in docs/26-ownership-migration-audit.md.
+- [x] Run npm install, lint, typecheck, production build and unit suite with production data isolated.
+- [ ] Satisfy full validation/transfer readiness: database integration, fallback checks and security/operational review remain gates.
+- [ ] Transfer accounts/projects/stores/domains (not authorized in this phase).
+
+
+## Google Analytics 4 integration (2026-09-25)
+
+- [x] Inspect layout, routes, metadata, existing Script usage, CSP and prior analytics before changing anything.
+- [x] Implement GA4 via `next/script` `afterInteractive`; no Google Tag Manager, no raw script tags.
+- [x] Keep the Measurement ID environment-configurable and no-op when absent; document it in `.env.example`.
+- [x] Rely on the standard configuration plus GA4 enhanced measurement for page views; add no duplicate manual `page_view`.
+- [x] Keep analytics out of the cinematic timeline, GSAP callbacks, scroll, touch, resize and animation frames.
+- [x] Widen CSP to the minimum Google measurement origins, public routes only, with no `unsafe-*` and no wildcard hosts.
+- [x] Disable analytics on `/admin/*` and `/api/*`; verified no tag, no dataLayer and no beacon on admin.
+- [x] Collect standard page/site measurement only; no `user_id`, no identifying parameters, ad personalisation off.
+- [x] Unit-test the CSP gating and route policy (`tests/unit/analytics-csp.test.ts`).
+- [x] Browser-verify the tag, nonce, beacon and SPA navigation against a production build (`tests/e2e/analytics.test.ts`).
+- [x] Run lint, typecheck, production build (with and without the Measurement ID) and the unit suite.
+- [x] Secret scan for leaked keys across the analytics change.
+- [x] Record evidence in `walkthrough.md`.
+- [ ] Set `NEXT_PUBLIC_GA_MEASUREMENT_ID` in Vercel and redeploy (deployment not authorized in this phase).
+- [ ] Review cookie consent / Google Consent Mode before broad production rollout.
+- [ ] Repair the 14 pre-existing Playwright failures (stale cinematic selectors, WCAG contrast); not caused by this change.

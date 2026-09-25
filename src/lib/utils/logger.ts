@@ -2,7 +2,7 @@ import 'server-only';
 
 type LogLevel = 'INFO' | 'WARN' | 'ERROR';
 
-const REDACT_KEYS = /(password|secret|token|key|cvv|card|mfa|email|phone)/i;
+const REDACT_KEYS = /(password|secret|token|key|cvv|card|mfa|email|phone|authorization|cookie|database.?url|direct.?url)/i;
 
 function redactValue(value: unknown, visited = new WeakSet(), depth = 0): unknown {
   if (depth > 5) return '[Max Depth Exceeded]';
@@ -11,6 +11,8 @@ function redactValue(value: unknown, visited = new WeakSet(), depth = 0): unknow
   if (value instanceof Error) {
     return {
       name: value.name,
+      ...('code' in value && typeof value.code === 'string' && /^P[0-9]{4}$/.test(value.code)
+        ? { code: value.code } : {}),
       // Redact raw messages in production logs to prevent URL token leakages
       message: process.env.NODE_ENV === 'production' ? '[REDACTED_ERROR_DETAILS]' : value.message,
       stack: process.env.NODE_ENV === 'development' ? value.stack : undefined,
@@ -29,7 +31,7 @@ function redactValue(value: unknown, visited = new WeakSet(), depth = 0): unknow
     for (const key in value) {
       if (Object.prototype.hasOwnProperty.call(value, key)) {
         const item = (value as Record<string, unknown>)[key];
-        if (REDACT_KEYS.test(key)) {
+        if (REDACT_KEYS.test(key) || (process.env.NODE_ENV === 'production' && (/^(stack|message|errorMessage|cause)$/i.test(key) || (key === 'error' && !(item instanceof Error))))) {
           copy[key] = '[REDACTED]';
         } else {
           copy[key] = redactValue(item, visited, depth + 1);

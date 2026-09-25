@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { verifyToken } from './lib/security/auth';
 import { ADMIN_SESSION_COOKIE, getAdminSessionSecret } from './lib/security/session';
+import { GA_COLLECT_ORIGINS, GA_TAG_ORIGIN, isAnalyticsEnabledFor } from './lib/config/analytics';
 
 const UNSAFE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
@@ -71,23 +72,31 @@ export async function proxy(request: NextRequest) {
   const nonce = btoa(crypto.randomUUID());
   const isDev = process.env.NODE_ENV !== 'production';
 
+  // Google Analytics widens the policy only where the tag actually renders: a configured
+  // Measurement ID on a public route. Admin, API and unconfigured environments keep the
+  // existing policy byte for byte.
+  const analytics = isAnalyticsEnabledFor(pathname);
+  const gaScript = analytics ? ` ${GA_TAG_ORIGIN}` : '';
+  const gaConnect = analytics ? ` ${GA_TAG_ORIGIN} ${GA_COLLECT_ORIGINS}` : '';
+  const gaImg = analytics ? ` ${GA_TAG_ORIGIN} https://*.google-analytics.com` : '';
+
   const scriptSrc = isDev
-    ? `script-src 'self' 'unsafe-eval' 'unsafe-inline';`
-    : `script-src 'self' 'nonce-${nonce}';`;
+    ? `script-src 'self' 'unsafe-eval' 'unsafe-inline'${gaScript};`
+    : `script-src 'self' 'nonce-${nonce}'${gaScript};`;
 
   // Framer Motion uses runtime transform styles throughout the cinematic presentation.
   const styleSrc = `style-src 'self' 'unsafe-inline';`;
 
   const connectSrc = isDev
-    ? `connect-src 'self' ws: wss:;`
-    : `connect-src 'self';`;
+    ? `connect-src 'self' ws: wss:${gaConnect};`
+    : `connect-src 'self'${gaConnect};`;
 
   const cspHeader = `
     default-src 'self';
     ${scriptSrc}
     ${styleSrc}
     ${connectSrc}
-    img-src 'self' data:;
+    img-src 'self' data: https://*.public.blob.vercel-storage.com${gaImg};
     font-src 'self';
     media-src 'self';
     worker-src 'self' blob:;
@@ -125,10 +134,6 @@ export const config = {
      */
     {
       source: '/((?!_next/static|_next/image|favicon.ico).*)',
-      missing: [
-        { type: 'header', key: 'next-router-prefetch' },
-        { type: 'header', key: 'purpose', value: 'prefetch' },
-      ],
     },
   ],
 };

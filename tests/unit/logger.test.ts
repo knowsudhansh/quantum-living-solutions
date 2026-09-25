@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { afterEach, describe, it, expect, vi } from 'vitest';
 import { writeLog } from '../../src/lib/utils/logger';
 
 describe('Structured JSON logger redaction', () => {
@@ -111,5 +111,23 @@ describe('Structured JSON logger redaction', () => {
     // Restore env
     (process.env as Record<string, string | undefined>).NODE_ENV = prevEnv;
     consoleSpy.mockRestore();
+  });
+});
+
+
+describe('production diagnostic boundaries', () => {
+  afterEach(() => { vi.unstubAllEnvs(); vi.restoreAllMocks(); });
+  it('redacts plain-object diagnostic text while retaining operation and Prisma code', () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    const spy = vi.spyOn(console, 'info').mockImplementation(() => {});
+    writeLog('ERROR', 'Upload failed', {
+      operation: 'database.mediaItem.create',
+      stack: 'private-path', errorMessage: 'private-url', cause: 'private-cause',
+      authorization: 'private-auth', databaseUrl: 'private-db',
+      error: Object.assign(new Error('private-message'), { code: 'P2002' }),
+    }, 'request-123');
+    const output = spy.mock.calls[0][0] as string;
+    expect(output).not.toContain('private-');
+    expect(JSON.parse(output)).toMatchObject({ requestId: 'request-123', context: { operation: 'database.mediaItem.create', error: { name: 'Error', code: 'P2002' } } });
   });
 });

@@ -1,4 +1,12 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+
+vi.mock('../../src/lib/storage/resumes', () => ({
+  ResumeStorageConfigurationError: class ResumeStorageConfigurationError extends Error {},
+  uploadResume: vi.fn(async (pathname: string) => ({
+    reference: `https://private.blob.vercel-storage.com/${pathname}`,
+    cleanup: vi.fn(async () => undefined),
+  })),
+}));
 import { POST as contactPost } from '../../src/app/api/contact/route';
 import { POST as newsletterPost } from '../../src/app/api/newsletter/route';
 import { POST as careersPost } from '../../src/app/api/careers/route';
@@ -80,18 +88,17 @@ describe('Public API Route Handlers Integration Validation', () => {
   });
 
   it('POST /api/careers should accept files and store candidate applications', async () => {
-    const payload = {
-      name: 'Tester Applicant',
-      email: 'applicant@test.com',
-      phone: '+918888888888',
-      role: 'Programmer',
-      message: 'I want to write automation rules.',
-      resumeUrl: 'https://dropbox.com/s/123/resume.pdf',
-    };
+    const payload = new FormData();
+    payload.set('name', 'Tester Applicant');
+    payload.set('email', 'applicant@test.com');
+    payload.set('phone', '+918888888888');
+    payload.set('role', 'Programmer');
+    payload.set('message', 'I want to write automation rules.');
+    payload.set('resume', new File(['%PDF-1.7 test'], 'resume.pdf', { type: 'application/pdf' }));
 
     const req = new Request('http://localhost:3000/api/careers', {
       method: 'POST',
-      body: JSON.stringify(payload),
+      body: payload,
     });
 
     const res = await careersPost(req);

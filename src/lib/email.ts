@@ -34,8 +34,7 @@ export async function sendEmail({ to, subject, html, from = FROM_EMAIL }: SendMa
     });
 
     if (!res.ok) {
-      const errorText = await res.text();
-      logger.error(`Resend API Error: Status ${res.status} - ${errorText}`);
+      logger.error('Resend API request failed', { status: res.status, operation: 'email.send' });
       return false;
     }
 
@@ -139,6 +138,7 @@ function escapeHtml(value: string | number | null | undefined) {
 }
 
 export async function notifyAdminOfCareer(application: CareerNotificationApplication) {
+  const adminCandidatesUrl = `${(process.env.NEXTAUTH_URL || '').replace(/\/$/, '')}/admin/candidates`;
   const html = `
     <h2>New Career Candidate Application</h2>
     <p><strong>Applicant Name:</strong> ${escapeHtml(application.name)}</p>
@@ -153,7 +153,7 @@ export async function notifyAdminOfCareer(application: CareerNotificationApplica
     <p><strong>Portfolio:</strong> ${application.portfolioUrl ? `<a href="${escapeHtml(application.portfolioUrl)}">${escapeHtml(application.portfolioUrl)}</a>` : 'Not provided'}</p>
     <p><strong>LinkedIn:</strong> ${application.linkedinUrl ? `<a href="${escapeHtml(application.linkedinUrl)}">${escapeHtml(application.linkedinUrl)}</a>` : 'Not provided'}</p>
     <p><strong>Cover message:</strong> ${escapeHtml(application.message || 'None')}</p>
-    <p><strong>Resume:</strong> <a href="${escapeHtml(application.resumeUrl)}">${escapeHtml(application.resumeUrl)}</a></p>
+    <p><strong>Resume:</strong> Review and download it from the authenticated <a href="${escapeHtml(adminCandidatesUrl)}">applicant dashboard</a>.</p>
     <hr />
   `;
   return sendEmail({ to: ADMIN_EMAIL, subject: `Career Application Intake: ${application.name} (${application.role})`, html });

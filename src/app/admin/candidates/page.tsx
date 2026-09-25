@@ -248,7 +248,7 @@ export default function AdminCandidatesPage() {
                         <button type="button" onClick={() => openCandidate(candidate)} className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.14em] text-[color:var(--gold-bright)] hover:text-white">
                           <Eye className="h-4 w-4" aria-hidden="true" /> Preview
                         </button>
-                        <a href={candidate.resumeUrl} download className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.14em] text-zinc-500 hover:text-white">
+                        <a href={`${candidate.resumeUrl}?download=1`} className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.14em] text-zinc-500 hover:text-white">
                           <Download className="h-4 w-4" aria-hidden="true" /> Download
                         </a>
                       </div>
@@ -326,7 +326,7 @@ export default function AdminCandidatesPage() {
                   <p className="mt-1 text-sm text-white">{selectedCandidate.resumeFileName || 'Uploaded resume'}</p>
                   <p className="text-xs text-zinc-600">{formatFileSize(selectedCandidate.resumeSize)}</p>
                 </div>
-                <a href={selectedCandidate.resumeUrl} download className="qls-button qls-button-secondary">
+                <a href={`${selectedCandidate.resumeUrl}?download=1`} className="qls-button qls-button-secondary">
                   <Download className="h-4 w-4" aria-hidden="true" />
                   Download
                 </a>

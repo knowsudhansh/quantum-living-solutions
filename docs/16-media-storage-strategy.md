@@ -12,6 +12,15 @@ This document establishes the media processing, optimization, and storage strate
   - High-res media files reside in S3-compatible object storage (e.g. Cloudflare R2 or AWS S3) coupled with an image optimization CDN (e.g. Cloudinary, Vercel Image Optimization, or imgix).
   - Career resumes and customer attachments are uploaded to isolated, non-public object storage buckets with signed-URL expiry access keys.
 
+### Career Resume Implementation
+
+- Résumé binaries are uploaded server-side to a dedicated private Vercel Blob store.
+- `RESUME_BLOB_STORE_ID` selects the dedicated store and Vercel OIDC authenticates the function. `RESUME_BLOB_READ_WRITE_TOKEN` remains an optional fallback for legacy connections. Neither variable may use a `NEXT_PUBLIC_` prefix.
+- Neon PostgreSQL stores applicant metadata and the private Blob reference only.
+- Browser access is mediated by the authenticated `/api/admin/candidates/[id]/resume` route. Private Blob URLs are not returned to admin clients.
+- If the Neon insert fails after upload, the API deletes the newly uploaded Blob to prevent orphaned files.
+- Local or production résumé files must never be stored below `public/` or committed to Git.
+
 ---
 
 ## 2. Media Delivery Decision Matrix

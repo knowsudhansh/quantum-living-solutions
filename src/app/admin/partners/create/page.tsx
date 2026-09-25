@@ -1,5 +1,7 @@
 'use client';
 
+import { MAX_MEDIA_FILE_SIZE, MEDIA_FILE_SIZE_ERROR } from '@/lib/config/uploads';
+
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -29,6 +31,10 @@ export default function AdminPartnerCreatePage() {
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (file.size > MAX_MEDIA_FILE_SIZE) {
+      setMessage({ type: 'error', text: MEDIA_FILE_SIZE_ERROR });
+      return;
+    }
     setUploadingLogo(true);
     setMessage(null);
     const formData = new FormData();

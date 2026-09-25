@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
 import path from 'path';
 import { prisma } from '../../../lib/db';
 import { notifyAdminOfCareer, sendCareerAutoReply } from '../../../lib/email';
+import { ResumeStorageConfigurationError, uploadResume } from '../../../lib/storage/resumes';
 import { logger } from '../../../lib/utils/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const MAX_RESUME_SIZE = 4 * 1024 * 1024;
 
@@ -43,8 +44,14 @@ type CareerPayload = {
   skills?: string | string[];
   availability?: string;
   message?: string;
-  resumeUrl?: string;
 };
+
+class ResumeValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ResumeValidationError';
+  }
+}
 
 function cleanText(value: unknown, max = 500) {
   return typeof value === 'string' ? value.trim().slice(0, max) : '';
@@ -117,49 +124,46 @@ function mimeTypeFromFile(file: File): ResumeMimeType | null {
   return null;
 }
 
-async function storeResume(file: File) {
+async function prepareResume(file: File) {
   if (file.size <= 0) {
-    throw new Error('Resume file is required');
+    throw new ResumeValidationError('Resume file is required');
   }
 
   if (file.size > MAX_RESUME_SIZE) {
-    throw new Error('Resume exceeds 4MB limit');
+    throw new ResumeValidationError('Resume exceeds 4MB limit');
   }
 
   const mimeType = mimeTypeFromFile(file);
   if (!mimeType) {
-    throw new Error('Only PDF, DOC, and DOCX resumes are allowed');
+    throw new ResumeValidationError('Only PDF, DOC, and DOCX resumes are allowed');
   }
 
   const policy = RESUME_POLICIES[mimeType];
   const buffer = Buffer.from(await file.arrayBuffer());
 
   if (!policy.hasValidSignature(buffer)) {
-    throw new Error('Resume file signature does not match the declared type');
+    throw new ResumeValidationError('Resume file signature does not match the declared type');
   }
 
   const uniqueId = crypto.randomUUID();
   const safeOriginalFilename = sanitizeOriginalFilename(file.name, policy.extension);
-  const safeFilename = `${uniqueId}${policy.extension}`;
-  const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'resumes');
-  await fs.mkdir(uploadDir, { recursive: true });
-  await fs.writeFile(path.join(uploadDir, safeFilename), buffer);
 
   return {
-    resumeUrl: `/uploads/resumes/${safeFilename}`,
+    buffer,
+    pathname: `resumes/${uniqueId}${policy.extension}`,
     resumeFileName: safeOriginalFilename,
     resumeMimeType: mimeType,
     resumeSize: file.size,
   };
 }
 
-function validateCore(payload: CareerPayload, resumeUrl?: string) {
+function validateCore(payload: CareerPayload, hasResume: boolean) {
   const name = cleanText(payload.name, 100);
   const email = cleanText(payload.email, 255).toLowerCase();
   const phone = cleanText(payload.phone, 50);
   const role = cleanText(payload.role, 100);
 
-  if (!name || !email || !phone || !role || !resumeUrl) {
+  if (!name || !email || !phone || !role || !hasResume) {
     return { error: 'Name, email, phone, role, and resume are required' };
   }
 
@@ -182,14 +186,7 @@ function validateCore(payload: CareerPayload, resumeUrl?: string) {
   return { name, email, phone, role };
 }
 
-async function applicationFromFormData(formData: FormData) {
-  const file = formData.get('resume');
-  const resume = file instanceof File ? await storeResume(file) : null;
-
-  if (!resume) {
-    throw new Error('Resume file is required');
-  }
-
+function applicationFromFormData(formData: FormData) {
   const payload: CareerPayload = {
     name: cleanText(formData.get('name'), 100),
     email: cleanText(formData.get('email'), 255),
@@ -205,37 +202,42 @@ async function applicationFromFormData(formData: FormData) {
     skills: cleanText(formData.get('skills'), 1000),
     availability: cleanText(formData.get('availability'), 100),
     message: cleanText(formData.get('message'), 3000),
-    resumeUrl: resume.resumeUrl,
   };
 
-  return { payload, resume };
-}
-
-async function applicationFromJson(request: Request) {
-  const payload = await request.json() as CareerPayload;
-  return {
-    payload,
-    resume: {
-      resumeUrl: cleanText(payload.resumeUrl, 512),
-      resumeFileName: null,
-      resumeMimeType: null,
-      resumeSize: null,
-    },
-  };
+  return payload;
 }
 
 export async function POST(request: Request) {
+  const requestId = request.headers.get('x-request-id')?.slice(0, 64) || crypto.randomUUID();
+  let operation = 'request.formData';
+  let cleanup: (() => Promise<void>) | undefined;
+
   try {
     const contentType = request.headers.get('content-type') || '';
-    const { payload, resume } = contentType.includes('multipart/form-data')
-      ? await applicationFromFormData(await request.formData())
-      : await applicationFromJson(request);
+    if (!contentType.includes('multipart/form-data')) {
+      return NextResponse.json({ error: 'Career applications must include a resume file' }, { status: 415 });
+    }
 
-    const validation = validateCore(payload, resume.resumeUrl);
+    const formData = await request.formData();
+    const file = formData.get('resume');
+    const payload = applicationFromFormData(formData);
+
+    operation = 'validate.application';
+    const validation = validateCore(payload, file instanceof File && file.size > 0);
     if ('error' in validation) {
       return NextResponse.json({ error: validation.error }, { status: 400 });
     }
 
+    if (!(file instanceof File)) {
+      return NextResponse.json({ error: 'Resume file is required' }, { status: 400 });
+    }
+
+    const resume = await prepareResume(file);
+    operation = 'storage.upload';
+    const storedResume = await uploadResume(resume.pathname, resume.buffer, resume.resumeMimeType);
+    cleanup = storedResume.cleanup;
+
+    operation = 'database.careerApplication.create';
     const application = await prisma.careerApplication.create({
       data: {
         name: validation.name,
@@ -252,7 +254,7 @@ export async function POST(request: Request) {
         skills: parseSkills(payload.skills),
         availability: nullableText(payload.availability, 100),
         message: nullableText(payload.message, 3000),
-        resumeUrl: resume.resumeUrl,
+        resumeUrl: storedResume.reference,
         resumeFileName: resume.resumeFileName,
         resumeMimeType: resume.resumeMimeType,
         resumeSize: resume.resumeSize,
@@ -260,21 +262,38 @@ export async function POST(request: Request) {
       },
     });
 
-    logger.info(`Database career application recorded. ID: ${application.id}`);
+    cleanup = undefined;
+
+    logger.info('Database career application recorded', { applicationId: application.id }, requestId);
 
     notifyAdminOfCareer(application).catch((err) =>
-      logger.error('Admin career application alert failed', err instanceof Error ? err : new Error(String(err)))
+      logger.error('Admin career application alert failed', err instanceof Error ? err : new Error(String(err)), requestId)
     );
 
     sendCareerAutoReply(application.name, application.email, application.role).catch((err) =>
-      logger.error('Career applicant confirmation failed', err instanceof Error ? err : new Error(String(err)))
+      logger.error('Career applicant confirmation failed', err instanceof Error ? err : new Error(String(err)), requestId)
     );
 
     return NextResponse.json({ success: true, applicationId: application.id }, { status: 201 });
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Internal server error occurred';
-    const status = /required|allowed|exceeds|signature|invalid/i.test(message) ? 400 : 500;
-    logger.error('Careers API endpoint exception', err instanceof Error ? err : new Error(String(err)));
-    return NextResponse.json({ error: status === 400 ? message : 'Internal server error occurred' }, { status });
+    if (cleanup) {
+      try {
+        await cleanup();
+      } catch (cleanupError) {
+        logger.error('Career resume cleanup failed', { operation: 'storage.cleanup', error: cleanupError }, requestId);
+      }
+    }
+
+    logger.error('Careers API endpoint exception', { operation, error: err }, requestId);
+
+    if (err instanceof ResumeValidationError) {
+      return NextResponse.json({ error: err.message, requestId }, { status: 400 });
+    }
+
+    if (err instanceof ResumeStorageConfigurationError) {
+      return NextResponse.json({ error: 'Resume storage is not configured', requestId }, { status: 503 });
+    }
+
+    return NextResponse.json({ error: 'Internal server error occurred', requestId }, { status: 500 });
   }
 }

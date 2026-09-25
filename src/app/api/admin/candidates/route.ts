@@ -5,9 +5,9 @@ import { logger } from '../../../../lib/utils/logger';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(request?: Request) {
+export async function GET(request: Request) {
   try {
-    const url = new URL(request?.url ?? 'http://localhost/api/admin/candidates');
+    const url = new URL(request.url);
     const search = (url.searchParams.get('search') || '').trim();
     const status = (url.searchParams.get('status') || 'ALL').trim();
     const role = (url.searchParams.get('role') || 'ALL').trim();
@@ -51,7 +51,10 @@ export async function GET(request?: Request) {
 
     return NextResponse.json({
       success: true,
-      candidates,
+      candidates: candidates.map((candidate) => ({
+        ...candidate,
+        resumeUrl: `/api/admin/candidates/${candidate.id}/resume`,
+      })),
       summary: {
         total,
         filtered: candidates.length,

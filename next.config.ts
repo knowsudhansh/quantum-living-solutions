@@ -4,8 +4,23 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname,
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**.public.blob.vercel-storage.com',
+      },
+    ],
+  },
   outputFileTracingExcludes: {
-    "*": ["./next.config.ts"],
+    "*": [
+      "./next.config.ts",
+      // Local credentials and tooling must never enter server deployment artifacts.
+      "./.env", "./.env.*", "./**/.env", "./**/.env.*",
+      "./generate-password.ts", "./.git/**", "./.vercel/**",
+      "./.next/dev/**", "./coverage/**", "./test-results/**",
+      "./playwright-report/**", "./.idea/**", "./.vscode/**",
+    ],
   },
   async headers() {
     const isProd = process.env.NODE_ENV === "production";

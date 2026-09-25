@@ -46,7 +46,7 @@ describe('Admin Dashboard API Route Handlers Integration Validation', () => {
   });
 
   it('GET /api/admin/candidates should return application register', async () => {
-    const res = await candidatesGet();
+    const res = await candidatesGet(new Request('http://localhost/api/admin/candidates'));
     expect(res.status).toBe(200);
 
     const body = await res.json() as { success: boolean; candidates: unknown[] };

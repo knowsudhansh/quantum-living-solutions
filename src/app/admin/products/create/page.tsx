@@ -1,5 +1,7 @@
 'use client';
 
+import { MAX_MEDIA_FILE_SIZE, MEDIA_FILE_SIZE_ERROR } from '@/lib/config/uploads';
+
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -116,6 +118,10 @@ export default function AdminProductCreatePage() {
   const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (file.size > MAX_MEDIA_FILE_SIZE) {
+      setMessage({ type: 'error', text: MEDIA_FILE_SIZE_ERROR });
+      return;
+    }
 
     setUploadingCover(true);
     setMessage(null);
@@ -146,6 +152,10 @@ export default function AdminProductCreatePage() {
   const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (file.size > MAX_MEDIA_FILE_SIZE) {
+      setMessage({ type: 'error', text: MEDIA_FILE_SIZE_ERROR });
+      return;
+    }
 
     setUploadingGallery(true);
     setMessage(null);
@@ -176,6 +186,10 @@ export default function AdminProductCreatePage() {
   const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (file.size > MAX_MEDIA_FILE_SIZE) {
+      setMessage({ type: 'error', text: MEDIA_FILE_SIZE_ERROR });
+      return;
+    }
 
     setUploadingPdf(true);
     setMessage(null);
@@ -862,7 +876,7 @@ export default function AdminProductCreatePage() {
               ) : (
                 <div className="border border-dashed border-zinc-800 rounded-sm aspect-video flex flex-col items-center justify-center bg-zinc-950/20 text-center p-4">
                   <span className="text-[10px] font-mono text-zinc-600 mb-3 select-none">
-                    Recommended aspect ratio 16:9 (Max 5MB)
+                    Recommended aspect ratio 16:9 (Max 4 MiB)
                   </span>
                   <input
                     id="cover-file-upload"

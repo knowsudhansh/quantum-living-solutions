@@ -28,9 +28,30 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# Private user uploads must never be committed or served from public/.
+/public/uploads/resumes/
+
 # system files
 .DS_Store
 *.tsbuildinfo
 next-env.d.ts
 
 generate-password.ts
+
+# Ownership migration: protect all environment variants; keep the empty template.
+.env.*
+!.env.example
+
+# Local deployment linkage, generated clients and user uploads.
+.vercel/
+/src/generated/client/
+/public/uploads/
+
+# Local tools, diagnostics and operating-system metadata.
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini
+*.stackdump
+*.heapsnapshot
+*.cpuprofile

@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import "./globals.css";
 import Header from "../components/navigation/header";
 import Footer from "../components/navigation/footer";
 import { ScrollReveal } from "../components/utils/scroll-reveal";
 import { MotionProvider } from "../components/animation/MotionProvider";
 import { SmoothScroll } from "../components/animation/SmoothScroll";
+import { GoogleAnalytics } from "../components/GoogleAnalytics";
 
 const siteUrl = process.env.NEXTAUTH_URL || "https://quantumlivingsolutions.com";
 
@@ -59,11 +61,14 @@ export const metadata: Metadata = {
 
 import { ToastProvider } from "../components/utils/toast";
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Issued per request by the proxy alongside the CSP; consumed by client-injected scripts.
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
+
   const organizationJsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -79,6 +84,7 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
         />
+        <GoogleAnalytics nonce={nonce} />
         <MotionProvider>
           <SmoothScroll />
           <ToastProvider>

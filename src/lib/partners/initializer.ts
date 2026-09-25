@@ -1,4 +1,5 @@
 import 'server-only';
+import { logger } from '../utils/logger';
 import { prisma } from '@/lib/db';
 
 const RCS_SLUG = 'rcs-electricals';
@@ -32,7 +33,7 @@ async function getOrCreateDefaultLogoId(): Promise<string | null> {
     });
     return newMedia.id;
   } catch (err) {
-    console.error('[Initializer] Failed to register default partner logo:', err);
+    logger.error('[Initializer] Failed to register default partner logo:', err);
     return null;
   }
 }
@@ -95,6 +96,6 @@ export async function ensureDefaultPartners(): Promise<void> {
     });
 
   } catch (err) {
-    console.error('[Initializer] Error during partner initialization:', err);
+    logger.error('[Initializer] Error during partner initialization:', err);
   }
 }

@@ -172,7 +172,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, bookingId: result.booking.id, visitPrice: PRIVATE_SITE_VISIT.price }, { status: 201 });
   } catch (err) {
     const errorMsg = err instanceof Error ? err.message : String(err);
-    logger.error(`Booking transaction failed: ${errorMsg}`, err instanceof Error ? err : new Error(String(err)));
+    logger.error('Booking transaction failed', err instanceof Error ? err : new Error(String(err)));
 
     if (errorMsg === 'SLOT_NOT_FOUND_OR_INACTIVE') {
       return NextResponse.json({ error: 'Selected slot is invalid or inactive' }, { status: 404 });
